@@ -1,0 +1,18 @@
+Uplink CSS Studio for Bricks changelog
+======================================
+
+1.0.0
+-----
+* First public release.
+* Integrated docked and full-screen CSS workspace inside the Bricks builder.
+* Live two-way updates through Bricks' native CSS Sync service.
+* Context-aware flex, grid, alignment, state, color, media query, and container query tools.
+* Property-aware completion backed by a bundled CSS standards catalog.
+* Bricks and ACSS variable discovery, ACSS recipe discovery, and per-user custom recipes.
+* Bricks-style @shortcut; recipe expansion and exact-shortcut Tab completion.
+* CSS outline navigation, formatter, search, comments, target assignment, and keyboard shortcuts.
+* Optional canvas width handles, remembered panel state, adaptive tool panels, and full-screen editing.
+
+Pre-release builds
+------------------
+Versions 0.9.14 through 0.9.28 were private development builds used to refine live synchronization, layout controls, completion, responsive authoring, recipes, viewport resizing, and release packaging.
