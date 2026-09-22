@@ -3,16 +3,16 @@ Uplink CSS Studio for Bricks changelog
 
 1.0.0
 -----
-* First public release.
-* Integrated docked and full-screen CSS workspace inside the Bricks builder.
-* Live two-way updates through Bricks' native CSS Sync service.
-* Context-aware flex, grid, alignment, state, color, media query, and container query tools.
-* Property-aware completion backed by a bundled CSS standards catalog.
-* Bricks and ACSS variable discovery, ACSS recipe discovery, and per-user custom recipes.
-* Bricks-style @shortcut; recipe expansion and exact-shortcut Tab completion.
-* CSS outline navigation, formatter, search, comments, target assignment, and keyboard shortcuts.
-* Optional canvas width handles, remembered panel state, adaptive tool panels, and full-screen editing.
+Initial public release.
 
-Pre-release builds
-------------------
-Versions 0.9.14 through 0.9.28 were private development builds used to refine live synchronization, layout controls, completion, responsive authoring, recipes, viewport resizing, and release packaging.
+Features
+--------
+* Native two-way editing of Bricks Custom CSS for elements, global classes, selectors, pseudo-states, and component variants.
+* Docked and full-screen CodeMirror workspace with formatting, search, comments, outline navigation, declaration toggles, and optional numeric scrubbing.
+* Context-aware flex, grid, alignment, state, color, shadow, gradient, easing, media-query, and container-query tools.
+* Interactive color variables, color picker, angle dial, cubic-bezier editor, multi-layer shadows, and type-aware gradient controls.
+* Property-aware completion, CSS math expansion, query-block completion, Bricks and ACSS variables, ACSS recipes, and per-user custom recipes.
+* Global class and element ID assignment, native Theme Style stylesheet editing and clickable active-style indicators for global HTML selectors, a Bricks Style Manager shortcut, and Bricks structure breadcrumbs.
+* Automatic native element labels for changed HTML tags without overwriting user-defined element names.
+* Draggable tool panels, horizontally scrollable compact-screen controls, optional first-applied-class selection, optional canvas resize handles, remembered preferences, and live canvas updates.
+* Protection against the empty `align-items: initial` declaration produced by Bricks CSS Sync.

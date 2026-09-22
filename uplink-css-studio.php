@@ -1,12 +1,14 @@
 <?php
 /**
  * Plugin Name: Uplink CSS Studio for Bricks
- * Description: An integrated CSS workspace for Bricks with live sync, smart completion, recipes, and responsive authoring tools.
+ * Plugin URI: https://uplinkplugins.com/articles/meet-uplink-css-studio-for-bricks/
+ * Description: A code-first CSS workspace for Bricks with live sync, completion, visual value tools, recipes, and query helpers.
  * Version: 1.0.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Tested up to: 7.1
  * Author: Stephen Walker
+ * Author URI: https://uplinkplugins.com/
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: uplink-css-studio
@@ -256,9 +258,9 @@ final class Plugin {
 
 		$base_url = plugin_dir_url( __FILE__ );
 		$recipes  = self::get_css_recipes();
-		wp_enqueue_style( 'uplink-css-studio', $base_url . 'assets/css/studio.css', array( 'bricks-builder' ), self::VERSION );
-		wp_enqueue_script( 'uplink-css-catalog', $base_url . 'assets/js/css-catalog.js', array(), self::VERSION, true );
-		wp_enqueue_script( 'uplink-css-studio', $base_url . 'assets/js/studio.js', array( 'jquery', 'wp-codemirror', 'code-editor', 'bricks-builder', 'uplink-css-catalog' ), self::VERSION, true );
+		wp_enqueue_style( 'uplink-css-studio', $base_url . 'assets/css/studio.css', array( 'bricks-builder' ), self::asset_version( 'assets/css/studio.css' ) );
+		wp_enqueue_script( 'uplink-css-catalog', $base_url . 'assets/js/css-catalog.js', array(), self::asset_version( 'assets/js/css-catalog.js' ), true );
+		wp_enqueue_script( 'uplink-css-studio', $base_url . 'assets/js/studio.js', array( 'jquery', 'wp-codemirror', 'code-editor', 'bricks-builder', 'uplink-css-catalog' ), self::asset_version( 'assets/js/studio.js' ), true );
 		wp_localize_script(
 			'uplink-css-studio',
 			'UplinkCssStudioConfig',
@@ -279,6 +281,11 @@ final class Plugin {
 				),
 			)
 		);
+	}
+
+	private static function asset_version( $relative_path ) {
+		$file = plugin_dir_path( __FILE__ ) . ltrim( $relative_path, '/' );
+		return is_file( $file ) ? (string) filemtime( $file ) : self::VERSION;
 	}
 }
 

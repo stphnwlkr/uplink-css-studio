@@ -8,11 +8,11 @@ Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A contextual CSS workspace inside the Bricks canvas with live sync, smart completion, recipes, and responsive tools.
+A code-first CSS workspace inside Bricks with live sync, completion, visual value tools, recipes, and query helpers.
 
 == Description ==
 
-Uplink CSS Studio for Bricks adds an integrated CSS workspace to the Bricks builder. It keeps Bricks' native Custom CSS and style controls as the source of truth, while adding a larger editor, contextual tools, property-aware completion, recipes, design variables, and live canvas updates.
+Uplink CSS Studio for Bricks adds an integrated CSS workspace to the Bricks builder. It keeps the native Bricks Custom CSS field as the source of truth while adding a larger editor, completion, recipes, design variables, visual value tools, and live canvas updates.
 
 Bricks 2.4 or newer is required, and Bricks' **Bi-directional sync between Custom CSS and style controls** setting must be enabled.
 
@@ -20,21 +20,41 @@ Bricks 2.4 or newer is required, and Bricks' **Bi-directional sync between Custo
 
 ACSS is optional. When it is active, CSS Studio can expose compatible ACSS variables and recipes. CSS Studio also includes a per-user recipe manager for sites without ACSS.
 
-CSS Studio was inspired by the in-builder editing workflows pioneered by Etch, Advanced Themer, and Code2Bricks. Uplink CSS Studio is an independent implementation and does not include or derive from their source code. Uplink CSS Studio is not affiliated with or endorsed by Bricks, Etch, Advanced Themer, Code2Bricks, or ACSS.
+== Responsive CSS approach ==
+
+CSS Studio is a code-first editor for the active Bricks Custom CSS field. It does not read or write Bricks' breakpoint-specific style-control values, and changing the active Bricks breakpoint does not open a separate CSS document.
+
+For responsive styling, write `@media` and `@container` rules in the CSS itself. The query tools use the site's registered Bricks breakpoint widths to help create those rules. The breakpoint and state labels in the Studio header report the current builder context; they do not imply separate breakpoint storage.
+
+This is intentionally different from tools built around Bricks' responsive style controls. CSS Studio is aimed at people who want to author and keep responsive behavior in CSS.
+
+== Credits and inspiration ==
+
+The in-editor value tools were inspired in particular by Elliot Bear's Drypoint and Strange Tech's Etch Enhancements. Advanced Themer and Code2Bricks also influenced the broader in-builder workflow.
+
+Uplink CSS Studio is an independent implementation. It does not include or derive from those projects' source code. It is not affiliated with or endorsed by Bricks, Drypoint, Etch, Strange Tech, Advanced Themer, Code2Bricks, or ACSS.
 
 == Features ==
 
 * Edits the native Bricks custom CSS for the active element, global class, selector, state, or component variant.
-* Dark CodeMirror workspace with formatting, search, comments, status, full-screen editing, and a searchable comment-based outline.
+* Dark CodeMirror workspace with soft line wrapping, formatting, search, comments, status, full-screen editing, and a searchable comment-based outline.
 * Context-aware icon controls for flex, grid, alignment, states, colors, shadows, gradients, filters, and transforms.
-* Media and container queries based on registered Bricks breakpoints, including `<=`, `>=`, and between ranges.
+* CSS-authored media and container query helpers based on registered Bricks breakpoint widths, including `<=`, `>=`, and between ranges.
+* Clickable comparison operators in media and container queries flip between `<` and `>`, or between `<=` and `>=`.
+* Per-declaration gutter checkboxes temporarily disable and restore individual CSS declarations.
+* Optional horizontal numeric scrubbing, with a preference and Command/Control + Alt + X shortcut.
+* Interactive angle, cubic-bezier easing with motion preview, multi-layer box-shadow/text-shadow, type-aware gradient, and color-alpha editors.
+* Draggable value and tool panels with viewport constraints.
+* Clickable `:hover`, `:focus`, `:focus-visible`, `:focus-within`, and `:active` selectors preview those states on the canvas.
 * Native CSS nesting when states or queries are inserted inside an existing selector.
 * Property and value completion from a bundled standards catalog, including modern and draft CSS properties.
 * Bricks and ACSS variable discovery, relevant value suggestions, abbreviations such as `fs` and `tt`, and Tab completion.
 * CSS math completion that expands custom properties and wraps arithmetic expressions in `calc(...)`.
 * `%root%` targeting plus Bricks global-class and element-ID assignment from the editor.
+* Native editing of site-wide HTML selectors in the applicable Theme Style > Stylesheet, clickable HTML badges for matching active Theme Styles, plus a native Style Manager shortcut.
 * ACSS recipe discovery and a per-user recipe manager with names, shortcuts, categories, search, editing, and `@shortcut;` expansion.
 * Live Bricks structure breadcrumbs that navigate to ancestors and mark elements containing custom CSS.
+* Automatic native element labels for changed HTML tags, while preserving labels entered by the user.
 * Immediate two-way updates through Bricks' native CSS Sync service, with revert and remembered panel state.
 * Optional open-on-selection and left/right canvas width handles, both enabled by default.
 * Bricks' CSS group promoted to the top of the Style panel without replacing Bricks' native editor theme.
@@ -43,6 +63,7 @@ CSS Studio was inspired by the in-builder editing workflows pioneered by Etch, A
 
 * Command/Control + Shift + C: Toggle CSS Studio.
 * Command/Control + Shift + O: Toggle the stylesheet outline.
+* Command/Control + Alt + X: Toggle numeric scrubbing.
 * Command/Control + /: Toggle comment.
 * Tab after a property abbreviation or partial property name: Complete the property and insert `: ;`, leaving the caret between the colon and semicolon.
 * Tab after an arithmetic declaration value: Expand bare custom properties, wrap the expression in `calc(...)`, and keep the declaration's existing semicolon. A semicolon is added only when one is not already present.
@@ -56,9 +77,10 @@ CSS Studio was inspired by the in-builder editing workflows pioneered by Etch, A
 
 1. Select an element in the Bricks canvas or Structure panel. CSS Studio opens automatically unless that preference is disabled.
 2. Assign a global class or ID from Studio when needed. New classes receive a `%root%` rule with the caret inside it.
-3. Write CSS, use the toolbar, or type `@recipe-shortcut;`. Changes update Bricks and the canvas while you type.
-4. Press Tab after an expression such as `--space-s * 2` to produce `calc(var(--space-s) * 2)`.
-5. Add media or container queries from registered breakpoints, then save the Bricks page normally.
+3. For a site-wide HTML tag such as `address` or `dl`, open the target panel and enter the tag. CSS Studio switches to the applicable site-wide Theme Style stylesheet and creates the rule when needed.
+4. Write CSS, use the toolbar, or type `@recipe-shortcut;`. Changes update Bricks and the canvas while you type.
+5. Press Tab after an expression such as `--space-s * 2` to produce `calc(var(--space-s) * 2)`.
+6. Add media or container queries from registered breakpoints, then save the Bricks page normally.
 
 == Requirements ==
 
@@ -68,6 +90,10 @@ CSS Studio was inspired by the in-builder editing workflows pioneered by Etch, A
 * In **Bricks > Settings > Builder**, enable **Bi-directional sync between Custom CSS and style controls**.
 
 CSS Studio does not load its builder interface until the Bricks version and CSS Sync requirements are met. Administrators receive a setup notice when either requirement is missing.
+
+== Data and privacy ==
+
+CSS Studio does not call an external service or send editor data off site. Element CSS stays in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored in that browser's local storage. Optional ACSS integration reads data from the locally installed ACSS plugin.
 
 == Installation ==
 
@@ -84,6 +110,10 @@ CSS Studio does not load its builder interface until the Bricks version and CSS 
 
 No. CSS Studio edits the native Bricks Custom CSS value and relies on Bricks' own bi-directional CSS sync.
 
+= Does CSS Studio edit Bricks' breakpoint-specific style values? =
+
+No. CSS Studio edits one Custom CSS stylesheet for the active target. Use its media and container query tools to write responsive rules in that stylesheet. The breakpoint label in the header is context only.
+
 = Can I keep Advanced Themer active? =
 
 Yes. Disable Advanced Themer's SuperPower CSS feature so that only one enhanced CSS editing layer controls the Bricks CSS sync workflow. Other Advanced Themer features may remain active.
@@ -99,8 +129,14 @@ Element CSS remains in Bricks. Custom recipes are stored in the current WordPres
 == Changelog ==
 
 = 1.0.0 =
-* First public release of Uplink CSS Studio for Bricks.
-* Add native Bricks CSS sync, contextual layout and state tools, media and container queries, property-aware completion, design variables, recipes, formatting, outline navigation, and viewport resizing.
-* Add a namespaced PHP entry point, post-specific authorization for recipe storage, normalized recipe input, and WordPress.org release metadata.
 
-For pre-release history, see changelog.txt in the plugin package.
+* Initial public release.
+* Native two-way editing of Bricks Custom CSS for elements, global classes, selectors, pseudo-states, and component variants.
+* Docked and full-screen CodeMirror workspace with formatting, search, comments, outline navigation, declaration toggles, and optional numeric scrubbing.
+* Context-aware flex, grid, alignment, state, color, shadow, gradient, easing, media-query, and container-query tools.
+* Interactive color variables, color picker, angle dial, cubic-bezier editor, multi-layer shadows, and type-aware gradient controls.
+* Property-aware completion, CSS math expansion, query-block completion, Bricks and ACSS variables, ACSS recipes, and per-user custom recipes.
+* Global class and element ID assignment, native Theme Style stylesheet editing and clickable active-style indicators for global HTML selectors, a Bricks Style Manager shortcut, and Bricks structure breadcrumbs.
+* Automatic native element labels for changed HTML tags without overwriting user-defined element names.
+* Draggable tool panels, horizontally scrollable compact-screen controls, optional first-applied-class selection, optional canvas resize handles, remembered preferences, and live canvas updates.
+* Protection against the empty `align-items: initial` declaration produced by Bricks CSS Sync.
