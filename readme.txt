@@ -97,7 +97,7 @@ CSS Studio does not call an external service or send editor data off site. Eleme
 
 == Installation ==
 
-1. Upload the `uplink-css-studio` folder to `/wp-content/plugins/`, or install the release ZIP from **Plugins > Add New > Upload Plugin**.
+1. Upload the `uplink-css-studio-for-bricks` folder to `/wp-content/plugins/`, or install the release ZIP from **Plugins > Add New > Upload Plugin**.
 2. Activate **Uplink CSS Studio for Bricks**.
 3. Confirm that Bricks 2.4 or newer is active.
 4. Go to **Bricks > Settings > Builder**, enable **Bi-directional sync between Custom CSS and style controls**, and save the settings.

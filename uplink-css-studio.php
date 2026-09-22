@@ -11,7 +11,7 @@
  * Author URI: https://uplinkplugins.com/
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: uplink-css-studio
+ * Text Domain: uplink-css-studio-for-bricks
  */
 
 namespace Uplink\CssStudio;
@@ -114,7 +114,7 @@ final class Plugin {
 
 		$output = array();
 		foreach ( is_array( $palettes ) ? $palettes : array() as $palette ) {
-			$palette_name = isset( $palette['name'] ) ? sanitize_text_field( $palette['name'] ) : __( 'Bricks palette', 'uplink-css-studio' );
+			$palette_name = isset( $palette['name'] ) ? sanitize_text_field( $palette['name'] ) : __( 'Bricks palette', 'uplink-css-studio-for-bricks' );
 			$colors       = array();
 			foreach ( isset( $palette['colors'] ) && is_array( $palette['colors'] ) ? $palette['colors'] : array() as $color ) {
 				if ( ! is_array( $color ) ) {
@@ -162,14 +162,14 @@ final class Plugin {
 		if ( ! self::is_bricks_compatible() ) {
 			$message = sprintf(
 				/* translators: %s: minimum supported Bricks version. */
-				esc_html__( 'Uplink CSS Studio requires Bricks %s or newer. Activate or update Bricks before using CSS Studio.', 'uplink-css-studio' ),
+				esc_html__( 'Uplink CSS Studio requires Bricks %s or newer. Activate or update Bricks before using CSS Studio.', 'uplink-css-studio-for-bricks' ),
 				esc_html( self::MINIMUM_BRICKS_VERSION )
 			);
 		} else {
 			$settings_url = admin_url( 'admin.php?page=bricks-settings#tab-builder' );
 			$message      = sprintf(
 				/* translators: %s: link to the Bricks Builder settings. */
-				wp_kses_post( __( 'Uplink CSS Studio requires Bricks CSS Sync. Enable <strong>Bi-directional sync between Custom CSS and style controls</strong> under <a href="%s">Bricks &gt; Settings &gt; Builder</a>.', 'uplink-css-studio' ) ),
+				wp_kses_post( __( 'Uplink CSS Studio requires Bricks CSS Sync. Enable <strong>Bi-directional sync between Custom CSS and style controls</strong> under <a href="%s">Bricks &gt; Settings &gt; Builder</a>.', 'uplink-css-studio-for-bricks' ) ),
 				esc_url( $settings_url )
 			);
 		}
@@ -182,16 +182,16 @@ final class Plugin {
 
 		$post_id = isset( $_POST['postId'] ) ? absint( $_POST['postId'] ) : 0;
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'You do not have permission to save CSS recipes.', 'uplink-css-studio' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'You do not have permission to save CSS recipes.', 'uplink-css-studio-for-bricks' ) ), 403 );
 		}
 
 		$raw = isset( $_POST['recipes'] ) && is_string( $_POST['recipes'] ) ? wp_unslash( $_POST['recipes'] ) : '{}'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( strlen( $raw ) > 500000 ) {
-			wp_send_json_error( array( 'message' => __( 'The recipe collection is too large.', 'uplink-css-studio' ) ), 413 );
+			wp_send_json_error( array( 'message' => __( 'The recipe collection is too large.', 'uplink-css-studio-for-bricks' ) ), 413 );
 		}
 		$decoded = json_decode( $raw, true );
 		if ( ! is_array( $decoded ) || count( $decoded ) > 100 ) {
-			wp_send_json_error( array( 'message' => __( 'The recipe collection is invalid.', 'uplink-css-studio' ) ), 400 );
+			wp_send_json_error( array( 'message' => __( 'The recipe collection is invalid.', 'uplink-css-studio-for-bricks' ) ), 400 );
 		}
 
 		$recipes = array();
@@ -201,8 +201,8 @@ final class Plugin {
 			$css = str_replace( array( "\r\n", "\r", "\0" ), array( "\n", "\n", '' ), $css );
 			$label = is_array( $value ) && isset( $value['label'] ) && is_string( $value['label'] ) ? sanitize_text_field( $value['label'] ) : ucwords( str_replace( array( '-', '_' ), ' ', $key ) );
 			$label = '' !== trim( $label ) ? substr( trim( $label ), 0, 120 ) : ucwords( str_replace( array( '-', '_' ), ' ', $key ) );
-			$category = is_array( $value ) && isset( $value['category'] ) && is_string( $value['category'] ) ? sanitize_text_field( $value['category'] ) : __( 'My recipes', 'uplink-css-studio' );
-			$category = '' !== trim( $category ) ? substr( trim( $category ), 0, 80 ) : __( 'My recipes', 'uplink-css-studio' );
+			$category = is_array( $value ) && isset( $value['category'] ) && is_string( $value['category'] ) ? sanitize_text_field( $value['category'] ) : __( 'My recipes', 'uplink-css-studio-for-bricks' );
+			$category = '' !== trim( $category ) ? substr( trim( $category ), 0, 80 ) : __( 'My recipes', 'uplink-css-studio-for-bricks' );
 			if ( '' === $key || '' === trim( $css ) || strlen( $css ) > 50000 ) {
 				continue;
 			}
@@ -276,8 +276,8 @@ final class Plugin {
 				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 				'recipeNonce'    => wp_create_nonce( 'uplink_css_studio_recipes' ),
 				'labels'         => array(
-					'title'       => __( 'CSS Studio', 'uplink-css-studio' ),
-					'noSelection' => __( 'Select an element in Bricks to edit its CSS.', 'uplink-css-studio' ),
+					'title'       => __( 'CSS Studio', 'uplink-css-studio-for-bricks' ),
+					'noSelection' => __( 'Select an element in Bricks to edit its CSS.', 'uplink-css-studio-for-bricks' ),
 				),
 			)
 		);
