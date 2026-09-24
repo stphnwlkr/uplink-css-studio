@@ -2,6 +2,8 @@
 
 Uplink CSS Studio is a code-first CSS workspace inside the Bricks builder. It edits Bricks' native Custom CSS field through the bi-directional CSS Sync service. It adds completion, recipes, query helpers, outline navigation, formatting, visual value tools, and a resizable editor.
 
+Version 1.1 adds a constrained HTML view for the selected element. Its lightweight HTML code editor includes syntax highlighting, line numbers, matching tags, context-aware tag and attribute completion, and single-root Emmet-style Tab expansion. It can update supported tags, simple text, IDs, attributes including inline styles, links, image fields, and Bricks global classes while leaving nested structure and builder-only settings under Bricks' control. Opening and closing tags are linked for one-step renaming. Adding text to an empty Block converts it in place to Basic Text and preserves the existing element data. The CSS breadcrumbs can also switch directly between element CSS and every assigned global class.
+
 [Product page and full introduction](https://uplinkplugins.com/articles/meet-uplink-css-studio-for-bricks/)
 
 CSS Studio does not edit Bricks' breakpoint-specific style-control values. It keeps responsive behavior in the Custom CSS stylesheet through `@media` and `@container` rules. Its query tools use registered Bricks breakpoint widths to help author those rules. The breakpoint label in the header reports builder context only.

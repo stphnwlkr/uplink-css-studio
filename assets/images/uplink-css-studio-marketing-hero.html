@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uplink CSS Studio marketing hero</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #101216; font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .canvas {
+      position: relative;
+      width: 2560px;
+      height: 1440px;
+      overflow: hidden;
+      color: #f6f4ef;
+      background: #111318 url("uplink-css-studio-marketing-backdrop.png") center / cover no-repeat;
+    }
+    .canvas::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 68% 55%, rgb(255 184 0 / 8%), transparent 34%),
+        linear-gradient(90deg, rgb(8 10 14 / 18%) 0%, rgb(8 10 14 / 8%) 42%, rgb(8 10 14 / 28%) 100%);
+    }
+    .copy {
+      position: absolute;
+      z-index: 8;
+      top: 96px;
+      left: 92px;
+      width: 1050px;
+    }
+    .eyebrow {
+      margin: 0 0 28px;
+      color: #ffbd18;
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: .32em;
+    }
+    h1 {
+      max-width: 1040px;
+      margin: 0;
+      font-size: 86px;
+      line-height: .98;
+      letter-spacing: -.052em;
+      text-wrap: balance;
+    }
+    .subhead {
+      margin: 28px 0 0;
+      color: #aeb5c1;
+      font-size: 31px;
+      font-weight: 480;
+      letter-spacing: -.015em;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+    .chip {
+      padding: 11px 17px;
+      border: 1px solid rgb(255 190 24 / 35%);
+      border-radius: 999px;
+      color: #d8dce4;
+      background: rgb(20 23 29 / 72%);
+      box-shadow: inset 0 1px rgb(255 255 255 / 4%);
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: .01em;
+      backdrop-filter: blur(12px);
+    }
+    .stage {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+    }
+    .shot {
+      position: absolute;
+      overflow: hidden;
+      border: 1px solid #4d535f;
+      border-radius: 20px;
+      background: #1b1e24;
+      box-shadow: 0 38px 90px rgb(0 0 0 / 58%), 0 0 0 1px rgb(255 255 255 / 4%), 0 0 45px rgb(255 184 0 / 6%);
+    }
+    .shot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 1px rgb(255 255 255 / 8%);
+    }
+    .shot img { position: absolute; display: block; max-width: none; }
+    .editor {
+      left: 520px;
+      top: 515px;
+      width: 1510px;
+      height: 820px;
+      border-color: #555b67;
+      transform: rotate(-.55deg);
+    }
+    .editor img { width: 2300px; height: 2350px; left: -816px; top: -1210px; }
+    .gradient {
+      left: 1760px;
+      top: 170px;
+      width: 720px;
+      height: 665px;
+      transform: rotate(1deg);
+    }
+    .gradient img { width: 1371px; height: 701px; left: -691px; top: -4px; }
+    .color {
+      left: 1815px;
+      top: 870px;
+      width: 650px;
+      height: 435px;
+      transform: rotate(.5deg);
+    }
+    .color img { width: 650px; height: 436px; left: 0; top: 0; }
+    .shadow {
+      left: 64px;
+      top: 720px;
+      width: 505px;
+      height: 590px;
+      transform: rotate(-1deg);
+    }
+    .shadow img { width: 505px; height: 535px; left: 0; top: 0; }
+    .accent-line {
+      position: absolute;
+      z-index: 7;
+      left: 92px;
+      bottom: 76px;
+      width: 285px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ffb800, #69d7d3);
+      box-shadow: 0 0 24px rgb(255 184 0 / 34%);
+    }
+  </style>
+</head>
+<body>
+  <main class="canvas">
+    <section class="copy">
+      <p class="eyebrow">UPLINK CSS STUDIO</p>
+      <h1>Write CSS Without Fighting the Builder</h1>
+      <p class="subhead">Code-first. Native sync. Visual when useful.</p>
+      <div class="chips" aria-label="Highlights">
+        <span class="chip">Native CSS sync</span>
+        <span class="chip">Responsive queries</span>
+        <span class="chip">OKLCH color</span>
+        <span class="chip">Visual value tools</span>
+      </div>
+    </section>
+    <section class="stage" aria-label="Real Uplink CSS Studio interface">
+      <figure class="shot editor"><img src="uplink-css-studio-ui-editor.png" alt="Uplink CSS Studio editor and toolbar"></figure>
+      <figure class="shot gradient"><img src="uplink-css-studio-ui-gradient.png" alt="Uplink CSS Studio gradient editor"></figure>
+      <figure class="shot color"><img src="uplink-css-studio-ui-color.png" alt="Uplink CSS Studio color editor"></figure>
+      <figure class="shot shadow"><img src="uplink-css-studio-ui-shadow.png" alt="Uplink CSS Studio shadow editor"></figure>
+    </section>
+    <span class="accent-line" aria-hidden="true"></span>
+  </main>
+</body>
+</html>

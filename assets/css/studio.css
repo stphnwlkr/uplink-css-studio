@@ -109,6 +109,7 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-shell.is-minimized .uplink-css-studio-resizer,
 .uplink-css-studio-shell.is-minimized .uplink-css-studio-toolbar,
 .uplink-css-studio-shell.is-minimized .uplink-css-studio-editor-wrap,
+.uplink-css-studio-shell.is-minimized .uplink-css-studio-html-wrap,
 .uplink-css-studio-shell.is-minimized .uplink-css-studio-footer { display: none; }
 
 .uplink-css-studio-resizer { position: absolute; z-index: 4; top: -5px; left: 0; width: 100%; height: 10px; cursor: row-resize; touch-action: none; }
@@ -149,7 +150,9 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-breadcrumb-theme { flex: 0 0 auto; min-width: 0; height: 20px; margin-left: 2px; padding: 0 5px; border: 1px solid rgb(120 213 255 / 42%); border-radius: 5px; background: rgb(120 213 255 / 10%); color: #9edcff; font: 750 8px/1 ui-monospace, monospace; letter-spacing: .05em; cursor: pointer; }
 .uplink-css-studio-breadcrumb-theme:hover, .uplink-css-studio-breadcrumb-theme:focus-visible { border-color: #78d5ff; background: rgb(120 213 255 / 18%); color: #d8f3ff; outline: none; }
 .uplink-css-studio-breadcrumb-empty { padding: 0 5px; color: #6f7682; }
-.uplink-css-studio-editing-target { max-width: 150px; color: #9edcff; }
+.uplink-css-studio-editing-target { display: inline-flex; max-width: 175px; align-items: center; color: #9edcff; }
+.uplink-css-studio-class-switcher { width: auto; min-width: 92px; max-width: 165px; height: 28px; padding: 0 29px 0 8px !important; border: 1px solid #454a55; border-radius: 5px; background-position: right 7px center !important; color: #e5e8ee; font: 650 12px/1 ui-monospace, monospace; text-overflow: ellipsis; }
+.uplink-css-studio-class-switcher:hover, .uplink-css-studio-class-switcher:focus-visible { border-color: #6d7481; background-color: #292c33 !important; color: #fff; outline: none; }
 
 .uplink-css-studio-shell button { box-sizing: border-box; font-family: Inter, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
 .uplink-css-studio-shell button:focus-visible { outline: 2px solid var(--uplink-css-studio-accent); outline-offset: 1px; }
@@ -169,6 +172,7 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
   cursor: pointer;
 }
 .uplink-css-studio-shell select:disabled { opacity: .5; cursor: not-allowed; }
+.uplink-css-studio-shell .uplink-css-studio-class-switcher { padding: 0 29px 0 8px !important; background-position: right 7px center !important; }
 .uplink-css-studio-icon-button { display: grid; width: 38px; height: 38px; flex: 0 0 38px; padding: 0; place-items: center; }
 .uplink-css-studio-icon-button .uplink-css-studio-svg { width: 20px; height: 20px; }
 .uplink-css-studio-style-manager { color: #d7dbe3; }
@@ -177,6 +181,11 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-header, .uplink-css-studio-toolbar { scrollbar-width: none !important; -ms-overflow-style: none; }
 .uplink-css-studio-header::-webkit-scrollbar, .uplink-css-studio-toolbar::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
 .uplink-css-studio-toolbar { position: relative; z-index: 5; gap: 5px; padding: 6px 11px; border-bottom: 1px solid #444852; background: #292c33; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+.uplink-css-studio-mode-tabs { flex: 0 0 auto; display: inline-flex; height: 28px; padding: 2px; gap: 2px; border: 1px solid #454a55; border-radius: 7px; background: #1d1f24; }
+.uplink-css-studio-mode-tab { min-width: 52px; height: 22px; padding: 0 10px; border: 0; border-radius: 4px; background: transparent; color: #aeb5c2; font-size: 11px; font-weight: 750; letter-spacing: .04em; cursor: pointer; }
+.uplink-css-studio-mode-tab:hover { background: #30343b; color: #fff; }
+.uplink-css-studio-mode-tab.is-active { background: var(--uplink-css-studio-accent); color: var(--uplink-css-studio-accent-text); }
+.uplink-css-studio-window.is-html-mode .uplink-css-studio-toolbar > :not(.uplink-css-studio-mode-tabs):not(.uplink-css-studio-mode-divider) { display: none; }
 .uplink-css-studio-tool { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; }
 .uplink-css-studio-tool .uplink-css-studio-svg { width: 18px; height: 18px; }
 .uplink-css-studio-layout-action.is-active, .uplink-css-studio-grid-template-action.is-active, .uplink-css-studio-alignment-action.is-active, .uplink-css-studio-place-alignment.is-active { border-color: var(--uplink-css-studio-accent); background: rgb(255 191 0 / 10%); color: var(--uplink-css-studio-accent); }
@@ -237,6 +246,47 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-value-pseudo.is-active { border-color: var(--uplink-css-studio-accent); background: rgb(245 184 0 / 16%); color: #ffe39a !important; }
 body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cursor: ew-resize !important; user-select: none !important; }
 
+.uplink-css-studio-html-wrap { min-width: 0; min-height: 0; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--uplink-css-studio-editor); }
+.uplink-css-studio-html-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 10px 14px; border-bottom: 1px solid #373b44; background: #202228; }
+.uplink-css-studio-html-head > div:first-child { min-width: 0; display: grid; gap: 3px; }
+.uplink-css-studio-html-head strong { color: #eef1f5; font-size: 12px; }
+.uplink-css-studio-html-note { overflow: hidden; color: #929aa8; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.uplink-css-studio-html-actions { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: flex-end; gap: 9px; }
+.uplink-css-studio-html-actions .uplink-css-studio-action { display: inline-flex; min-width: 108px; height: 34px; padding: 0 14px; align-items: center; justify-content: center; border-color: var(--uplink-css-studio-button-border); background: var(--uplink-css-studio-button); box-shadow: 0 1px 1px rgb(0 0 0 / 18%); line-height: 1; text-align: center; white-space: nowrap; }
+.uplink-css-studio-html-actions .uplink-css-studio-html-apply { min-width: 136px; border-color: var(--uplink-css-studio-accent); background: var(--uplink-css-studio-accent); color: var(--uplink-css-studio-accent-text); }
+.uplink-css-studio-html-actions .uplink-css-studio-action:hover { border-color: #686f7c; background: var(--uplink-css-studio-button-hover); box-shadow: 0 2px 6px rgb(0 0 0 / 20%); }
+.uplink-css-studio-html-actions .uplink-css-studio-html-apply:hover { border-color: #ffc928; background: #ffc928; color: var(--uplink-css-studio-accent-text); box-shadow: 0 2px 7px rgb(245 184 0 / 20%); }
+#uplink-html-source { width: 100%; height: 100%; min-width: 0; min-height: 0; box-sizing: border-box; resize: none; padding: 18px 20px; border: 0; border-radius: 0; background: #1d1f24; color: #eef1f5; outline: 0; font: 16px/1.7 "SFMono-Regular", "Cascadia Code", Consolas, monospace; font-variant-ligatures: none; tab-size: 2; white-space: pre-wrap; overflow-wrap: anywhere; }
+#uplink-html-source:focus { box-shadow: inset 0 0 0 1px rgb(245 184 0 / 45%); }
+#uplink-html-source:disabled { color: #737b89; cursor: not-allowed; }
+.uplink-css-studio-html-wrap > .CodeMirror { width: 100%; height: 100%; min-width: 0; min-height: 0; background: #1d1f24; color: #f0f2f6; font: 16px/1.7 "SFMono-Regular", "Cascadia Code", Consolas, monospace; font-variant-ligatures: none; letter-spacing: 0; }
+.uplink-css-studio-html-wrap > .CodeMirror.is-disabled { color: #737b89; cursor: not-allowed; }
+.uplink-css-studio-html-wrap .CodeMirror-scroll { padding: 12px 0 28px; }
+.uplink-css-studio-html-wrap .CodeMirror-lines { padding: 2px 0; }
+.uplink-css-studio-html-wrap .CodeMirror pre.CodeMirror-line, .uplink-css-studio-html-wrap .CodeMirror pre.CodeMirror-line-like { padding: 0 18px 0 14px; }
+.uplink-css-studio-html-wrap .CodeMirror-gutters { min-width: 48px; background: #191b20; border-right: 1px solid #373b44; }
+.uplink-css-studio-html-wrap .CodeMirror-linenumber { min-width: 26px; padding: 0 10px 0 8px; color: #858d9c; }
+.uplink-css-studio-html-wrap .CodeMirror-activeline-background { background: rgb(255 255 255 / 5%); }
+.uplink-css-studio-html-wrap .CodeMirror-activeline-gutter .CodeMirror-linenumber { color: var(--uplink-css-studio-accent); }
+.uplink-css-studio-html-wrap .CodeMirror-selected { background: rgb(92 139 255 / 28%) !important; }
+.uplink-css-studio-html-wrap .CodeMirror-line::selection,
+.uplink-css-studio-html-wrap .CodeMirror-line > span::selection,
+.uplink-css-studio-html-wrap .CodeMirror-line > span > span::selection,
+.uplink-css-studio-html-wrap .CodeMirror textarea::selection { background: #355b85 !important; color: #fff !important; }
+.uplink-css-studio-html-wrap .CodeMirror-line::-moz-selection,
+.uplink-css-studio-html-wrap .CodeMirror-line > span::-moz-selection,
+.uplink-css-studio-html-wrap .CodeMirror-line > span > span::-moz-selection,
+.uplink-css-studio-html-wrap .CodeMirror textarea::-moz-selection { background: #355b85 !important; color: #fff !important; }
+.uplink-css-studio-html-wrap .CodeMirror-cursor { width: 2px; border: 0; background: #ffd24a; }
+.uplink-css-studio-html-wrap .CodeMirror-matchingtag { background: transparent !important; }
+.uplink-css-studio-html-wrap .CodeMirror-lint-mark { background-image: none !important; }
+.uplink-css-studio-html-wrap .CodeMirror .cm-tag { color: #ffad7d !important; }
+.uplink-css-studio-html-wrap .CodeMirror .cm-attribute { color: #7dd7ff !important; }
+.uplink-css-studio-html-wrap .CodeMirror .cm-string { color: #a9e89c !important; }
+.uplink-css-studio-html-wrap .CodeMirror .cm-comment { color: #9aa3b3 !important; font-style: italic; }
+.uplink-css-studio-html-wrap .CodeMirror .cm-bracket { color: #d7dbe3 !important; }
+.uplink-css-studio-html-wrap .CodeMirror .cm-error { color: #ff8290 !important; background: rgb(255 80 100 / 10%); }
+
 .uplink-css-studio-shell .CodeMirror-hints {
   z-index: 100030 !important;
   min-width: 280px;
@@ -254,9 +304,13 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
 .uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-abbreviation { color: #9edcff !important; }
 .uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-catalog { color: #e5e8ee !important; }
 .uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-unsupported { color: #aeb6c4 !important; }
+.uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-html-tag { color: #ffad7d !important; }
+.uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-html-attribute { color: #7dd7ff !important; }
 .uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-abbreviation { color: #17181c !important; }
 .uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-catalog,
-.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-unsupported { color: #17181c !important; }
+.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-unsupported,
+.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-html-tag,
+.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-html-attribute { color: #17181c !important; }
 
 .uplink-css-studio-popover { position: fixed; z-index: 100020; top: 10px; width: min(340px, calc(100vw - 20px)); max-height: calc(100vh - 20px); overflow: auto; overscroll-behavior: contain; border: 1px solid #444750; border-radius: 9px; background: #24262c; box-shadow: 0 18px 46px rgb(0 0 0 / 48%); }
 .uplink-css-studio-outline-panel { left: 10px; }
@@ -551,4 +605,6 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
   .uplink-css-studio-ease-points, .uplink-css-studio-shadow-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .uplink-css-studio-shadow-workspace { grid-template-columns: 132px minmax(0, 1fr); }
   .uplink-css-studio-shadow-position { width: 132px; height: 132px; }
+  .uplink-css-studio-html-head { align-items: flex-start; }
+  .uplink-css-studio-html-note { white-space: normal; }
 }

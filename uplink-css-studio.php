@@ -3,7 +3,7 @@
  * Plugin Name: Uplink CSS Studio for Bricks
  * Plugin URI: https://uplinkplugins.com/articles/meet-uplink-css-studio-for-bricks/
  * Description: A code-first CSS workspace for Bricks with live sync, completion, visual value tools, recipes, and query helpers.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Tested up to: 7.1
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Plugin {
-	const VERSION = '1.0.0';
+	const VERSION = '1.1.0';
 	const MINIMUM_BRICKS_VERSION = '2.4';
 	const USER_RECIPES_META = '_uplink_css_studio_recipes';
 
@@ -246,6 +246,21 @@ final class Plugin {
 				),
 			)
 		);
+		$html_editor_settings = wp_enqueue_code_editor(
+			array(
+				'type'       => 'text/html',
+				'codemirror' => array(
+					'indentUnit'      => 2,
+					'tabSize'         => 2,
+					'indentWithTabs'  => false,
+					'lineNumbers'     => true,
+					'lineWrapping'    => true,
+					'autoCloseTags'   => true,
+					'matchTags'       => false,
+					'styleActiveLine' => true,
+				),
+			)
+		);
 
 		/*
 		 * Bricks 2.4 ships its own CodeMirror base and one-dark theme. WordPress'
@@ -265,7 +280,8 @@ final class Plugin {
 			'uplink-css-studio',
 			'UplinkCssStudioConfig',
 			array(
-				'editorSettings' => $editor_settings,
+				'editorSettings'     => $editor_settings,
+				'htmlEditorSettings' => $html_editor_settings,
 				'postId'         => $post_id,
 				'version'        => self::VERSION,
 				'recipeProvider' => empty( $recipes ) ? '' : 'ACSS',

@@ -1,6 +1,22 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.1.0
+-----
+Added a constrained, bidirectional HTML view for the selected Bricks element.
+
+Features
+--------
+* Edit supported HTML tags, simple text content, IDs, attributes including inline styles, links, and image source or alt text.
+* Use HTML syntax highlighting, line numbers, matching tags, context-aware tag and attribute completion, and focused Emmet-style Tab expansion.
+* Rename matching opening and closing tags in one edit by clicking the opening tag name.
+* Convert an empty Bricks Block to Basic Text in place when text or inline formatting is added, preserving its existing element data.
+* Apply HTML changes to the current builder session with Command + ] on macOS or Control + ] elsewhere.
+* Add state-aware Reset draft and Apply to builder actions that enable only for an unapplied HTML draft, with clear page-save guidance.
+* Switch directly between element CSS and every assigned global class from the CSS breadcrumbs.
+* Create or attach Bricks global styling classes from the HTML class attribute without using the raw class input.
+* Preserve Bricks child structure and builder-only settings, with validation for unsafe or unsupported markup.
+
 1.0.0
 -----
 Initial public release.

@@ -13,6 +13,13 @@
     fullscreen: false,
     preFullscreenMinimized: false,
     editor: null,
+    htmlEditor: null,
+    mode: 'css',
+    htmlDirty: false,
+    htmlApplying: false,
+    htmlElementId: '',
+    htmlOriginals: new Map(),
+    htmlLinkedTag: null,
     proxy: null,
     context: null,
     original: '',
@@ -176,7 +183,28 @@
     container: 'div', div: 'div', dropdown: 'li', heading: 'h3', image: 'figure', 'post-title': 'h3',
     'product-title': 'h1', section: 'section', 'text-basic': 'div'
   };
+  const htmlTextElements = new Set(['button', 'heading', 'text-basic', 'text-link']);
+  const htmlTagEditableElements = new Set(['block', 'button', 'container', 'div', 'heading', 'image', 'section', 'text-basic']);
+  const htmlBuiltInTags = {
+    block: new Set(['a', 'article', 'aside', 'div', 'footer', 'header', 'main', 'nav', 'section']),
+    button: new Set(['a', 'button', 'span']),
+    container: new Set(['a', 'article', 'aside', 'div', 'footer', 'header', 'main', 'nav', 'section']),
+    div: new Set(['a', 'article', 'aside', 'div', 'footer', 'header', 'main', 'nav', 'section']),
+    heading: new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
+    image: new Set(['div', 'figure', 'picture']),
+    section: new Set(['section']),
+    'text-basic': new Set(['address', 'div', 'figcaption', 'figure', 'p', 'span'])
+  };
+  const htmlVoidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+  const htmlForbiddenTags = new Set(['base', 'body', 'embed', 'head', 'html', 'iframe', 'link', 'meta', 'object', 'script', 'style']);
+  const htmlInlineTextTags = new Set(['a', 'abbr', 'b', 'br', 'cite', 'code', 'del', 'em', 'i', 'mark', 'q', 's', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'wbr']);
+  const htmlChildPlaceholder = '<!-- Child elements remain managed in Bricks -->';
   const automaticLabelSetting = '_uplinkCssStudioAutoLabel';
+  const htmlAttributeSuggestions = [
+    'id', 'class', 'style', 'title', 'role', 'tabindex', 'hidden', 'lang', 'dir',
+    'aria-label', 'aria-describedby', 'aria-hidden', 'aria-current', 'data-',
+    'href', 'target', 'rel'
+  ];
 
   function colorVariableEntries(editor = state.editor) {
     const colorNames = /(?:^--(?:primary|secondary|tertiary|base|neutral|black|white)(?:-|$)|(?:^|[-_])(?:color|colour|background|surface|accent|brand)(?:-|$)|^--(?:text|link|bg|divider)-(?:dark|light|muted|hover|ultra)|^--body-bg-color$)/i;
@@ -570,6 +598,566 @@
     return true;
   }
 
+  function htmlEscapeAttribute(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function htmlGlobalClassNames(ctx, element = ctx?.element) {
+    const ids = Array.isArray(element?.settings?._cssGlobalClasses) ? element.settings._cssGlobalClasses : [];
+    return ids.map((id) => (ctx?.s?.globalClasses || []).find((item) => item?.id === id)?.name).filter(Boolean);
+  }
+
+  function htmlElementAttributes(ctx, element = ctx?.element) {
+    const settings = element?.settings || {};
+    const attributes = new Map();
+    if (settings._cssId) attributes.set('id', String(settings._cssId));
+    const classes = htmlGlobalClassNames(ctx, element);
+    if (classes.length) attributes.set('class', classes.join(' '));
+    (Array.isArray(settings._attributes) ? settings._attributes : []).forEach((attribute) => {
+      const name = String(attribute?.name || '').trim().toLowerCase();
+      if (!name || ['id', 'class', 'href', 'target', 'src', 'alt'].includes(name) || /^on/i.test(name)) return;
+      attributes.set(name, String(attribute?.value ?? ''));
+    });
+    if (elementHtmlTag(element) === 'a' && settings.link && typeof settings.link === 'object') {
+      const link = settings.link;
+      const href = String(link.url || link.useDynamicData || '').trim();
+      if (href) attributes.set('href', href);
+      if (link.newTab) attributes.set('target', '_blank');
+      if (link.rel) attributes.set('rel', String(link.rel));
+      if (link.title) attributes.set('title', String(link.title));
+      if (link.ariaLabel) attributes.set('aria-label', String(link.ariaLabel));
+    }
+    return attributes;
+  }
+
+  function htmlAttributeSource(attributes) {
+    return [...attributes.entries()].map(([name, value]) => value === '' ? ` ${name}` : ` ${name}="${htmlEscapeAttribute(value)}"`).join('');
+  }
+
+  function elementHasBricksChildren(ctx, element = ctx?.element) {
+    return contextElements(ctx).some((candidate) => candidate?.parent === element?.id);
+  }
+
+  function serializeElementHtml(ctx) {
+    const element = ctx?.element;
+    if (!element) return '';
+    const tag = elementHtmlTag(element) || defaultElementTags[element.name] || 'div';
+    const attributes = htmlAttributeSource(htmlElementAttributes(ctx, element));
+    if (element.name === 'image') {
+      const image = element.settings?.image && typeof element.settings.image === 'object' ? element.settings.image : {};
+      const src = String(image.url || image.useDynamicData || '').trim();
+      const alt = String(element.settings?.altText || '').trim();
+      const imageAttributes = new Map();
+      if (src) imageAttributes.set('src', src);
+      imageAttributes.set('alt', alt);
+      return `<${tag}${attributes}>\n  <img${htmlAttributeSource(imageAttributes)}>\n</${tag}>`;
+    }
+    if (htmlVoidTags.has(tag)) return `<${tag}${attributes}>`;
+    if (htmlTextElements.has(element.name)) {
+      return `<${tag}${attributes}>${String(element.settings?.text ?? '')}</${tag}>`;
+    }
+    const inner = elementHasBricksChildren(ctx, element) ? `\n  ${htmlChildPlaceholder}\n` : '';
+    return `<${tag}${attributes}>${inner}</${tag}>`;
+  }
+
+  function validateHtmlUrl(value) {
+    const normalized = String(value || '').trim().replace(/[\u0000-\u001f\u007f\s]+/g, '').toLowerCase();
+    return !/^(?:javascript|vbscript):/.test(normalized) && !/^data:text\/html/.test(normalized);
+  }
+
+  function validateHtmlTree(root) {
+    for (const node of [root, ...root.querySelectorAll('*')]) {
+      const tag = node.tagName.toLowerCase();
+      if (htmlForbiddenTags.has(tag)) throw new Error(`<${tag}> is not supported in the HTML view`);
+      for (const attribute of [...node.attributes]) {
+        const name = attribute.name.toLowerCase();
+        if (/^on/i.test(name)) throw new Error(`Event attributes such as ${name} are not allowed`);
+        if (['href', 'src', 'action', 'formaction', 'poster', 'xlink:href'].includes(name) && !validateHtmlUrl(attribute.value)) {
+          throw new Error(`The ${name} value uses an unsafe URL`);
+        }
+      }
+    }
+  }
+
+  function parseElementHtml(ctx, source) {
+    const template = document.createElement('template');
+    template.innerHTML = String(source || '').trim();
+    const roots = [...template.content.childNodes].filter((node) => node.nodeType !== Node.TEXT_NODE || node.textContent.trim());
+    const rootElements = roots.filter((node) => node.nodeType === Node.ELEMENT_NODE);
+    if (rootElements.length !== 1 || roots.some((node) => node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.COMMENT_NODE)) {
+      throw new Error('Enter exactly one root HTML element');
+    }
+    const root = rootElements[0];
+    validateHtmlTree(root);
+    const tag = root.tagName.toLowerCase();
+    if (!/^[a-z][a-z0-9-]*$/.test(tag) || htmlVoidTags.has(tag)) throw new Error('The selected Bricks element needs a normal opening and closing tag');
+    const currentTag = elementHtmlTag(ctx.element) || defaultElementTags[ctx.element.name] || '';
+    if (tag !== currentTag && !htmlTagEditableElements.has(ctx.element.name)) {
+      throw new Error(`Bricks does not expose tag editing for this ${ctx.element.name} element`);
+    }
+
+    const classNames = String(root.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean);
+    const invalidClasses = classNames.filter((name) => !/^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/.test(name));
+    if (invalidClasses.length) throw new Error(`Invalid class name: ${invalidClasses.join(', ')}`);
+    const id = String(root.getAttribute('id') || '').trim();
+    if (id && !/^[A-Za-z][A-Za-z0-9_:.\-]*$/.test(id)) throw new Error('The HTML ID is not valid');
+
+    let text;
+    let convertToText = false;
+    let image;
+    if (ctx.element.name === 'image') {
+      const children = [...root.children];
+      if (children.length !== 1 || children[0].tagName.toLowerCase() !== 'img') throw new Error('Image elements must keep their single <img> child');
+      const imageNode = children[0];
+      image = { src: imageNode.getAttribute('src') || '', alt: imageNode.getAttribute('alt') || '' };
+    } else if (htmlTextElements.has(ctx.element.name)) {
+      text = root.innerHTML;
+    } else if (elementHasBricksChildren(ctx)) {
+      const meaningful = [...root.childNodes].filter((node) => {
+        if (node.nodeType === Node.TEXT_NODE) return Boolean(node.textContent.trim());
+        return node.nodeType !== Node.COMMENT_NODE || node.textContent.trim() !== 'Child elements remain managed in Bricks';
+      });
+      if (meaningful.length) throw new Error('Child elements stay managed in the Bricks Structure panel');
+    } else if (ctx.element.name === 'block' && root.innerHTML.trim()) {
+      const unsupported = [...root.querySelectorAll('*')].find((node) => !htmlInlineTextTags.has(node.tagName.toLowerCase()));
+      if (unsupported) throw new Error(`Convert nested <${unsupported.tagName.toLowerCase()}> content in the Bricks Structure panel`);
+      text = root.innerHTML;
+      convertToText = true;
+    } else if (root.innerHTML.trim()) {
+      throw new Error('This Bricks element does not expose editable HTML content');
+    }
+
+    const reserved = new Set(['id', 'class', 'href', 'target', 'src', 'alt']);
+    if (tag === 'a') ['rel', 'title', 'aria-label'].forEach((name) => reserved.add(name));
+    const attributes = [...root.attributes]
+      .filter((attribute) => !reserved.has(attribute.name.toLowerCase()))
+      .map((attribute) => ({ name: attribute.name, value: attribute.value }));
+    const href = root.getAttribute('href');
+    const target = root.getAttribute('target');
+    return {
+      tag, id, classNames, attributes, href, target, text, image, convertToText,
+      rel: root.getAttribute('rel'),
+      title: root.getAttribute('title'),
+      ariaLabel: root.getAttribute('aria-label')
+    };
+  }
+
+  function generateAttributeId(ctx, used = new Set()) {
+    let id = '';
+    do {
+      id = ctx?.proxy?.$_generateId ? ctx.proxy.$_generateId() : Math.random().toString(36).slice(2, 8);
+    } while (!id || used.has(id));
+    used.add(id);
+    return id;
+  }
+
+  function prepareHtmlGlobalClasses(ctx, classNames) {
+    ctx.s.globalClasses = Array.isArray(ctx.s.globalClasses) ? ctx.s.globalClasses : [];
+    const existingByName = new Map(ctx.s.globalClasses.filter(Boolean).map((item) => [item.name, item]));
+    const createdNames = classNames.filter((name) => !existingByName.has(name));
+    const currentIds = Array.isArray(ctx.element.settings?._cssGlobalClasses) ? ctx.element.settings._cssGlobalClasses : [];
+    const nextExistingIds = classNames.map((name) => existingByName.get(name)?.id).filter(Boolean);
+    const changed = createdNames.length || currentIds.join('|') !== nextExistingIds.join('|');
+    if (changed && ctx.proxy.$_userHasPermission && !ctx.proxy.$_userHasPermission('assign_unassign_global_classes')) {
+      throw new Error('Your Bricks role cannot assign or remove global classes');
+    }
+    if (createdNames.length && ctx.proxy.$_userHasPermission && !ctx.proxy.$_userHasPermission('create_global_classes')) {
+      throw new Error('Your Bricks role cannot create global classes');
+    }
+    return { existingByName, createdNames };
+  }
+
+  function applyHtmlGlobalClasses(ctx, classNames, prepared) {
+    const created = [];
+    prepared.createdNames.forEach((name) => {
+      const globalClass = { id: generateClassId(ctx), name, settings: {} };
+      ctx.s.globalClasses.push(globalClass);
+      prepared.existingByName.set(name, globalClass);
+      created.push(globalClass);
+      ctx.s.globalChanges = ctx.s.globalChanges || {};
+      ctx.s.globalChanges.added = Array.isArray(ctx.s.globalChanges.added) ? ctx.s.globalChanges.added : [];
+      if (!ctx.s.globalChanges.added.includes(globalClass.id)) ctx.s.globalChanges.added.push(globalClass.id);
+    });
+    if (created.length && ctx.proxy.$_postMessage) ctx.proxy.$_postMessage({ key: 'globalClassesNew', value: JSON.stringify(created) });
+    const ids = classNames.map((name) => prepared.existingByName.get(name)?.id).filter(Boolean);
+    if (ids.length) ctx.element.settings._cssGlobalClasses = ids;
+    else delete ctx.element.settings._cssGlobalClasses;
+  }
+
+  function applyElementTag(element, tag) {
+    const settings = element.settings;
+    const defaultTag = defaultElementTags[element.name];
+    if (tag === defaultTag) {
+      delete settings.tag;
+      delete settings.customTag;
+      return;
+    }
+    if (htmlBuiltInTags[element.name]?.has(tag) || element.name === 'button') {
+      settings.tag = tag;
+      delete settings.customTag;
+      return;
+    }
+    settings.tag = 'custom';
+    settings.customTag = tag;
+  }
+
+  function applyElementAttributes(ctx, attributes) {
+    const current = new Map((Array.isArray(ctx.element.settings._attributes) ? ctx.element.settings._attributes : [])
+      .filter((attribute) => attribute?.name)
+      .map((attribute) => [String(attribute.name).toLowerCase(), attribute]));
+    const used = new Set([...current.values()].map((attribute) => attribute.id).filter(Boolean));
+    const next = attributes.map((attribute) => ({
+      id: current.get(attribute.name.toLowerCase())?.id || generateAttributeId(ctx, used),
+      name: attribute.name,
+      value: attribute.value
+    }));
+    if (next.length) ctx.element.settings._attributes = next;
+    else delete ctx.element.settings._attributes;
+  }
+
+  function applyElementLink(element, parsed) {
+    if (parsed.tag !== 'a') return;
+    if (!parsed.href) {
+      delete element.settings.link;
+      return;
+    }
+    const current = element.settings.link && typeof element.settings.link === 'object' ? element.settings.link : {};
+    const next = { ...current, type: current.type || 'external', newTab: parsed.target === '_blank' };
+    if (current.useDynamicData && parsed.href === current.useDynamicData) delete next.url;
+    else { next.url = parsed.href; delete next.useDynamicData; }
+    ['rel', 'title'].forEach((key) => {
+      if (parsed[key]) next[key] = parsed[key];
+      else delete next[key];
+    });
+    if (parsed.ariaLabel) next.ariaLabel = parsed.ariaLabel;
+    else delete next.ariaLabel;
+    element.settings.link = next;
+  }
+
+  function applyElementHtml(ctx, source, options = {}) {
+    const parsed = parseElementHtml(ctx, source);
+    const preparedClasses = prepareHtmlGlobalClasses(ctx, parsed.classNames);
+    const element = ctx.element;
+    element.settings = element.settings && !Array.isArray(element.settings) ? element.settings : {};
+    if (parsed.convertToText) element.name = 'text-basic';
+    applyElementTag(element, parsed.tag);
+    if (parsed.id) element.settings._cssId = parsed.id;
+    else delete element.settings._cssId;
+    applyHtmlGlobalClasses(ctx, parsed.classNames, preparedClasses);
+    applyElementAttributes(ctx, parsed.attributes);
+    applyElementLink(element, parsed);
+    if (parsed.text !== undefined) element.settings.text = parsed.text;
+    if (parsed.image) {
+      const currentImage = element.settings.image && typeof element.settings.image === 'object' ? element.settings.image : {};
+      element.settings.image = { ...currentImage };
+      if (currentImage.useDynamicData && parsed.image.src === currentImage.useDynamicData) delete element.settings.image.url;
+      else { element.settings.image.url = parsed.image.src; delete element.settings.image.useDynamicData; }
+      element.settings.altText = parsed.image.alt;
+    }
+    syncAutomaticElementLabel(ctx);
+    markElementContentDirty(ctx);
+    ctx.s.rerenderControls = Date.now();
+    requestCanvasRender(ctx);
+    state.htmlDirty = false;
+    syncHtmlEditorFromBricks(ctx, true);
+    renderBreadcrumbs(ctx);
+    const message = options.reverting
+      ? 'HTML changes reverted'
+      : parsed.convertToText
+        ? 'Block converted to Basic Text in the current builder session'
+        : 'HTML applied to the current builder session';
+    setStatus(`${message}; save the Bricks page to persist`, 'synced');
+  }
+
+  function htmlSourceInput() {
+    return document.querySelector('#uplink-html-source');
+  }
+
+  function htmlSourceValue() {
+    return state.htmlEditor?.getValue?.() ?? htmlSourceInput()?.value ?? '';
+  }
+
+  function setHtmlSourceValue(value) {
+    state.htmlApplying = true;
+    if (state.htmlEditor) state.htmlEditor.setValue(String(value || ''));
+    else if (htmlSourceInput()) htmlSourceInput().value = String(value || '');
+    state.htmlApplying = false;
+  }
+
+  function setHtmlSourceDisabled(disabled) {
+    const readOnly = disabled ? 'nocursor' : false;
+    if (state.htmlEditor && state.htmlEditor.getOption('readOnly') !== readOnly) state.htmlEditor.setOption('readOnly', readOnly);
+    const input = htmlSourceInput();
+    if (input && input.disabled !== disabled) input.disabled = disabled;
+    state.htmlEditor?.getWrapperElement?.().classList.toggle('is-disabled', disabled);
+  }
+
+  function updateHtmlActionState() {
+    const enabled = Boolean(state.context?.element && state.htmlDirty);
+    const discard = document.querySelector('.uplink-css-studio-html-discard');
+    const apply = document.querySelector('.uplink-css-studio-html-apply');
+    if (discard) discard.disabled = !enabled;
+    if (apply) apply.disabled = !enabled;
+  }
+
+  function selectLinkedHtmlTag(event) {
+    const input = htmlSourceInput();
+    if (!input && !state.htmlEditor) return;
+    const source = htmlSourceValue();
+    const open = source.match(/^\s*<([a-z][a-z0-9-]*)\b/i);
+    if (!open) { state.htmlLinkedTag = null; return; }
+    const start = open.index + open[0].indexOf(open[1]);
+    const end = start + open[1].length;
+    const caret = state.htmlEditor
+      ? state.htmlEditor.indexFromPos(event
+        ? state.htmlEditor.coordsChar({ left: event.clientX, top: event.clientY }, 'window')
+        : state.htmlEditor.getCursor())
+      : input.selectionStart;
+    if (caret < start || caret > end) { state.htmlLinkedTag = null; return; }
+    const closing = new RegExp(`</${escapePattern(open[1])}\\s*>\\s*$`, 'i');
+    if (!closing.test(source)) { state.htmlLinkedTag = null; return; }
+    state.htmlLinkedTag = { tag: open[1] };
+    if (state.htmlEditor) {
+      requestAnimationFrame(() => {
+        state.htmlEditor.setSelection(state.htmlEditor.posFromIndex(start), state.htmlEditor.posFromIndex(end));
+        state.htmlEditor.focus();
+      });
+    } else input.setSelectionRange(start, end);
+  }
+
+  function syncLinkedHtmlTag() {
+    const input = htmlSourceInput();
+    const linked = state.htmlLinkedTag;
+    if ((!input && !state.htmlEditor) || !linked) return;
+    const source = htmlSourceValue();
+    const open = source.match(/^\s*<([a-z][a-z0-9-]*)\b/i);
+    if (!open || open[1] === linked.tag) return;
+    const closing = new RegExp(`</${escapePattern(linked.tag)}(\\s*)>\\s*$`, 'i');
+    const match = closing.exec(source);
+    if (!match) { state.htmlLinkedTag = null; return; }
+    if (state.htmlEditor) {
+      const start = match.index;
+      const end = start + match[0].length;
+      state.htmlApplying = true;
+      state.htmlEditor.replaceRange(`</${open[1]}${match[1]}>`, state.htmlEditor.posFromIndex(start), state.htmlEditor.posFromIndex(end), '+linked-tag');
+      state.htmlApplying = false;
+    } else {
+      const selectionStart = input.selectionStart;
+      const selectionEnd = input.selectionEnd;
+      input.value = source.replace(closing, `</${open[1]}$1>`);
+      input.setSelectionRange(selectionStart, selectionEnd);
+    }
+    linked.tag = open[1];
+  }
+
+  function htmlTagsForContext() {
+    const name = state.context?.element?.name;
+    const tags = new Set(htmlBuiltInTags[name] || []);
+    const current = elementHtmlTag(state.context?.element);
+    if (current) tags.add(current);
+    return [...tags].sort((a, b) => a.localeCompare(b));
+  }
+
+  function htmlHints(editor) {
+    const cursor = editor.getCursor();
+    const before = editor.getRange(CodeMirror.Pos(0, 0), cursor);
+    const openIndex = before.lastIndexOf('<');
+    const closeIndex = before.lastIndexOf('>');
+    if (openIndex <= closeIndex) return { list: [], from: cursor, to: cursor };
+    const tagFragment = before.slice(openIndex);
+    const tagMatch = tagFragment.match(/^<\/?([a-z0-9-]*)$/i);
+    if (tagMatch) {
+      const prefix = tagMatch[1].toLowerCase();
+      const from = CodeMirror.Pos(cursor.line, cursor.ch - tagMatch[1].length);
+      const list = htmlTagsForContext().filter((tag) => tag.startsWith(prefix)).map((tag) => ({
+        text: tag,
+        displayText: `<${tag}>`,
+        className: 'uplink-css-studio-hint-html-tag'
+      }));
+      return { list, from, to: cursor };
+    }
+    if (/^<\/?[a-z][a-z0-9-]*/i.test(tagFragment) && !/^<\//.test(tagFragment)) {
+      const attributeMatch = tagFragment.match(/\s([a-z][\w:-]*)?$/i);
+      if (attributeMatch) {
+        const prefix = String(attributeMatch[1] || '').toLowerCase();
+        const from = CodeMirror.Pos(cursor.line, cursor.ch - prefix.length);
+        const list = htmlAttributeSuggestions.filter((attribute) => attribute.startsWith(prefix)).map((attribute) => ({
+          text: attribute.endsWith('-') ? attribute : `${attribute}=""`,
+          displayText: attribute,
+          className: 'uplink-css-studio-hint-html-attribute',
+          hint(cm, data, completion) {
+            cm.replaceRange(completion.text, data.from, data.to, '+complete');
+            if (completion.text.endsWith('=""')) cm.setCursor(data.from.line, data.from.ch + completion.text.length - 1);
+          }
+        }));
+        return { list, from, to: cursor };
+      }
+    }
+    return { list: [], from: cursor, to: cursor };
+  }
+
+  function htmlAutocomplete(editor = state.htmlEditor) {
+    if (!editor?.showHint) return;
+    editor.showHint({ hint: htmlHints, completeSingle: false, closeOnUnfocus: true, container: document.querySelector('.uplink-css-studio-shell') });
+  }
+
+  function maybeHtmlAutocomplete(editor, change) {
+    if (!change?.text?.length || change.origin === 'setValue' || change.origin === '+linked-tag') return;
+    const typed = change.text.join('');
+    const cursor = editor.getCursor();
+    const before = editor.getRange(CodeMirror.Pos(0, 0), cursor);
+    if (before.lastIndexOf('<') > before.lastIndexOf('>') && /^[<a-z-]$/i.test(typed)) htmlAutocomplete(editor);
+  }
+
+  function parseHtmlAbbreviation(value) {
+    const match = String(value || '').match(/^([a-z][\w-]*)?((?:[.#][\w-]+)*)(?:\[((?:[^\]"']|"[^"]*"|'[^']*')*)\])?(?:\{([\s\S]*)\})?$/i);
+    if (!match || (!match[1] && !match[2])) return null;
+    const tag = (match[1] || elementHtmlTag(state.context?.element) || 'div').toLowerCase();
+    if (htmlForbiddenTags.has(tag) || htmlVoidTags.has(tag)) return null;
+    let id = '';
+    const classes = [];
+    for (const token of match[2].matchAll(/([.#])([\w-]+)/g)) {
+      if (token[1] === '#') id = token[2];
+      else classes.push(token[2]);
+    }
+    const attributes = [];
+    const attributePattern = /([:\w-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^\s]+)))?/g;
+    let attribute;
+    while ((attribute = attributePattern.exec(match[3] || ''))) {
+      attributes.push([attribute[1], attribute[2] ?? attribute[3] ?? attribute[4] ?? '']);
+    }
+    return { tag, id, classes, attributes, text: match[4] ?? '' };
+  }
+
+  function expandHtmlAbbreviation(editor = state.htmlEditor) {
+    if (!editor || editor.getOption('readOnly')) return CodeMirror.Pass;
+    const cursor = editor.getCursor();
+    const selected = editor.getSelection();
+    const line = editor.getLine(cursor.line);
+    const before = line.slice(0, cursor.ch);
+    const token = selected || before.match(/(?:^|\s)([a-z.#][\w.#-]*(?:\[[^\]]*\])?(?:\{[^{}]*\})?)$/i)?.[1] || '';
+    const parsed = parseHtmlAbbreviation(token);
+    if (!parsed) return CodeMirror.Pass;
+    const attributes = [];
+    if (parsed.id) attributes.push(`id="${htmlEscapeAttribute(parsed.id)}"`);
+    if (parsed.classes.length) attributes.push(`class="${htmlEscapeAttribute(parsed.classes.join(' '))}"`);
+    parsed.attributes.forEach(([name, value]) => attributes.push(value === '' ? name : `${name}="${htmlEscapeAttribute(value)}"`));
+    const opening = `<${parsed.tag}${attributes.length ? ` ${attributes.join(' ')}` : ''}>`;
+    const expansion = `${opening}${parsed.text}</${parsed.tag}>`;
+    const from = selected ? editor.getCursor('from') : CodeMirror.Pos(cursor.line, cursor.ch - token.length);
+    const to = selected ? editor.getCursor('to') : cursor;
+    editor.replaceRange(expansion, from, to, '+emmet');
+    editor.setCursor(from.line, from.ch + opening.length + parsed.text.length);
+    setStatus('HTML abbreviation expanded', 'dirty');
+    return undefined;
+  }
+
+  function syncHtmlEditorFromBricks(ctx, force = false) {
+    if (!htmlSourceInput() && !state.htmlEditor) return;
+    const elementId = ctx?.element?.id || '';
+    if (!ctx) {
+      setHtmlSourceValue('');
+      setHtmlSourceDisabled(true);
+      state.htmlElementId = '';
+      state.htmlDirty = false;
+      state.htmlLinkedTag = null;
+      updateHtmlActionState();
+      return;
+    }
+    setHtmlSourceDisabled(false);
+    const changedElement = state.htmlElementId !== elementId;
+    if (!force && state.htmlDirty && !changedElement) return;
+    const source = serializeElementHtml(ctx);
+    if (!force && !changedElement && htmlSourceValue() === source) {
+      updateHtmlScopeNote(ctx);
+      return;
+    }
+    setHtmlSourceValue(source);
+    state.htmlElementId = elementId;
+    state.htmlDirty = false;
+    state.htmlLinkedTag = null;
+    updateHtmlActionState();
+    if (!state.htmlOriginals.has(elementId)) state.htmlOriginals.set(elementId, { source, name: ctx.element.name });
+    updateHtmlScopeNote(ctx);
+  }
+
+  function updateHtmlScopeNote(ctx) {
+    const note = document.querySelector('.uplink-css-studio-html-note');
+    if (!note) return;
+    if (!ctx?.element) {
+      note.textContent = 'Select a Bricks element to inspect its editable HTML surface.';
+      return;
+    }
+    const details = ['Classes become Bricks global classes', 'attributes round-trip through Bricks', 'save the page to persist'];
+    if (elementHasBricksChildren(ctx)) details.unshift('Children stay in the Structure panel');
+    else if (ctx.element.name === 'block') details.unshift('Adding text converts this Block to Basic Text');
+    note.textContent = details.join(' · ');
+  }
+
+  function focusActiveEditor() {
+    if (state.mode === 'html') { state.htmlEditor?.refresh(); state.htmlEditor?.focus(); }
+    else { state.editor?.refresh(); state.editor?.focus(); }
+  }
+
+  function setEditorMode(mode) {
+    state.mode = mode === 'html' ? 'html' : 'css';
+    const windowElement = document.querySelector('.uplink-css-studio-window');
+    const cssPanel = document.querySelector('[data-editor-panel="css"]');
+    const htmlPanel = document.querySelector('[data-editor-panel="html"]');
+    if (!windowElement || !cssPanel || !htmlPanel) return;
+    windowElement.classList.toggle('is-html-mode', state.mode === 'html');
+    cssPanel.hidden = state.mode !== 'css';
+    htmlPanel.hidden = state.mode !== 'html';
+    document.querySelectorAll('[data-studio-mode]').forEach((button) => {
+      const active = button.dataset.studioMode === state.mode;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelector('.uplink-css-studio-shortcuts').hidden = state.mode === 'html';
+    document.querySelector('.uplink-css-studio-html-shortcuts').hidden = state.mode !== 'html';
+    closePopovers();
+    if (state.mode === 'html') {
+      syncHtmlEditorFromBricks(state.context || activeContext());
+    }
+    requestAnimationFrame(focusActiveEditor);
+  }
+
+  function applyHtmlEditor() {
+    if (!state.htmlDirty) return;
+    const ctx = state.context || activeContext();
+    if (!ctx?.element) { setStatus('Select an element to edit its HTML', 'dirty'); return; }
+    try {
+      applyElementHtml(ctx, htmlSourceValue());
+    } catch (error) {
+      setStatus(error.message || 'Could not apply HTML', 'dirty');
+    }
+  }
+
+  function discardHtmlEdits() {
+    if (!state.htmlDirty) return;
+    syncHtmlEditorFromBricks(state.context || activeContext(), true);
+    setStatus('HTML draft reset to the current builder element', 'synced');
+  }
+
+  function revertHtmlEditor() {
+    const ctx = state.context || activeContext();
+    const original = ctx?.element?.id ? state.htmlOriginals.get(ctx.element.id) : null;
+    if (!ctx || original == null) return;
+    const snapshot = typeof original === 'string' ? { source: original, name: ctx.element.name } : original;
+    const currentName = ctx.element.name;
+    try {
+      ctx.element.name = snapshot.name || currentName;
+      applyElementHtml(ctx, snapshot.source || '', { reverting: true });
+    } catch (error) {
+      ctx.element.name = currentName;
+      setStatus(error.message || 'Could not revert HTML', 'dirty');
+    }
+  }
+
   function hasCustomCss(settings) {
     return Object.entries(settings || {}).some(([key, value]) => key.startsWith('_cssCustom') && typeof value === 'string' && value.trim());
   }
@@ -678,6 +1266,12 @@
     return path;
   }
 
+  function assignedGlobalClasses(ctx) {
+    const ids = Array.isArray(ctx?.element?.settings?._cssGlobalClasses) ? ctx.element.settings._cssGlobalClasses : [];
+    const classes = new Map((ctx?.s?.globalClasses || []).filter(Boolean).map((item) => [item.id, item]));
+    return ids.map((id) => classes.get(id)).filter(Boolean);
+  }
+
   function renderBreadcrumbs(ctx) {
     const nav = document.querySelector('.uplink-css-studio-breadcrumbs');
     const editingTarget = document.querySelector('.uplink-css-studio-editing-target');
@@ -698,7 +1292,9 @@
       const theme = elementThemeStyleSources(ctx, element);
       return `${element.id}:${label}:${css.own ? 1 : 0}:${css.classCss ? 1 : 0}:${theme.tag}:${theme.matches.map((match) => match.id).join(',')}`;
     });
-    const signature = `${parts.join('|')}|${ctx.kind}|${ctx.label}`;
+    const classTargets = assignedGlobalClasses(ctx);
+    const classSignature = classTargets.map((item) => `${item.id}:${item.name}`).join(',');
+    const signature = `${parts.join('|')}|${ctx.kind}|${ctx.label}|${classSignature}`;
     if (signature === state.breadcrumbSignature) return;
     state.breadcrumbSignature = signature;
 
@@ -717,10 +1313,57 @@
       return `${separator}<span class="uplink-css-studio-breadcrumb-item"><button class="uplink-css-studio-breadcrumb" type="button" data-element-id="${escapeAttr(element.id)}" data-tooltip="${escapeAttr(tooltip)}"${current}><span class="uplink-css-studio-breadcrumb-label">${escapeHtml(label)}</span>${marker}</button>${themeMarker}</span>`;
     }).join('') || '<span class="uplink-css-studio-breadcrumb-empty">—</span>';
 
-    const showEditingTarget = ctx.kind !== 'Element';
+    const targetSelect = editingTarget.querySelector('select');
+    const targetLabel = editingTarget.querySelector('strong');
+    const canSelectClass = classTargets.length > 0 && (ctx.kind === 'Element' || ctx.kind === 'Class');
+    const showEditingTarget = canSelectClass || ctx.kind !== 'Element';
     editingTarget.hidden = !showEditingTarget;
     editingDivider.hidden = !showEditingTarget;
-    editingTarget.querySelector('strong').textContent = showEditingTarget ? `${ctx.kind} · ${ctx.label}` : '';
+    if (canSelectClass) {
+      targetLabel.hidden = true;
+      targetSelect.hidden = false;
+      targetSelect.innerHTML = [
+        `<option value="__element__">Element CSS</option>`,
+        ...classTargets.map((item) => `<option value="${escapeAttr(item.id)}">.${escapeHtml(item.name || item.id)}</option>`)
+      ].join('');
+      targetSelect.value = ctx.kind === 'Class' ? String(ctx.target.id || '') : '__element__';
+      targetSelect.title = targetSelect.options[targetSelect.selectedIndex]?.textContent || 'CSS target';
+    } else {
+      targetSelect.hidden = true;
+      targetSelect.innerHTML = '';
+      targetLabel.hidden = false;
+      targetLabel.textContent = showEditingTarget ? `${ctx.kind} · ${ctx.label}` : '';
+    }
+  }
+
+  function switchCssTarget(targetId) {
+    const ctx = state.context || activeContext();
+    if (!ctx?.element || !targetId) return;
+    if (state.pendingWrite) writeToBricks(true);
+    state.siteWideContext = null;
+    state.firstClassElementId = ctx.element.id;
+    ctx.s.activeSelector = undefined;
+    ctx.s.pseudoClassActive = '';
+    ctx.s.globalClassesSelected = ctx.s.globalClassesSelected || {};
+
+    if (targetId === '__element__') {
+      delete ctx.s.globalClassesSelected[ctx.element.id];
+      ctx.s.activeClass = undefined;
+      ctx.s.activeClassIsLocked = false;
+    } else {
+      const globalClass = assignedGlobalClasses(ctx).find((item) => item.id === targetId);
+      if (!globalClass) {
+        setStatus('That class is no longer assigned to this element', 'dirty');
+        renderBreadcrumbs(activeContext());
+        return;
+      }
+      ctx.s.globalClassesSelected[ctx.element.id] = globalClass.id;
+      ctx.s.activeClassIsLocked = (ctx.s.globalClassesLocked || []).includes(globalClass.id);
+      ctx.s.activeClass = ctx.proxy.$_clone ? ctx.proxy.$_clone(globalClass) : globalClass;
+    }
+
+    const next = activeContext();
+    if (next) setContext(next);
   }
 
   function selectBreadcrumbElement(elementId) {
@@ -728,6 +1371,10 @@
     if (!ctx || !elementId) return;
     const element = contextElements(ctx).find((item) => item?.id === elementId);
     if (!element) return;
+    if (element.id === ctx.element.id && ctx.kind !== 'Element') {
+      switchCssTarget('__element__');
+      return;
+    }
     if (state.pendingWrite) writeToBricks(true);
     state.siteWideContext = null;
     closePopovers();
@@ -818,7 +1465,7 @@
             <div class="uplink-css-studio-context-summary">
               <nav class="uplink-css-studio-breadcrumbs" aria-label="Element structure"><span class="uplink-css-studio-breadcrumb-empty">—</span></nav>
               <span class="uplink-css-studio-context-divider uplink-css-studio-editing-divider" hidden>·</span>
-              <span class="uplink-css-studio-chip uplink-css-studio-editing-target" hidden><strong></strong></span>
+              <span class="uplink-css-studio-chip uplink-css-studio-editing-target" hidden><strong></strong><select class="uplink-css-studio-class-switcher" aria-label="CSS target" hidden></select></span>
               <span class="uplink-css-studio-context-divider">/</span>
               <span class="uplink-css-studio-chip uplink-css-studio-breakpoint"><strong>—</strong></span>
               <span class="uplink-css-studio-context-divider">/</span>
@@ -833,6 +1480,11 @@
             <button class="uplink-css-studio-icon-button uplink-css-studio-close" type="button" aria-label="Close CSS Studio" data-tooltip="Close">${icon('close')}</button>
           </header>
           <div class="uplink-css-studio-toolbar" role="toolbar" aria-label="CSS tools">
+            <div class="uplink-css-studio-mode-tabs" role="tablist" aria-label="Editor mode">
+              <button class="uplink-css-studio-mode-tab is-active" type="button" role="tab" data-studio-mode="css" aria-selected="true">CSS</button>
+              <button class="uplink-css-studio-mode-tab" type="button" role="tab" data-studio-mode="html" aria-selected="false">HTML</button>
+            </div>
+            <span class="uplink-css-studio-toolbar-divider uplink-css-studio-mode-divider" aria-hidden="true"></span>
             <button class="uplink-css-studio-tool uplink-css-studio-outline-toggle" type="button" aria-label="Toggle stylesheet outline" data-tooltip="Outline · ⌘⇧O">${icon('outline')}</button>
             <button class="uplink-css-studio-tool uplink-css-studio-recipes-toggle" type="button" aria-label="Open recipe manager" data-tooltip="Recipe manager">${icon('shortcuts')}</button>
             <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" data-tooltip="%root%, class, ID & HTML">${icon('target')}</button>
@@ -875,7 +1527,7 @@
             <button class="uplink-css-studio-tool uplink-css-studio-comment" type="button" aria-label="Toggle comment" data-tooltip="Toggle comment · ⌘/">${icon('comment')}</button>
             <button class="uplink-css-studio-tool uplink-css-studio-format" type="button" aria-label="Format CSS" data-tooltip="Format CSS">${icon('format')}</button>
           </div>
-          <div class="uplink-css-studio-editor-wrap">
+          <div class="uplink-css-studio-editor-wrap" data-editor-panel="css">
             <textarea id="uplink-css-source" aria-label="CSS source"></textarea>
             <aside class="uplink-css-studio-popover uplink-css-studio-outline-panel" hidden aria-label="Stylesheet outline">
               <div class="uplink-css-studio-popover-head"><strong>Outline</strong><span class="uplink-css-studio-outline-count">0</span></div>
@@ -961,10 +1613,21 @@
             </aside>
             <div class="uplink-css-studio-empty" hidden>${escapeHtml(config.labels?.noSelection || 'Select an element in Bricks to edit its CSS.')}</div>
           </div>
+          <div class="uplink-css-studio-html-wrap" data-editor-panel="html" hidden>
+            <div class="uplink-css-studio-html-head">
+              <div><strong>Selected element HTML</strong><span class="uplink-css-studio-html-note">Classes become Bricks global classes · attributes round-trip through Bricks</span></div>
+              <div class="uplink-css-studio-html-actions">
+                <button class="uplink-css-studio-action uplink-css-studio-html-discard" type="button" data-tooltip="Reset the HTML draft to the current builder element" disabled>Reset draft</button>
+                <button class="uplink-css-studio-action is-primary uplink-css-studio-html-apply" type="button" data-tooltip="Apply HTML to the current builder session · ⌘/Ctrl+]" disabled>Apply to builder</button>
+              </div>
+            </div>
+            <textarea id="uplink-html-source" aria-label="Selected element HTML" spellcheck="false" autocomplete="off"></textarea>
+          </div>
           <footer class="uplink-css-studio-footer">
             <span class="uplink-css-studio-status">Ready</span>
             <span class="uplink-css-studio-position">Ln 1, Col 1</span>
             <span class="uplink-css-studio-shortcuts"><kbd>@recipe;</kbd> insert recipe &nbsp; <kbd>r Tab</kbd> %root% &nbsp; <kbd>⌘⌥X</kbd> scrub</span>
+            <span class="uplink-css-studio-shortcuts uplink-css-studio-html-shortcuts" hidden><kbd>Tab</kbd> expand &nbsp; <kbd>Ctrl Space</kbd> complete &nbsp; <kbd>⌘/Ctrl ]</kbd> apply</span>
           </footer>
         </section>
       </div>`);
@@ -1001,6 +1664,36 @@
     state.editor.on('gutterClick', toggleDeclarationAtLine);
     state.editor.getWrapperElement().addEventListener('pointerdown', handleValuePointerDown);
     state.editor.getWrapperElement().addEventListener('click', handleValueClick);
+
+    const htmlSettings = $.extend(true, {}, config.htmlEditorSettings || config.editorSettings || {}, {
+      codemirror: {
+        mode: 'htmlmixed', lint: false, lineNumbers: true, lineWrapping: true, indentUnit: 2,
+        tabSize: 2, autoCloseBrackets: true, autoCloseTags: true, matchBrackets: false,
+        matchTags: false, styleActiveLine: true,
+        extraKeys: {
+          'Cmd-S': applyHtmlEditor,
+          'Ctrl-S': applyHtmlEditor,
+          'Cmd-]': applyHtmlEditor,
+          'Ctrl-]': applyHtmlEditor,
+          'Ctrl-Space': htmlAutocomplete,
+          'Tab': expandHtmlAbbreviation,
+          'Cmd-/': 'toggleComment',
+          'Ctrl-/': 'toggleComment'
+        },
+        hintOptions: { completeSingle: false, closeOnUnfocus: true }
+      }
+    });
+    state.htmlEditor = wp.codeEditor.initialize($('#uplink-html-source'), htmlSettings).codemirror;
+    state.htmlEditor.on('change', () => {
+      if (state.htmlApplying) return;
+      syncLinkedHtmlTag();
+      state.htmlDirty = true;
+      updateHtmlActionState();
+      setStatus('HTML changes are ready to apply', 'dirty');
+    });
+    state.htmlEditor.on('inputRead', maybeHtmlAutocomplete);
+    state.htmlEditor.on('cursorActivity', updateCursorPosition);
+    state.htmlEditor.getWrapperElement().addEventListener('pointerup', selectLinkedHtmlTag);
     bindEvents();
     mountLauncher();
     mountCanvasResizers();
@@ -2351,6 +3044,9 @@
     document.querySelector('.uplink-css-studio-fullscreen').addEventListener('click', toggleFullscreen);
     document.querySelector('.uplink-css-studio-minimize').addEventListener('click', toggleMinimize);
     document.querySelector('.uplink-css-studio-revert').addEventListener('click', revert);
+    document.querySelectorAll('[data-studio-mode]').forEach((button) => button.addEventListener('click', () => setEditorMode(button.dataset.studioMode)));
+    document.querySelector('.uplink-css-studio-html-apply').addEventListener('click', applyHtmlEditor);
+    document.querySelector('.uplink-css-studio-html-discard').addEventListener('click', discardHtmlEdits);
     document.querySelector('.uplink-css-studio-format').addEventListener('click', formatCss);
     document.querySelector('.uplink-css-studio-style-manager').addEventListener('click', openNativeStyleManager);
     document.querySelector('.uplink-css-studio-preferences-toggle').addEventListener('click', (event) => { event.stopPropagation(); togglePreferences(); });
@@ -2365,6 +3061,9 @@
       }
       const crumb = event.target.closest('[data-element-id]');
       if (crumb) selectBreadcrumbElement(crumb.dataset.elementId);
+    });
+    document.querySelector('.uplink-css-studio-class-switcher').addEventListener('change', (event) => {
+      switchCssTarget(event.target.value);
     });
     bindResizer();
     bindCanvasResizers();
@@ -3229,6 +3928,8 @@
     state.fullscreen = false;
     state.minimized = Boolean(state.prefs.minimized);
     state.originals = new Map();
+    state.htmlOriginals = new Map();
+    state.htmlDirty = false;
     shell.classList.toggle('is-minimized', state.minimized);
     shell.classList.remove('is-fullscreen');
     shell.hidden = false;
@@ -3248,7 +3949,10 @@
     document.querySelector('#uplink-css-studio-launcher')?.classList.add('is-active');
     setContext(ctx);
     state.dismissedElementId = '';
-    if (!state.minimized) requestAnimationFrame(() => { state.editor.refresh(); state.editor.focus(); });
+    if (!state.minimized) requestAnimationFrame(() => {
+      if (state.mode === 'html') { state.htmlEditor?.refresh(); state.htmlEditor?.focus(); }
+      else { state.editor.refresh(); state.editor.focus(); }
+    });
   }
 
   function close() {
@@ -3285,7 +3989,7 @@
     button.setAttribute('aria-label', state.minimized ? 'Restore CSS Studio' : 'Minimize CSS Studio');
     button.dataset.tooltip = state.minimized ? 'Restore editor' : 'Minimize';
     closePopovers();
-    if (!state.minimized) requestAnimationFrame(() => { state.editor.refresh(); state.editor.focus(); });
+    if (!state.minimized) requestAnimationFrame(focusActiveEditor);
   }
 
   function updateFullscreenButton() {
@@ -3309,7 +4013,7 @@
     preview.classList.toggle('uplink-css-studio-dock-minimized', state.minimized);
     updateFullscreenButton();
     closePopovers();
-    requestAnimationFrame(() => { state.editor.refresh(); if (!state.minimized) state.editor.focus(); });
+    requestAnimationFrame(() => { if (!state.minimized) focusActiveEditor(); });
   }
 
   function toggleFullscreen() {
@@ -3326,7 +4030,7 @@
     preview.classList.add('uplink-css-studio-studio-fullscreen');
     updateFullscreenButton();
     closePopovers();
-    requestAnimationFrame(() => { state.editor.refresh(); state.editor.focus(); });
+    requestAnimationFrame(focusActiveEditor);
   }
 
   function refreshContext() {
@@ -3555,6 +4259,7 @@
       setStatus('Select an element to begin', '');
       renderOutline();
       refreshLayoutTools();
+      syncHtmlEditorFromBricks(null, true);
       return;
     }
     if (ctx.kind === 'Theme style') destroyCssSyncManager();
@@ -3586,6 +4291,7 @@
     updateCursorPosition();
     refreshLayoutTools();
     scheduleValueDecorations(true);
+    syncHtmlEditorFromBricks(ctx, state.htmlElementId !== ctx.element.id);
   }
 
   function onEditorChange() {
@@ -3922,6 +4628,7 @@
     if (!ctx || !state.editor) return;
     state.context = ctx;
     renderBreadcrumbs(ctx);
+    syncHtmlEditorFromBricks(ctx);
     const storedValue = String(ctx.target.settings[ctx.key] || '');
     const cleanedStoredValue = ctx.kind === 'Theme style' ? storedValue : stripGeneratedAlignmentDefaults(storedValue);
     const removedAlignmentSetting = ctx.kind === 'Theme style' ? false : removeGeneratedAlignmentSettings(ctx);
@@ -4162,6 +4869,7 @@
 
   function revert() {
     if (!state.context) return;
+    if (state.mode === 'html') { revertHtmlEditor(); return; }
     const original = state.originals.get(contextSignature(state.context)) ?? state.original;
     state.applying = true; state.editor.setValue(original); state.applying = false;
     writeToBricks(true);
@@ -5281,8 +5989,9 @@
   }
 
   function updateCursorPosition() {
-    if (!state.editor) return;
-    const cursor = state.editor.getCursor();
+    const editor = state.mode === 'html' ? state.htmlEditor : state.editor;
+    if (!editor) return;
+    const cursor = editor.getCursor();
     const position = document.querySelector('.uplink-css-studio-position');
     if (position) position.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
   }

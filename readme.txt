@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,11 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 == Features ==
 
 * Edits the native Bricks custom CSS for the active element, global class, selector, state, or component variant.
+* A selected-element HTML view can update supported tags, simple text content, IDs, reusable global classes, attributes (including inline styles), links, and image source or alt text without replacing the Bricks structure tree.
+* The HTML view includes syntax highlighting, line numbers, matching tags, context-aware tag and attribute completion, and focused Emmet-style Tab expansion for one root element.
+* Clicking an opening tag name selects it for linked renaming, so the closing tag updates as you type.
+* Adding text or inline formatting to an empty Bricks Block converts it in place to Basic Text while preserving its tag, ID, classes, attributes, position, and styling.
+* Classes entered in the HTML view create or attach Bricks global classes; the raw CSS class input is left untouched.
 * Dark CodeMirror workspace with soft line wrapping, formatting, search, comments, status, full-screen editing, and a searchable comment-based outline.
 * Context-aware icon controls for flex, grid, alignment, states, colors, shadows, gradients, filters, and transforms.
 * CSS-authored media and container query helpers based on registered Bricks breakpoint widths, including `<=`, `>=`, and between ranges.
@@ -53,7 +58,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * `%root%` targeting plus Bricks global-class and element-ID assignment from the editor.
 * Native editing of site-wide HTML selectors in the applicable Theme Style > Stylesheet, clickable HTML badges for matching active Theme Styles, plus a native Style Manager shortcut.
 * ACSS recipe discovery and a per-user recipe manager with names, shortcuts, categories, search, editing, and `@shortcut;` expansion.
-* Live Bricks structure breadcrumbs that navigate to ancestors and mark elements containing custom CSS.
+* Live Bricks structure breadcrumbs that navigate to ancestors, mark elements containing custom CSS, and switch between element CSS and every assigned global class.
 * Automatic native element labels for changed HTML tags, while preserving labels entered by the user.
 * Immediate two-way updates through Bricks' native CSS Sync service, with revert and remembered panel state.
 * Optional open-on-selection and left/right canvas width handles, both enabled by default.
@@ -65,6 +70,9 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Command/Control + Shift + O: Toggle the stylesheet outline.
 * Command/Control + Alt + X: Toggle numeric scrubbing.
 * Command/Control + /: Toggle comment.
+* Command + ] on macOS or Control + ] elsewhere: Apply HTML changes to the current builder session. Save the Bricks page to persist them.
+* Control + Space in the HTML editor: Show tag or attribute completion for the current cursor position.
+* Tab after a supported single-root HTML abbreviation such as `p.lead`, `a.button[href=/contact]`, or `span.label{New}`: Expand the abbreviation and place the caret in the element.
 * Tab after a property abbreviation or partial property name: Complete the property and insert `: ;`, leaving the caret between the colon and semicolon.
 * Tab after an arithmetic declaration value: Expand bare custom properties, wrap the expression in `calc(...)`, and keep the declaration's existing semicolon. A semicolon is added only when one is not already present.
 * Type `@recipe-shortcut;`: Insert the matching ACSS or user recipe at the cursor.
@@ -81,6 +89,8 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 4. Write CSS, use the toolbar, or type `@recipe-shortcut;`. Changes update Bricks and the canvas while you type.
 5. Press Tab after an expression such as `--space-s * 2` to produce `calc(var(--space-s) * 2)`.
 6. Add media or container queries from registered breakpoints, then save the Bricks page normally.
+
+The HTML tab is intentionally a constrained view of the selected Bricks element. Existing child elements remain in the Structure panel and cannot be created, deleted, or reordered from the HTML tab. Bricks-only settings that are not represented in the markup are preserved.
 
 == Requirements ==
 
@@ -127,6 +137,18 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service.
 
 == Changelog ==
+
+= 1.1.0 =
+
+* Added a bidirectional selected-element HTML view for supported tag, text, ID, global-class, attribute (including inline-style), link, and image changes.
+* Added linked opening and closing tag renaming in the HTML editor.
+* Added HTML syntax highlighting, line numbers, matching tags, contextual completion, and focused Emmet-style Tab expansion.
+* Added in-place conversion from an empty Block to Basic Text when editable inner content is added.
+* Added Command/Control + ] as the HTML apply shortcut.
+* Added state-aware Reset draft and Apply to builder actions. Both enable only when the HTML draft differs from the current builder element, and applied changes still require a Bricks page save.
+* Added direct switching between element CSS and assigned global classes in the CSS breadcrumbs.
+* Classes typed in the HTML view create or attach Bricks global styling classes instead of writing to the raw class input.
+* Protected Bricks child structure and builder-only settings, with validation for unsafe or unsupported markup.
 
 = 1.0.0 =
 
