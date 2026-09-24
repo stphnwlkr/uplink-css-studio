@@ -51,7 +51,7 @@
 .uplink-css-studio-svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #uplink-css-studio-launcher .uplink-css-studio-svg { width: 20px; height: 20px; }
 
-.uplink-css-studio-canvas-resizers { position: fixed; z-index: 100010; inset: 0; pointer-events: none; }
+.uplink-css-studio-canvas-resizers { position: fixed; z-index: 100090; inset: 0; pointer-events: none; }
 .uplink-css-studio-canvas-resizers[hidden] { display: none !important; }
 .uplink-css-studio-canvas-resize-handle { position: absolute; display: block; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; pointer-events: auto; touch-action: none; }
 .uplink-css-studio-canvas-resize-handle:after { content: ""; position: absolute; border-radius: 3px; background: #cbd0da; box-shadow: 0 0 0 1px rgb(15 17 21 / 80%); opacity: .95; transition: background .12s ease, box-shadow .12s ease, opacity .12s ease; }
@@ -65,7 +65,7 @@ body.uplink-css-studio-canvas-resizing-width { cursor: ew-resize !important; }
 
 .uplink-css-studio-tooltip {
   position: fixed;
-  z-index: 100020;
+  z-index: 100130;
   inset: 0 auto auto 0;
   max-width: 260px;
   padding: 9px 11px;
@@ -84,7 +84,7 @@ body.uplink-css-studio-canvas-resizing-width { cursor: ew-resize !important; }
 .uplink-css-studio-shell {
   --uplink-css-studio-dock-height: 48%;
   position: absolute;
-  z-index: 1003;
+  z-index: 100100;
   inset: auto 0 0;
   height: var(--uplink-css-studio-dock-height);
   min-height: 280px;

@@ -1,6 +1,16 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.1.1
+-----
+Fixed anchored tool panel positioning and stacking.
+
+Fixes
+-----
+* Open tool panels above or below their anchor according to the available viewport space.
+* Constrain oversized panels to the larger available area and keep their contents scrollable.
+* Keep Bricks controls and CSS Studio viewport resize handles beneath open tool panels.
+
 1.1.0
 -----
 Added a constrained, bidirectional HTML view for the selected Bricks element.

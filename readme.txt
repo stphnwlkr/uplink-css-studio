@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -137,6 +137,12 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service.
 
 == Changelog ==
+
+= 1.1.1 =
+
+* Restored space-aware placement for anchored tool panels so they open above or below based on available room.
+* Kept constrained panels within the viewport with internal scrolling when neither side can show the full panel.
+* Corrected popup stacking so Bricks controls and CSS Studio viewport resize handles no longer appear over tool panels.
 
 = 1.1.0 =
 

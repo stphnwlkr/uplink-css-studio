@@ -5777,8 +5777,10 @@
     const spaceAbove = Math.max(0, buttonRect.top - gap - gutter);
     const spaceBelow = Math.max(0, window.innerHeight - buttonRect.bottom - gap - gutter);
     const desiredHeight = Math.min(active.panel.scrollHeight || panelRect.height, window.innerHeight - gutter * 2);
-    const placeBelow = spaceBelow >= Math.min(desiredHeight, 240) || spaceBelow >= spaceAbove;
-    const availableHeight = Math.max(140, placeBelow ? spaceBelow : spaceAbove);
+    const fitsBelow = spaceBelow >= desiredHeight;
+    const fitsAbove = spaceAbove >= desiredHeight;
+    const placeBelow = fitsBelow || (!fitsAbove && spaceBelow >= spaceAbove);
+    const availableHeight = Math.max(0, placeBelow ? spaceBelow : spaceAbove);
     const renderedHeight = Math.min(desiredHeight, availableHeight);
     const desiredLeft = buttonRect.left + buttonRect.width / 2 - panelRect.width / 2;
     const maxLeft = Math.max(gutter, window.innerWidth - panelRect.width - gutter);
