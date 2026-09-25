@@ -1,6 +1,14 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.1.2
+-----
+Fixed the Studio layer appearing above Bricks full-screen managers.
+
+Fixes
+-----
+* Keep CSS Studio and its viewport resize handles below Bricks managers while retaining their position above ordinary builder controls.
+
 1.1.1
 -----
 Fixed anchored tool panel positioning and stacking.
