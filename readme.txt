@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Immediate two-way updates through Bricks' native CSS Sync service, with revert and remembered panel state.
 * Optional open-on-selection and left/right canvas width handles, both enabled by default.
 * Bricks' CSS group promoted to the top of the Style panel without replacing Bricks' native editor theme.
+* GitHub Release update discovery through the normal WordPress Plugins screen, with optional WordPress-managed automatic updates.
 
 == Keyboard shortcuts ==
 
@@ -103,16 +104,18 @@ CSS Studio does not load its builder interface until the Bricks version and CSS 
 
 == Data and privacy ==
 
-CSS Studio does not call an external service or send editor data off site. Element CSS stays in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored in that browser's local storage. Optional ACSS integration reads data from the locally installed ACSS plugin.
+CSS Studio does not send editor data off site. Element CSS stays in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored in that browser's local storage. Optional ACSS integration reads data from the locally installed ACSS plugin. WordPress periodically requests public release metadata from GitHub to check for plugin updates.
 
 == Installation ==
 
-1. Upload the `uplink-css-studio-for-bricks` folder to `/wp-content/plugins/`, or install the release ZIP from **Plugins > Add New > Upload Plugin**.
+1. Upload the `uplink-css-studio` folder to `/wp-content/plugins/`, or install the release ZIP from **Plugins > Add New > Upload Plugin**.
 2. Activate **Uplink CSS Studio for Bricks**.
 3. Confirm that Bricks 2.4 or newer is active.
 4. Go to **Bricks > Settings > Builder**, enable **Bi-directional sync between Custom CSS and style controls**, and save the settings.
 5. If Advanced Themer is active, update it to version 3.5 or newer or disable **SuperPower CSS**. Other Advanced Themer features can remain enabled.
 6. Open a page in Bricks and select an element to start using CSS Studio.
+
+Future releases are announced through the normal WordPress Plugins screen. WordPress remains in control of whether an available update is installed manually or through its per-plugin auto-update setting.
 
 == Frequently Asked Questions ==
 
@@ -134,9 +137,13 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 
 = Where is my data stored? =
 
-Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service.
+Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public GitHub Releases page for updates.
 
 == Changelog ==
+
+= 1.2.0 =
+
+* Added update discovery and optional WordPress-managed automatic updates from verified Uplink CSS Studio GitHub release packages.
 
 = 1.1.3 =
 

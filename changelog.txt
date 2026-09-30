@@ -1,6 +1,17 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.2.0
+-----
+Added update discovery through GitHub Releases.
+
+Features
+--------
+* Show new Uplink CSS Studio releases in the normal WordPress Plugins screen.
+* Support WordPress' per-plugin automatic-update setting without enabling unattended updates by default.
+* Require the validated `uplink-css-studio.zip` release asset instead of installing a repository source archive.
+* Provide one permanent latest-release download URL for the product website.
+
 1.1.3
 -----
 Improved editor isolation and updated compatibility guidance.

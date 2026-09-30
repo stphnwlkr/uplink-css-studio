@@ -1,0 +1,49 @@
+name: Publish plugin release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@v4
+
+      - name: Validate the release version
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          grep -Fq "Version: ${RELEASE_VERSION}" uplink-css-studio.php
+          grep -Fq "const VERSION = '${RELEASE_VERSION}';" uplink-css-studio.php
+          grep -Fq "Stable tag: ${RELEASE_VERSION}" readme.txt
+
+      - name: Build the installable ZIP
+        run: |
+          mkdir -p build/uplink-css-studio
+          rsync -a ./ build/uplink-css-studio/ \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.gitignore' \
+            --exclude 'assets/images/' \
+            --exclude 'build/' \
+            --exclude '*.zip'
+          cd build
+          zip -qr ../uplink-css-studio.zip uplink-css-studio
+          cd ..
+          unzip -t uplink-css-studio.zip
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          gh release create "${RELEASE_VERSION}" uplink-css-studio.zip \
+            --title "Uplink CSS Studio ${RELEASE_VERSION}" \
+            --generate-notes \
+            --verify-tag

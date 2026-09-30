@@ -19,15 +19,19 @@ ACSS is optional. If Advanced Themer is active, update it to version 3.5 or newe
 
 ## Data and privacy
 
-CSS Studio does not call an external service or send editor data off site. Element CSS stays in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored in that browser's local storage. Optional ACSS integration reads data from the locally installed ACSS plugin.
+CSS Studio does not send editor data off site. Element CSS stays in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored in that browser's local storage. Optional ACSS integration reads data from the locally installed ACSS plugin. WordPress periodically requests public release metadata from GitHub to check for plugin updates.
 
 ## Installation
 
 Install the release ZIP in WordPress, activate the plugin, enable Bricks CSS Sync, and open a page in the Bricks builder. Select an element to open CSS Studio.
 
+Starting with version 1.2.0, new releases appear in the normal WordPress Plugins screen. Updates are downloaded from the plugin's public GitHub Releases page. You can install them manually or use WordPress' per-plugin automatic-update setting.
+
+The current release always has the same direct download URL: [Download the latest Uplink CSS Studio ZIP](https://github.com/stphnwlkr/uplink-css-studio/releases/latest/download/uplink-css-studio.zip).
+
 ## Development and licensing
 
-The plugin is licensed under GPL-2.0-or-later. The bundled CSS property catalog includes data from `@vscode/web-custom-data` under the MIT license and draft entries from the W3C CSS Gaps Module Level 1. See `THIRD-PARTY-NOTICES.txt`.
+The plugin is licensed under GPL-2.0-or-later. The bundled CSS property catalog includes data from `@vscode/web-custom-data` under the MIT license and draft entries from the W3C CSS Gaps Module Level 1. Plugin Update Checker is bundled under the MIT license. See `THIRD-PARTY-NOTICES.txt`.
 
 The in-editor value tools were inspired in particular by Elliot Bear's Drypoint and Strange Tech's Etch Enhancements. Advanced Themer and Code2Bricks also influenced the broader in-builder workflow.
 

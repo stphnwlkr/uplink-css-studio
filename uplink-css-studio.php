@@ -2,8 +2,9 @@
 /**
  * Plugin Name: Uplink CSS Studio for Bricks
  * Plugin URI: https://uplinkplugins.com/articles/meet-uplink-css-studio-for-bricks/
+ * Update URI: https://github.com/stphnwlkr/uplink-css-studio/
  * Description: A code-first CSS workspace for Bricks with live sync, completion, visual value tools, recipes, and query helpers.
- * Version: 1.1.3
+ * Version: 1.2.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Tested up to: 7.1
@@ -21,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Plugin {
-	const VERSION = '1.1.3';
+	const VERSION = '1.2.0';
 	const MINIMUM_BRICKS_VERSION = '2.4';
 	const USER_RECIPES_META = '_uplink_css_studio_recipes';
 
@@ -149,9 +150,32 @@ final class Plugin {
 	}
 
 	public static function boot() {
+		self::boot_update_checker();
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_builder_assets' ), 100 );
 		add_action( 'wp_ajax_uplink_css_studio_save_recipes', array( __CLASS__, 'save_user_recipes' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'render_prerequisite_notice' ) );
+	}
+
+	private static function boot_update_checker() {
+		$library = __DIR__ . '/lib/plugin-update-checker/plugin-update-checker.php';
+
+		// Never replace a development checkout, and fail safely if a custom build omits the library.
+		if ( is_dir( __DIR__ . '/.git' ) || ! is_file( $library ) ) {
+			return;
+		}
+
+		require_once $library;
+
+		$checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+			'https://github.com/stphnwlkr/uplink-css-studio/',
+			__FILE__,
+			'uplink-css-studio'
+		);
+		$checker->setBranch( 'main' );
+		$checker->getVcsApi()->enableReleaseAssets(
+			'/^uplink-css-studio\.zip$/i',
+			\YahnisElsts\PluginUpdateChecker\v5p7\Vcs\Api::REQUIRE_RELEASE_ASSETS
+		);
 	}
 
 	public static function render_prerequisite_notice() {
