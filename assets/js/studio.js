@@ -877,6 +877,18 @@
     return document.querySelector('#uplink-html-source');
   }
 
+  function disableWritingAssistants(editor, source) {
+    [source, editor?.getWrapperElement?.(), editor?.getInputField?.()].filter(Boolean).forEach((element) => {
+      element.setAttribute('spellcheck', 'false');
+      element.setAttribute('autocomplete', 'off');
+      element.setAttribute('autocorrect', 'off');
+      element.setAttribute('autocapitalize', 'off');
+      element.setAttribute('data-gramm', 'false');
+      element.setAttribute('data-gramm_editor', 'false');
+      element.setAttribute('data-enable-grammarly', 'false');
+    });
+  }
+
   function htmlSourceValue() {
     return state.htmlEditor?.getValue?.() ?? htmlSourceInput()?.value ?? '';
   }
@@ -1528,7 +1540,7 @@
             <button class="uplink-css-studio-tool uplink-css-studio-format" type="button" aria-label="Format CSS" data-tooltip="Format CSS">${icon('format')}</button>
           </div>
           <div class="uplink-css-studio-editor-wrap" data-editor-panel="css">
-            <textarea id="uplink-css-source" aria-label="CSS source"></textarea>
+            <textarea id="uplink-css-source" aria-label="CSS source" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></textarea>
             <aside class="uplink-css-studio-popover uplink-css-studio-outline-panel" hidden aria-label="Stylesheet outline">
               <div class="uplink-css-studio-popover-head"><strong>Outline</strong><span class="uplink-css-studio-outline-count">0</span></div>
               <input class="uplink-css-studio-outline-search" type="search" placeholder="Filter headings…" aria-label="Filter outline headings">
@@ -1621,7 +1633,7 @@
                 <button class="uplink-css-studio-action is-primary uplink-css-studio-html-apply" type="button" data-tooltip="Apply HTML to the current builder session · ⌘/Ctrl+]" disabled>Apply to builder</button>
               </div>
             </div>
-            <textarea id="uplink-html-source" aria-label="Selected element HTML" spellcheck="false" autocomplete="off"></textarea>
+            <textarea id="uplink-html-source" aria-label="Selected element HTML" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></textarea>
           </div>
           <footer class="uplink-css-studio-footer">
             <span class="uplink-css-studio-status">Ready</span>
@@ -1655,6 +1667,7 @@
       }
     });
     state.editor = wp.codeEditor.initialize($('#uplink-css-source'), settings).codemirror;
+    disableWritingAssistants(state.editor, document.querySelector('#uplink-css-source'));
     state.editor.on('change', onEditorChange);
     state.editor.on('inputRead', maybeAutocomplete);
     state.editor.on('cursorActivity', () => {
@@ -1684,6 +1697,7 @@
       }
     });
     state.htmlEditor = wp.codeEditor.initialize($('#uplink-html-source'), htmlSettings).codemirror;
+    disableWritingAssistants(state.htmlEditor, htmlSourceInput());
     state.htmlEditor.on('change', () => {
       if (state.htmlApplying) return;
       syncLinkedHtmlTag();

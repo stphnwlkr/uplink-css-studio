@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ Uplink CSS Studio for Bricks adds an integrated CSS workspace to the Bricks buil
 
 Bricks 2.4 or newer is required, and Bricks' **Bi-directional sync between Custom CSS and style controls** setting must be enabled.
 
-**Compatibility note:** If Advanced Themer is active, disable its **SuperPower CSS** feature before using CSS Studio. Running both CSS editing layers at the same time can compete with Bricks' native CSS sync.
+**Compatibility note:** If Advanced Themer is active, update it to version 3.5 or newer, which supports Bricks' bidirectional CSS sync, or disable its **SuperPower CSS** feature. Earlier versions must not run SuperPower CSS alongside CSS Studio.
 
 ACSS is optional. When it is active, CSS Studio can expose compatible ACSS variables and recipes. CSS Studio also includes a per-user recipe manager for sites without ACSS.
 
@@ -111,7 +111,7 @@ CSS Studio does not call an external service or send editor data off site. Eleme
 2. Activate **Uplink CSS Studio for Bricks**.
 3. Confirm that Bricks 2.4 or newer is active.
 4. Go to **Bricks > Settings > Builder**, enable **Bi-directional sync between Custom CSS and style controls**, and save the settings.
-5. If Advanced Themer is active, disable **SuperPower CSS** in Advanced Themer. Other Advanced Themer features can remain enabled.
+5. If Advanced Themer is active, update it to version 3.5 or newer or disable **SuperPower CSS**. Other Advanced Themer features can remain enabled.
 6. Open a page in Bricks and select an element to start using CSS Studio.
 
 == Frequently Asked Questions ==
@@ -126,7 +126,7 @@ No. CSS Studio edits one Custom CSS stylesheet for the active target. Use its me
 
 = Can I keep Advanced Themer active? =
 
-Yes. Disable Advanced Themer's SuperPower CSS feature so that only one enhanced CSS editing layer controls the Bricks CSS sync workflow. Other Advanced Themer features may remain active.
+Yes. Advanced Themer 3.5 or newer supports Bricks' bidirectional CSS sync and can remain active with SuperPower CSS enabled. With an earlier version, disable SuperPower CSS so that only one enhanced CSS editing layer controls the Bricks CSS sync workflow. Other Advanced Themer features may remain active.
 
 = Is ACSS required? =
 
@@ -137,6 +137,11 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service.
 
 == Changelog ==
+
+= 1.1.3 =
+
+* Updated Advanced Themer compatibility guidance for version 3.5 and its bidirectional CSS sync support.
+* Disabled Grammarly and browser writing assistance inside the CSS and HTML code editors.
 
 = 1.1.2 =
 

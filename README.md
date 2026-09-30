@@ -15,7 +15,7 @@ CSS Studio does not edit Bricks' breakpoint-specific style-control values. It ke
 - Bricks 2.4 or newer
 - "Bi-directional sync between Custom CSS and style controls" enabled in Bricks settings
 
-ACSS is optional. If Advanced Themer is active, disable its SuperPower CSS feature before using CSS Studio.
+ACSS is optional. If Advanced Themer is active, update it to version 3.5 or newer, which supports Bricks' bidirectional CSS sync, or disable its SuperPower CSS feature. Earlier versions must not run SuperPower CSS alongside CSS Studio.
 
 ## Data and privacy
 
