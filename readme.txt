@@ -14,6 +14,8 @@ A code-first CSS workspace inside Bricks with live sync, completion, visual valu
 
 Uplink CSS Studio for Bricks adds an integrated CSS workspace to the Bricks builder. It keeps the native Bricks Custom CSS field as the source of truth while adding a larger editor, completion, recipes, design variables, visual value tools, and live canvas updates.
 
+[View the CSS Studio project page](https://plugins.uplink.press/project/css-studio-for-bricks/)
+
 Bricks 2.4 or newer is required, and Bricks' **Bi-directional sync between Custom CSS and style controls** setting must be enabled.
 
 **Compatibility note:** If Advanced Themer is active, update it to version 3.5 or newer, which supports Bricks' bidirectional CSS sync, or disable its **SuperPower CSS** feature. Earlier versions must not run SuperPower CSS alongside CSS Studio.

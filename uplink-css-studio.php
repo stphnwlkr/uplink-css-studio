@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Uplink CSS Studio for Bricks
- * Plugin URI: https://uplinkplugins.com/articles/meet-uplink-css-studio-for-bricks/
+ * Plugin URI: https://plugins.uplink.press/project/css-studio-for-bricks/
  * Update URI: https://github.com/stphnwlkr/uplink-css-studio/
  * Description: A code-first CSS workspace for Bricks with live sync, completion, visual value tools, recipes, and query helpers.
  * Version: 1.2.0
