@@ -1638,7 +1638,7 @@
           <footer class="uplink-css-studio-footer">
             <span class="uplink-css-studio-status">Ready</span>
             <span class="uplink-css-studio-position">Ln 1, Col 1</span>
-            <span class="uplink-css-studio-shortcuts"><kbd>@recipe;</kbd> insert recipe &nbsp; <kbd>r Tab</kbd> %root% &nbsp; <kbd>⌘⌥X</kbd> scrub</span>
+            <span class="uplink-css-studio-shortcuts"><kbd>@recipe;</kbd> insert recipe &nbsp; <kbd>tr80 Tab</kbd> rem &nbsp; <kbd>r Tab</kbd> %root% &nbsp; <kbd>⌘⌥X</kbd> scrub</span>
             <span class="uplink-css-studio-shortcuts uplink-css-studio-html-shortcuts" hidden><kbd>Tab</kbd> expand &nbsp; <kbd>Ctrl Space</kbd> complete &nbsp; <kbd>⌘/Ctrl ]</kbd> apply</span>
           </footer>
         </section>
@@ -3375,6 +3375,7 @@
     const cmToken = editor.getTokenAt(cursor);
     if (/comment|string/.test(cmToken.type || '')) return CodeMirror.Pass;
 
+    if (expandToRemShortcut(editor, cursor, beforeCursor, CodeMirror)) return;
     if (completeCssCalculation(editor, cursor, beforeCursor, CodeMirror)) return;
 
     const tokenMatch = beforeCursor.match(/([\w-]+)$/);
@@ -3409,6 +3410,44 @@
     if (!property) return CodeMirror.Pass;
 
     insertPropertyCompletion(editor, from, cursor, property);
+  }
+
+  function resolvedRootFontSizePx() {
+    const documents = [state.canvasDocument];
+    const frame = document.querySelector('#bricks-builder-iframe, #bricks-preview iframe');
+    try {
+      if (frame?.contentDocument && !documents.includes(frame.contentDocument)) documents.push(frame.contentDocument);
+    } catch (error) {}
+
+    for (const frameDocument of documents.filter(Boolean)) {
+      try {
+        const value = parseFloat(frameDocument.defaultView?.getComputedStyle(frameDocument.documentElement).fontSize || '');
+        if (Number.isFinite(value) && value > 0) return value;
+      } catch (error) {}
+    }
+
+    // Bricks uses a 10px root when no rendered canvas value is available.
+    return 10;
+  }
+
+  function formatRemNumber(value) {
+    const rounded = Math.round(value * 10000) / 10000;
+    return String(Object.is(rounded, -0) ? 0 : rounded);
+  }
+
+  function expandToRemShortcut(editor, cursor, beforeCursor, CodeMirror) {
+    const declaration = beforeCursor.match(/(?:^|[;{])\s*[\w-]+\s*:[^;{}]*\btr(-?(?:\d+(?:\.\d*)?|\.\d+))$/i);
+    if (!declaration) return false;
+    const pixels = Number(declaration[1]);
+    if (!Number.isFinite(pixels)) return false;
+    const token = `tr${declaration[1]}`;
+    const from = CodeMirror.Pos(cursor.line, cursor.ch - token.length);
+    const rootPixels = resolvedRootFontSizePx();
+    const replacement = `${formatRemNumber(pixels / rootPixels)}rem`;
+    editor.replaceRange(replacement, from, cursor, 'complete');
+    editor.setCursor({ line: from.line, ch: from.ch + replacement.length });
+    setStatus(`${pixels}px → ${replacement} (${formatRemNumber(rootPixels)}px HTML root)`, 'dirty');
+    return true;
   }
 
   const cssMathFunctions = /^(?:var|env|calc|min|max|clamp|round|mod|rem|sin|cos|tan|asin|acos|atan|atan2|pow|sqrt|hypot|log|exp|abs|sign)\s*\(/i;

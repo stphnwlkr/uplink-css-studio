@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.3.0
+-----
+Added root-aware pixel-to-rem abbreviation expansion.
+
+Features
+--------
+* Type `tr` followed by a pixel number and press Tab to insert the equivalent rem value.
+* Resolve the conversion against the rendered Bricks HTML font size, including `100%` (16px) and `62.5%` (10px) configurations.
+
 1.2.0
 -----
 Added update discovery through GitHub Releases.

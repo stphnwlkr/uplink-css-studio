@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -56,6 +56,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Native CSS nesting when states or queries are inserted inside an existing selector.
 * Property and value completion from a bundled standards catalog, including modern and draft CSS properties.
 * Bricks and ACSS variable discovery, relevant value suggestions, abbreviations such as `fs` and `tt`, and Tab completion.
+* Root-aware `tr` conversion: type a pixel value such as `tr80` and press Tab to insert the equivalent rem value using the rendered Bricks HTML font size.
 * CSS math completion that expands custom properties and wraps arithmetic expressions in `calc(...)`.
 * `%root%` targeting plus Bricks global-class and element-ID assignment from the editor.
 * Native editing of site-wide HTML selectors in the applicable Theme Style > Stylesheet, clickable HTML badges for matching active Theme Styles, plus a native Style Manager shortcut.
@@ -78,6 +79,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Tab after a supported single-root HTML abbreviation such as `p.lead`, `a.button[href=/contact]`, or `span.label{New}`: Expand the abbreviation and place the caret in the element.
 * Tab after a property abbreviation or partial property name: Complete the property and insert `: ;`, leaving the caret between the colon and semicolon.
 * Tab after an arithmetic declaration value: Expand bare custom properties, wrap the expression in `calc(...)`, and keep the declaration's existing semicolon. A semicolon is added only when one is not already present.
+* Tab after `tr` plus a pixel number, such as `tr80`: Convert it to rem using the rendered Bricks HTML font size (`5rem` at `100%`, `8rem` at `62.5%`).
 * Type `@recipe-shortcut;`: Insert the matching ACSS or user recipe at the cursor.
 * Tab after an exact ACSS or user-recipe shortcut: Insert the recipe at the cursor.
 * `r` + Tab in an otherwise empty editor: Insert `%root%`.
@@ -142,6 +144,10 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public GitHub Releases page for updates.
 
 == Changelog ==
+
+= 1.3.0 =
+
+* Added root-aware `tr` Tab expansion for converting pixel numbers to rem from the rendered Bricks HTML font size.
 
 = 1.2.0 =
 
