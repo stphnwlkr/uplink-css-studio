@@ -722,7 +722,7 @@
         return node.nodeType !== Node.COMMENT_NODE || node.textContent.trim() !== 'Child elements remain managed in Bricks';
       });
       if (meaningful.length) throw new Error('Child elements stay managed in the Bricks Structure panel');
-    } else if (ctx.element.name === 'block' && root.innerHTML.trim()) {
+    } else if (['block', 'div'].includes(ctx.element.name) && root.innerHTML.trim()) {
       const unsupported = [...root.querySelectorAll('*')].find((node) => !htmlInlineTextTags.has(node.tagName.toLowerCase()));
       if (unsupported) throw new Error(`Convert nested <${unsupported.tagName.toLowerCase()}> content in the Bricks Structure panel`);
       text = root.innerHTML;
@@ -868,7 +868,7 @@
     const message = options.reverting
       ? 'HTML changes reverted'
       : parsed.convertToText
-        ? 'Block converted to Basic Text in the current builder session'
+        ? 'Element converted to Basic Text in the current builder session'
         : 'HTML applied to the current builder session';
     setStatus(`${message}; save the Bricks page to persist`, 'synced');
   }
@@ -1106,7 +1106,7 @@
     }
     const details = ['Classes become Bricks global classes', 'attributes round-trip through Bricks', 'save the page to persist'];
     if (elementHasBricksChildren(ctx)) details.unshift('Children stay in the Structure panel');
-    else if (ctx.element.name === 'block') details.unshift('Adding text converts this Block to Basic Text');
+    else if (['block', 'div'].includes(ctx.element.name)) details.unshift(`Adding text converts this ${ctx.element.name === 'block' ? 'Block' : 'Div'} to Basic Text`);
     note.textContent = details.join(' · ');
   }
 

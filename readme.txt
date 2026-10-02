@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,7 +42,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * A selected-element HTML view can update supported tags, simple text content, IDs, reusable global classes, attributes (including inline styles), links, and image source or alt text without replacing the Bricks structure tree.
 * The HTML view includes syntax highlighting, line numbers, matching tags, context-aware tag and attribute completion, and focused Emmet-style Tab expansion for one root element.
 * Clicking an opening tag name selects it for linked renaming, so the closing tag updates as you type.
-* Adding text or inline formatting to an empty Bricks Block converts it in place to Basic Text while preserving its tag, ID, classes, attributes, position, and styling.
+* Adding text or inline formatting to an empty Bricks Block or Div converts it in place to Basic Text while preserving its tag, ID, classes, attributes, position, and styling.
 * Classes entered in the HTML view create or attach Bricks global classes; the raw CSS class input is left untouched.
 * Dark CodeMirror workspace with soft line wrapping, formatting, search, comments, status, full-screen editing, and a searchable comment-based outline.
 * Context-aware icon controls for flex, grid, alignment, states, colors, shadows, gradients, filters, and transforms.
@@ -144,6 +144,12 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public GitHub Releases page for updates.
 
 == Changelog ==
+
+= 1.4.0 =
+
+* Convert an empty Bricks Div to Basic Text when text or inline formatting is added in the HTML editor, including Divs using a paragraph tag.
+* Preserve the element tag, ID, classes, attributes, position, and styling during conversion.
+* Keep elements with Bricks children managed in the Structure panel.
 
 = 1.3.1 =
 

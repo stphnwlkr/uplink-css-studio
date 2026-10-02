@@ -1,6 +1,16 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.4.0
+-----
+Extended HTML text conversion to Bricks Div elements.
+
+Features
+--------
+* Convert an empty Bricks Div to Basic Text when text or inline formatting is added in the HTML editor, including Divs using a paragraph tag.
+* Preserve the element tag, ID, classes, attributes, position, and styling during conversion.
+* Keep elements with Bricks children managed in the Structure panel.
+
 1.3.1
 -----
 Improved the CSS Studio toolbar.
