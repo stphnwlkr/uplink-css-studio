@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.3.1
+-----
+Improved the CSS Studio toolbar.
+
+Fixes
+-----
+* Updated the Has me, container query, and media query icons and placed them immediately after the selector target.
+* Made the middle toolbar scroll horizontally while keeping the CSS/HTML tabs and search, comment, and format controls fixed.
+
 1.3.0
 -----
 Added root-aware pixel-to-rem abbreviation expansion.

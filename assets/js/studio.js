@@ -368,10 +368,10 @@
     queryBelow: '<path d="M19.9432 19.0137L19.4843 20.4414L4.05652 15.4824L4.5155 14.0547L19.9432 19.0137ZM19.9432 4.98242L5.89441 9.49805L19.9432 14.0137L19.4843 15.4414L4.24988 10.5449L4.24988 8.45117L19.4843 3.55469L19.9432 4.98242Z" fill="currentColor" stroke="none"/>',
     queryAbove: '<path d="M19.9432 15.4824L4.5155 20.4414L4.05652 19.0137L19.4843 14.0547L19.9432 15.4824ZM19.7499 8.45117V10.5449L4.5155 15.4414L4.05652 14.0137L18.1044 9.49805L4.05652 4.98242L4.5155 3.55469L19.7499 8.45117Z" fill="currentColor" stroke="none"/>',
     queryBetween: '<path d="M4 5v14M20 5v14M8 12h8M9 9l-3 3 3 3M15 9l3 3-3 3"/>',
-    parent: '<path d="M8 5H5v14h3M16 5h3v14h-3M9 12h6M12 9l3 3-3 3"/>',
+    parent: '<path d="M11 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h15a2 2 0 0 1 2 2v6M6 7l5 5M7 12h4V8"/><rect x="15" y="15" width="7" height="7" rx="1"/>',
     target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
-    container: '<rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 3v4M16 3v4M8 17v4M16 17v4"/>',
-    media: '<rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3M7 9l-2 2 2 2M17 9l2 2-2 2"/>',
+    container: '<path d="M8 2H4a2 2 0 0 0-2 2v4M16 2h4a2 2 0 0 1 2 2v4M22 16v4a2 2 0 0 1-2 2h-4M8 22H4a2 2 0 0 1-2-2v-4M12 6l6 3.5v5L12 18l-6-3.5v-5L12 6Zm-6 3.5 6 3.5 6-3.5M12 13v5"/>',
+    media: '<path d="M16 8v6a2 2 0 0 0 4 0v-2a8 8 0 1 0-3 6.25"/><circle cx="12" cy="12" r="4"/>',
     hover: '<path d="m6 3 11 9-5 1 3 6-2 1-3-6-4 4Z"/>',
     effects: '<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="4"/>',
     color: '<path d="M12 3.5c3.9 4.3 6 7.2 6 10a6 6 0 0 1-12 0c0-2.8 2.1-5.7 6-10Z"/><path d="M8.5 15.5c.7 1.4 1.9 2 3.5 2"/>',
@@ -1497,47 +1497,50 @@
               <button class="uplink-css-studio-mode-tab" type="button" role="tab" data-studio-mode="html" aria-selected="false">HTML</button>
             </div>
             <span class="uplink-css-studio-toolbar-divider uplink-css-studio-mode-divider" aria-hidden="true"></span>
-            <button class="uplink-css-studio-tool uplink-css-studio-outline-toggle" type="button" aria-label="Toggle stylesheet outline" data-tooltip="Outline · ⌘⇧O">${icon('outline')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-recipes-toggle" type="button" aria-label="Open recipe manager" data-tooltip="Recipe manager">${icon('shortcuts')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" data-tooltip="%root%, class, ID & HTML">${icon('target')}</button>
-            <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
-            <button class="uplink-css-studio-tool uplink-css-studio-layout-action uplink-css-studio-display-block" type="button" data-layout-preset="block" aria-label="Display block" aria-pressed="false" data-tooltip="Display: Block" hidden>${icon('displayBlock')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-layout-action" type="button" data-layout-preset="flex-row" aria-label="Display flex row" aria-pressed="false" data-tooltip="Display: Flex row">${icon('flexRow')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-layout-action" type="button" data-layout-preset="flex-column" aria-label="Display flex column" aria-pressed="false" data-tooltip="Display: Flex column">${icon('flexColumn')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-layout-action" type="button" data-layout-preset="grid" aria-label="Display grid" aria-pressed="false" data-tooltip="Display: Grid">${icon('grid')}</button>
-            <span class="uplink-css-studio-grid-template-tools" hidden>
-              <button class="uplink-css-studio-tool uplink-css-studio-grid-template-action" type="button" data-grid-template="columns" aria-label="Grid template columns" aria-pressed="false" data-tooltip="Grid template columns">${icon('gridColumns')}</button>
-              <button class="uplink-css-studio-tool uplink-css-studio-grid-template-action" type="button" data-grid-template="rows" aria-label="Grid template rows" aria-pressed="false" data-tooltip="Grid template rows">${icon('gridRows')}</button>
-            </span>
-            <span class="uplink-css-studio-alignment-tools" hidden>
+            <div class="uplink-css-studio-toolbar-scroll" role="group" aria-label="CSS tools, scroll horizontally" tabindex="0">
+              <button class="uplink-css-studio-tool uplink-css-studio-outline-toggle" type="button" aria-label="Toggle stylesheet outline" data-tooltip="Outline · ⌘⇧O">${icon('outline')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-recipes-toggle" type="button" aria-label="Open recipe manager" data-tooltip="Recipe manager">${icon('shortcuts')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" data-tooltip="%root%, class, ID & HTML">${icon('target')}</button>
+              <button class="uplink-css-studio-tool" type="button" data-recipe="parent" aria-label="Has me selector" data-tooltip="Has me selector :has(> &)">${icon('parent')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-container-toggle" type="button" aria-label="Container queries" data-tooltip="Container queries">${icon('container')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-media-toggle" type="button" aria-label="Media queries" data-tooltip="Media queries">${icon('media')}</button>
               <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
-              <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="start" aria-label="Main axis: start" aria-pressed="false" data-tooltip="Main axis: start"></button>
-              <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="center" aria-label="Main axis: center" aria-pressed="false" data-tooltip="Main axis: center"></button>
-              <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="end" aria-label="Main axis: end" aria-pressed="false" data-tooltip="Main axis: end"></button>
+              <button class="uplink-css-studio-tool uplink-css-studio-layout-action uplink-css-studio-display-block" type="button" data-layout-preset="block" aria-label="Display block" aria-pressed="false" data-tooltip="Display: Block" hidden>${icon('displayBlock')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-layout-action" type="button" data-layout-preset="flex-row" aria-label="Display flex row" aria-pressed="false" data-tooltip="Display: Flex row">${icon('flexRow')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-layout-action" type="button" data-layout-preset="flex-column" aria-label="Display flex column" aria-pressed="false" data-tooltip="Display: Flex column">${icon('flexColumn')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-layout-action" type="button" data-layout-preset="grid" aria-label="Display grid" aria-pressed="false" data-tooltip="Display: Grid">${icon('grid')}</button>
+              <span class="uplink-css-studio-grid-template-tools" hidden>
+                <button class="uplink-css-studio-tool uplink-css-studio-grid-template-action" type="button" data-grid-template="columns" aria-label="Grid template columns" aria-pressed="false" data-tooltip="Grid template columns">${icon('gridColumns')}</button>
+                <button class="uplink-css-studio-tool uplink-css-studio-grid-template-action" type="button" data-grid-template="rows" aria-label="Grid template rows" aria-pressed="false" data-tooltip="Grid template rows">${icon('gridRows')}</button>
+              </span>
+              <span class="uplink-css-studio-alignment-tools" hidden>
+                <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="start" aria-label="Main axis: start" aria-pressed="false" data-tooltip="Main axis: start"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="center" aria-label="Main axis: center" aria-pressed="false" data-tooltip="Main axis: center"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="end" aria-label="Main axis: end" aria-pressed="false" data-tooltip="Main axis: end"></button>
+                <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="start" aria-label="Cross axis: start" aria-pressed="false" data-tooltip="Cross axis: start"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="center" aria-label="Cross axis: center" aria-pressed="false" data-tooltip="Cross axis: center"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="end" aria-label="Cross axis: end" aria-pressed="false" data-tooltip="Cross axis: end"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-place-alignment" type="button" data-place-value="center" aria-label="Place center" aria-pressed="false" data-tooltip="Place center">${icon('center')}</button>
+              </span>
               <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
-              <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="start" aria-label="Cross axis: start" aria-pressed="false" data-tooltip="Cross axis: start"></button>
-              <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="center" aria-label="Cross axis: center" aria-pressed="false" data-tooltip="Cross axis: center"></button>
-              <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="end" aria-label="Cross axis: end" aria-pressed="false" data-tooltip="Cross axis: end"></button>
-              <button class="uplink-css-studio-tool uplink-css-studio-place-alignment" type="button" data-place-value="center" aria-label="Place center" aria-pressed="false" data-tooltip="Place center">${icon('center')}</button>
-            </span>
-            <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
-            <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Spacing" aria-label="Spacing shortcuts" data-tooltip="Spacing">${icon('spacing')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Type" data-context="text" aria-label="Typography shortcuts" data-tooltip="Typography">${icon('type')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Size" aria-label="Sizing shortcuts" data-tooltip="Sizing">${icon('size')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Position" aria-label="Position shortcuts" data-tooltip="Position">${icon('position')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Surface" aria-label="Surface shortcuts" data-tooltip="Surface">${icon('surface')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-colors-toggle" type="button" aria-label="Color tools" data-tooltip="Colors">${icon('color')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Effects" aria-label="Effect shortcuts" data-tooltip="Effects">${icon('effects')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Motion" aria-label="Motion shortcuts" data-tooltip="Motion">${icon('motion')}</button>
-            <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
-            <button class="uplink-css-studio-tool" type="button" data-recipe="parent" aria-label="Has me selector" data-tooltip="Has me selector :has(> &)">${icon('parent')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-container-toggle" type="button" aria-label="Container queries" data-tooltip="Container queries">${icon('container')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-media-toggle" type="button" aria-label="Media queries" data-tooltip="Media queries">${icon('media')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-states-toggle" type="button" aria-label="State selector" data-tooltip="State selector">${icon('hover')}</button>
-            <span class="uplink-css-studio-toolbar-spacer"></span>
-            <button class="uplink-css-studio-tool uplink-css-studio-search" type="button" aria-label="Find in CSS" data-tooltip="Find · ⌘F">${icon('search')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-comment" type="button" aria-label="Toggle comment" data-tooltip="Toggle comment · ⌘/">${icon('comment')}</button>
-            <button class="uplink-css-studio-tool uplink-css-studio-format" type="button" aria-label="Format CSS" data-tooltip="Format CSS">${icon('format')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Spacing" aria-label="Spacing shortcuts" data-tooltip="Spacing">${icon('spacing')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Type" data-context="text" aria-label="Typography shortcuts" data-tooltip="Typography">${icon('type')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Size" aria-label="Sizing shortcuts" data-tooltip="Sizing">${icon('size')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Position" aria-label="Position shortcuts" data-tooltip="Position">${icon('position')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Surface" aria-label="Surface shortcuts" data-tooltip="Surface">${icon('surface')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-colors-toggle" type="button" aria-label="Color tools" data-tooltip="Colors">${icon('color')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Effects" aria-label="Effect shortcuts" data-tooltip="Effects">${icon('effects')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-shortcut-category" type="button" data-shortcut-group="Motion" aria-label="Motion shortcuts" data-tooltip="Motion">${icon('motion')}</button>
+              <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
+              <button class="uplink-css-studio-tool uplink-css-studio-states-toggle" type="button" aria-label="State selector" data-tooltip="State selector">${icon('hover')}</button>
+            </div>
+            <div class="uplink-css-studio-toolbar-end">
+              <button class="uplink-css-studio-tool uplink-css-studio-search" type="button" aria-label="Find in CSS" data-tooltip="Find · ⌘F">${icon('search')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-comment" type="button" aria-label="Toggle comment" data-tooltip="Toggle comment · ⌘/">${icon('comment')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-format" type="button" aria-label="Format CSS" data-tooltip="Format CSS">${icon('format')}</button>
+            </div>
           </div>
           <div class="uplink-css-studio-editor-wrap" data-editor-panel="css">
             <textarea id="uplink-css-source" aria-label="CSS source" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></textarea>

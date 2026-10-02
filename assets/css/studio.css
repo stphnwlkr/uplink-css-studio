@@ -134,7 +134,7 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-header > * { flex: 0 0 auto; }
 .uplink-css-studio-brand { display: flex; align-items: center; gap: 8px; color: #f3f5f8; font-size: 12px; font-weight: 760; letter-spacing: .02em; white-space: nowrap; }
 .uplink-css-studio-brand .uplink-css-studio-svg { width: 21px; height: 21px; color: var(--uplink-css-studio-accent); }
-.uplink-css-studio-header-spacer, .uplink-css-studio-toolbar-spacer { flex: 1 0 12px; min-width: 12px; }
+.uplink-css-studio-header-spacer { flex: 1 0 12px; min-width: 12px; }
 .uplink-css-studio-context-summary { display: flex; flex: 0 0 auto; align-items: center; min-width: 0; color: #aeb5c2; font: 600 12px/1 ui-monospace, monospace; }
 .uplink-css-studio-context-divider { padding: 0 4px; color: #4f5562; }
 .uplink-css-studio-chip { min-width: 0; max-width: 180px; padding: 4px 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -178,9 +178,12 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-style-manager { color: #d7dbe3; }
 .uplink-css-studio-style-manager:hover, .uplink-css-studio-style-manager:focus-visible { color: var(--uplink-css-studio-accent); }
 
-.uplink-css-studio-header, .uplink-css-studio-toolbar { scrollbar-width: none !important; -ms-overflow-style: none; }
-.uplink-css-studio-header::-webkit-scrollbar, .uplink-css-studio-toolbar::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-.uplink-css-studio-toolbar { position: relative; z-index: 5; gap: 5px; padding: 6px 11px; border-bottom: 1px solid #444852; background: #292c33; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+.uplink-css-studio-header, .uplink-css-studio-toolbar-scroll { scrollbar-width: none !important; -ms-overflow-style: none; }
+.uplink-css-studio-header::-webkit-scrollbar, .uplink-css-studio-toolbar-scroll::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+.uplink-css-studio-toolbar { position: relative; z-index: 5; gap: 5px; padding: 6px 11px; border-bottom: 1px solid #444852; background: #292c33; min-width: 0; overflow: hidden; }
+.uplink-css-studio-toolbar-scroll { display: flex; align-items: center; gap: 5px; flex: 1 1 0; min-width: 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+.uplink-css-studio-toolbar-scroll:focus-visible { outline: 1px solid var(--uplink-css-studio-accent); outline-offset: -1px; }
+.uplink-css-studio-toolbar-end { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; }
 .uplink-css-studio-mode-tabs { flex: 0 0 auto; display: inline-flex; height: 28px; padding: 2px; gap: 2px; border: 1px solid #454a55; border-radius: 7px; background: #1d1f24; }
 .uplink-css-studio-mode-tab { min-width: 52px; height: 22px; padding: 0 10px; border: 0; border-radius: 4px; background: transparent; color: #aeb5c2; font-size: 11px; font-weight: 750; letter-spacing: .04em; cursor: pointer; }
 .uplink-css-studio-mode-tab:hover { background: #30343b; color: #fff; }
@@ -190,7 +193,7 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-tool .uplink-css-studio-svg { width: 18px; height: 18px; }
 .uplink-css-studio-layout-action.is-active, .uplink-css-studio-grid-template-action.is-active, .uplink-css-studio-alignment-action.is-active, .uplink-css-studio-place-alignment.is-active { border-color: var(--uplink-css-studio-accent); background: rgb(255 191 0 / 10%); color: var(--uplink-css-studio-accent); }
 .uplink-css-studio-grid-template-tools, .uplink-css-studio-alignment-tools { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; }
-.uplink-css-studio-toolbar-divider { width: 1px; height: 24px; margin: 0 5px; background: #4c505a; }
+.uplink-css-studio-toolbar-divider { flex: 0 0 1px; width: 1px; height: 24px; margin: 0 5px; background: #4c505a; }
 
 .uplink-css-studio-editor-wrap { min-width: 0; min-height: 0; position: relative; overflow: hidden; background: var(--uplink-css-studio-editor); }
 .uplink-css-studio-editor-wrap > textarea { width: 100%; height: 100%; resize: none; background: var(--uplink-css-studio-editor); color: white; }
