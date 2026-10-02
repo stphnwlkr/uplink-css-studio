@@ -4229,7 +4229,7 @@
       const startRect = wrapper.getBoundingClientRect();
       const startValue = Number.parseFloat(input.value) || startRect.width;
       const startScaleValue = Number.parseFloat(scaleInput?.value);
-      const scale = startValue / Math.max(1, startRect.width);
+      const scale = scaleInput?.readOnly ? 1 : startValue / Math.max(1, startRect.width);
       const centerX = startRect.left + startRect.width / 2;
       let pendingX = event.clientX;
       let frame = 0;
@@ -4241,9 +4241,12 @@
       const applyDimension = (commit = false) => {
         frame = 0;
         const displaySize = Math.abs(pendingX - centerX) * 2;
-        const value = Math.max(320, Math.min(2560, displaySize * scale));
+        const scalingOff = Boolean(scaleInput?.readOnly);
+        const availableWidth = document.querySelector('#bricks-preview')?.getBoundingClientRect().width || 2560;
+        const maxWidth = scalingOff ? Math.min(2560, availableWidth) : 2560;
+        const value = Math.min(maxWidth, Math.max(320, displaySize * (scalingOff ? 1 : scale)));
         setNativePreviewDimension(input, value, commit);
-        if (scaleInput && Number.isFinite(startScaleValue)) setNativePreviewDimension(scaleInput, startScaleValue, commit);
+        if (scaleInput && !scaleInput.readOnly && Number.isFinite(startScaleValue)) setNativePreviewDimension(scaleInput, startScaleValue, commit);
         requestAnimationFrame(syncCanvasResizerGeometry);
       };
       const onMove = (moveEvent) => {

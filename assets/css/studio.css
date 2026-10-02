@@ -92,6 +92,11 @@ body.uplink-css-studio-canvas-resizing-width { cursor: ew-resize !important; }
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Bricks retains its scale factor when scaling is off; center the unscaled canvas by its actual width. */
+body:has(#preview-scale[readonly]) #bricks-preview:not(.is-previewing):not(.canvas-preview-active) #bricks-builder-iframe-wrapper {
+  margin-inline: auto !important;
+}
+
 #bricks-preview.uplink-css-studio-dock-open #bricks-builder-iframe-wrapper {
   height: calc(100% - var(--uplink-css-studio-dock-height, 48%));
   transition: height .16s ease;

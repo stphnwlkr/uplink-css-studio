@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.5.1
+-----
+Fixed viewport resizing after switching Bricks Scale off.
+
+Fixes
+-----
+* Fixed canvas alignment after enabling and then disabling Bricks Scale.
+* Keep resize handles from updating the disabled scale control and constrain the unscaled canvas to the available preview width.
+
 1.5.0
 -----
 Added Bricks dynamic-data autocomplete in the HTML editor.
