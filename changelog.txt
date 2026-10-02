@@ -1,6 +1,16 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.5.0
+-----
+Added Bricks dynamic-data autocomplete in the HTML editor.
+
+Features
+--------
+* Added dynamic-data autocomplete in the HTML editor using the site’s registered Bricks tags, including third-party providers.
+* Filter suggestions by tag-name prefix after an opening brace, in text and quoted attributes.
+* Insert complete tags with Enter or Tab while preserving an existing closing brace.
+
 1.4.0
 -----
 Extended HTML text conversion to Bricks Div elements.

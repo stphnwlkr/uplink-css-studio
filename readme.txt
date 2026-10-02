@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * A selected-element HTML view can update supported tags, simple text content, IDs, reusable global classes, attributes (including inline styles), links, and image source or alt text without replacing the Bricks structure tree.
 * The HTML view includes syntax highlighting, line numbers, matching tags, context-aware tag and attribute completion, and focused Emmet-style Tab expansion for one root element.
 * Clicking an opening tag name selects it for linked renaming, so the closing tag updates as you type.
+* Type `{` followed by a dynamic-tag name prefix to look up registered Bricks tags. Suggestions show the tag, label, and group and work in text and quoted attributes. Modifier suggestions are not included.
 * Adding text or inline formatting to an empty Bricks Block or Div converts it in place to Basic Text while preserving its tag, ID, classes, attributes, position, and styling.
 * Classes entered in the HTML view create or attach Bricks global classes; the raw CSS class input is left untouched.
 * Dark CodeMirror workspace with soft line wrapping, formatting, search, comments, status, full-screen editing, and a searchable comment-based outline.
@@ -75,7 +76,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Command/Control + Alt + X: Toggle numeric scrubbing.
 * Command/Control + /: Toggle comment.
 * Command + ] on macOS or Control + ] elsewhere: Apply HTML changes to the current builder session. Save the Bricks page to persist them.
-* Control + Space in the HTML editor: Show tag or attribute completion for the current cursor position.
+* Control + Space in the HTML editor: Show HTML tag, attribute, or Bricks dynamic-data completion for the current cursor position.
 * Tab after a supported single-root HTML abbreviation such as `p.lead`, `a.button[href=/contact]`, or `span.label{New}`: Expand the abbreviation and place the caret in the element.
 * Tab after a property abbreviation or partial property name: Complete the property and insert `: ;`, leaving the caret between the colon and semicolon.
 * Tab after an arithmetic declaration value: Expand bare custom properties, wrap the expression in `calc(...)`, and keep the declaration's existing semicolon. A semicolon is added only when one is not already present.
@@ -144,6 +145,12 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public GitHub Releases page for updates.
 
 == Changelog ==
+
+= 1.5.0 =
+
+* Added dynamic-data autocomplete in the HTML editor using the site’s registered Bricks tags, including third-party providers.
+* Filter suggestions by tag-name prefix after an opening brace, in text and quoted attributes.
+* Insert complete tags with Enter or Tab while preserving an existing closing brace.
 
 = 1.4.0 =
 

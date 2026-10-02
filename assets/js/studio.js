@@ -974,7 +974,36 @@
     return [...tags].sort((a, b) => a.localeCompare(b));
   }
 
+  function htmlDynamicDataHints(editor) {
+    const cursor = editor.getCursor();
+    const line = editor.getLine(cursor.line);
+    const before = line.slice(0, cursor.ch);
+    const match = before.match(/\{([a-z0-9_-]*)$/i);
+    if (!match || editor.getTokenAt(cursor)?.type?.includes('comment')) return null;
+    const prefix = match[1].toLowerCase();
+    const suffix = line.slice(cursor.ch).match(/^[a-z0-9_-]*\}?/i)[0];
+    const from = CodeMirror.Pos(cursor.line, cursor.ch - match[0].length);
+    const to = CodeMirror.Pos(cursor.line, cursor.ch + suffix.length);
+    const tags = Array.isArray(config.dynamicTags) ? config.dynamicTags : [];
+    const seen = new Set();
+    const list = tags.flatMap((tag) => {
+      const name = String(tag?.name || '').replace(/^\{/, '').replace(/\}$/, '');
+      if (!name || seen.has(name) || !name.toLowerCase().startsWith(prefix)) return [];
+      seen.add(name);
+      const label = String(tag.label || name);
+      const group = String(tag.group || 'Bricks');
+      return [{
+        text: `{${name}}`,
+        displayText: `{${name}} · ${label} · ${group}`,
+        className: 'uplink-css-studio-hint-dynamic-data'
+      }];
+    });
+    return { list, from, to };
+  }
+
   function htmlHints(editor) {
+    const dynamicData = htmlDynamicDataHints(editor);
+    if (dynamicData) return dynamicData;
     const cursor = editor.getCursor();
     const before = editor.getRange(CodeMirror.Pos(0, 0), cursor);
     const openIndex = before.lastIndexOf('<');
@@ -1022,6 +1051,7 @@
     const typed = change.text.join('');
     const cursor = editor.getCursor();
     const before = editor.getRange(CodeMirror.Pos(0, 0), cursor);
+    if (/^[{a-z0-9_-]$/i.test(typed) && htmlDynamicDataHints(editor)) { htmlAutocomplete(editor); return; }
     if (before.lastIndexOf('<') > before.lastIndexOf('>') && /^[<a-z-]$/i.test(typed)) htmlAutocomplete(editor);
   }
 
