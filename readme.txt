@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,8 @@ The in-editor value tools were inspired in particular by Elliot Bear's Drypoint 
 Uplink CSS Studio is an independent implementation. It does not include or derive from those projects' source code. It is not affiliated with or endorsed by Bricks, Drypoint, Etch, Strange Tech, Advanced Themer, Code2Bricks, or ACSS.
 
 == Features ==
+
+* Optional browser-saved preference to hide the canvas element-actions toolbar.
 
 * Edits the native Bricks custom CSS for the active element, global class, selector, state, or component variant.
 * A selected-element HTML view can update supported tags, simple text content, IDs, reusable global classes, attributes (including inline styles), links, and image source or alt text without replacing the Bricks structure tree.
@@ -145,6 +147,11 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public GitHub Releases page for updates.
 
 == Changelog ==
+
+= 1.5.2 =
+
+* Added a browser-saved preference to hide the blue canvas element-actions toolbar.
+* Apply visibility changes immediately and preserve the preference when the canvas reloads.
 
 = 1.5.1 =
 

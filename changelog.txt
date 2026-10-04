@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.5.2
+-----
+Added an option to hide canvas element actions.
+
+Preferences
+-----------
+* Added a browser-saved preference to hide the blue canvas element-actions toolbar.
+* Apply visibility changes immediately and preserve the preference when the canvas reloads.
+
 1.5.1
 -----
 Fixed viewport resizing after switching Bricks Scale off.

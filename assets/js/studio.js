@@ -399,7 +399,7 @@
   }
 
   function readPrefs() {
-    const defaults = { autoOpen: true, firstAppliedClass: true, viewportHandles: true, numericScrubbing: true, minimized: false, dockHeight: '', colorMode: 'hex' };
+    const defaults = { autoOpen: true, firstAppliedClass: true, viewportHandles: true, hideElementActions: false, numericScrubbing: true, minimized: false, dockHeight: '', colorMode: 'hex' };
     try { return Object.assign(defaults, JSON.parse(localStorage.getItem(storeKey)) || {}); } catch (e) { return defaults; }
   }
 
@@ -1645,6 +1645,7 @@
               <label class="uplink-css-studio-switch-row"><span><strong>Open on element selection</strong><small>Show the editor when an element is clicked in the canvas or Structure panel.</small></span><input class="uplink-css-studio-auto-open" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Select first applied class</strong><small>Edit the first unlocked global class when moving to another element.</small></span><input class="uplink-css-studio-first-class" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Viewport resize handles</strong><small>Show width controls on the left and right edges of the visible canvas.</small></span><input class="uplink-css-studio-viewport-handles" type="checkbox"></label>
+              <label class="uplink-css-studio-switch-row"><span><strong>Hide element actions</strong><small>Hide the blue action toolbar on canvas elements.</small></span><input class="uplink-css-studio-hide-element-actions" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Numeric scrubbing</strong><small>Drag numeric CSS values horizontally. Toggle with Cmd/Ctrl+Alt+X.</small></span><input class="uplink-css-studio-numeric-scrubbing" type="checkbox"></label>
               <p class="uplink-css-studio-pref-note">The editor also remembers whether it was minimized or expanded.</p>
             </aside>
@@ -3052,6 +3053,27 @@
     }, 40);
   }
 
+  function syncElementActionsVisibility(frameDocument = null) {
+    const documents = frameDocument ? [document, frameDocument] : [document];
+    if (!frameDocument) {
+      const frame = document.querySelector('#bricks-builder-iframe, #bricks-preview iframe');
+      try { if (frame?.contentDocument) documents.push(frame.contentDocument); } catch (error) {}
+    }
+    documents.forEach((doc) => {
+      const styleId = 'uplink-css-studio-element-actions-style';
+      const existing = doc.getElementById(styleId);
+      if (!state.prefs.hideElementActions) {
+        existing?.remove();
+        return;
+      }
+      if (existing || !doc.head) return;
+      const style = doc.createElement('style');
+      style.id = styleId;
+      style.textContent = '#bricks-preview-element-actions { display: none !important; }';
+      doc.head.appendChild(style);
+    });
+  }
+
   function bindCanvasSelectionOpener() {
     const frame = document.querySelector('#bricks-builder-iframe, #bricks-preview iframe');
     if (!frame) return;
@@ -3061,6 +3083,7 @@
     }
     let frameDocument;
     try { frameDocument = frame.contentDocument; } catch (error) { return; }
+    syncElementActionsVisibility(frameDocument);
     if (!frameDocument || state.canvasDocument === frameDocument) return;
     state.canvasDocument = frameDocument;
     frameDocument.addEventListener('pointerup', (event) => {
@@ -3297,6 +3320,12 @@
       savePrefs();
       mountCanvasResizers();
       setStatus(state.prefs.viewportHandles ? 'Viewport resize handles enabled' : 'Viewport resize handles disabled', 'synced');
+    });
+    document.querySelector('.uplink-css-studio-hide-element-actions').addEventListener('change', (event) => {
+      state.prefs.hideElementActions = Boolean(event.target.checked);
+      savePrefs();
+      syncElementActionsVisibility();
+      setStatus(state.prefs.hideElementActions ? 'Element actions hidden' : 'Element actions shown', 'synced');
     });
     document.querySelector('.uplink-css-studio-numeric-scrubbing').addEventListener('change', (event) => {
       setNumericScrubbing(Boolean(event.target.checked));
@@ -5519,10 +5548,12 @@
     const autoOpen = document.querySelector('.uplink-css-studio-auto-open');
     const firstAppliedClass = document.querySelector('.uplink-css-studio-first-class');
     const viewportHandles = document.querySelector('.uplink-css-studio-viewport-handles');
+    const hideElementActions = document.querySelector('.uplink-css-studio-hide-element-actions');
     const numericScrubbing = document.querySelector('.uplink-css-studio-numeric-scrubbing');
     if (autoOpen) autoOpen.checked = Boolean(state.prefs.autoOpen);
     if (firstAppliedClass) firstAppliedClass.checked = Boolean(state.prefs.firstAppliedClass);
     if (viewportHandles) viewportHandles.checked = Boolean(state.prefs.viewportHandles);
+    if (hideElementActions) hideElementActions.checked = Boolean(state.prefs.hideElementActions);
     if (numericScrubbing) numericScrubbing.checked = Boolean(state.prefs.numericScrubbing);
     togglePopover('preferences');
   }
