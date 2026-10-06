@@ -1,6 +1,16 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.6.0
+-----
+Added a keyboard shortcut for the CSS Target class field.
+
+Features
+--------
+* Added Command + Option + G on macOS and Control + Alt + G on Windows/Linux to open CSS Target with the global class field focused.
+* Open or restore CSS Studio as needed, support the canvas and editor, and preserve an existing class-name draft when refocusing.
+* Added the shortcut to the target-button tooltip and accessibility metadata.
+
 1.5.2
 -----
 Added an option to hide canvas element actions.

@@ -4,7 +4,7 @@
  * Plugin URI: https://plugins.uplink.press/project/css-studio-for-bricks/
  * Update URI: https://github.com/stphnwlkr/uplink-css-studio/
  * Description: A code-first CSS workspace for Bricks with live sync, completion, visual value tools, recipes, and query helpers.
- * Version: 1.5.2
+ * Version: 1.6.0
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Tested up to: 7.1
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Plugin {
-	const VERSION = '1.5.2';
+	const VERSION = '1.6.0';
 	const MINIMUM_BRICKS_VERSION = '2.4';
 	const USER_RECIPES_META = '_uplink_css_studio_recipes';
 

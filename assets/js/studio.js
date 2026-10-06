@@ -1530,7 +1530,7 @@
             <div class="uplink-css-studio-toolbar-scroll" role="group" aria-label="CSS tools, scroll horizontally" tabindex="0">
               <button class="uplink-css-studio-tool uplink-css-studio-outline-toggle" type="button" aria-label="Toggle stylesheet outline" data-tooltip="Outline · ⌘⇧O">${icon('outline')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-recipes-toggle" type="button" aria-label="Open recipe manager" data-tooltip="Recipe manager">${icon('shortcuts')}</button>
-              <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" data-tooltip="%root%, class, ID & HTML">${icon('target')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" aria-keyshortcuts="${navigator.platform.toLowerCase().includes('mac') ? 'Meta+Alt+G' : 'Control+Alt+G'}" data-tooltip="%root%, class, ID & HTML · ${navigator.platform.toLowerCase().includes('mac') ? '⌘⌥G' : 'Ctrl+Alt+G'}">${icon('target')}</button>
               <button class="uplink-css-studio-tool" type="button" data-recipe="parent" aria-label="Has me selector" data-tooltip="Has me selector :has(> &)">${icon('parent')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-container-toggle" type="button" aria-label="Container queries" data-tooltip="Container queries">${icon('container')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-media-toggle" type="button" aria-label="Media queries" data-tooltip="Media queries">${icon('media')}</button>
@@ -3086,6 +3086,7 @@
     syncElementActionsVisibility(frameDocument);
     if (!frameDocument || state.canvasDocument === frameDocument) return;
     state.canvasDocument = frameDocument;
+    frameDocument.addEventListener('keydown', classTargetShortcut, true);
     frameDocument.addEventListener('pointerup', (event) => {
       if (!state.prefs.autoOpen || state.open || event.button !== 0) return;
       const element = event.target?.closest?.('[data-id], [id^="brxe-"], [class*="brxe-"]');
@@ -4013,7 +4014,25 @@
     }
   }
 
+  function classTargetShortcut(event) {
+    const isMac = navigator.platform.toLowerCase().includes('mac');
+    const command = isMac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey;
+    if (!command || !event.altKey || event.shiftKey || event.isComposing || event.repeat || event.getModifierState?.('AltGraph')) return false;
+    if (event.code !== 'KeyG' && event.key?.toLowerCase() !== 'g') return false;
+    if (!activeContext()?.element) return false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (!state.open) open();
+    if (state.minimized) toggleMinimize();
+    if (state.mode !== 'css') setEditorMode('css');
+    const panel = document.querySelector('.uplink-css-studio-targets-panel');
+    if (panel?.hidden) toggleTargetsPanel();
+    requestAnimationFrame(() => document.querySelector('.uplink-css-studio-class-input')?.focus());
+    return true;
+  }
+
   function shortcuts(event) {
+    if (classTargetShortcut(event)) return;
     const command = navigator.platform.toLowerCase().includes('mac') ? event.metaKey : event.ctrlKey;
     if (command && event.shiftKey && event.key.toLowerCase() === 'c') {
       event.preventDefault(); event.stopPropagation(); state.open ? close() : open(); return;
