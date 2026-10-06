@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,9 +149,14 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 
 = Where is my data stored? =
 
-Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public GitHub Releases page for updates.
+Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public update metadata for updates.
 
 == Changelog ==
+
+= 1.7.1 =
+
+* Fetch update information from a public JSON file instead of GitHub API endpoints, avoiding API rate-limit failures.
+* Continue installing the official release ZIP and checking versions through WordPress.
 
 = 1.7.0 =
 

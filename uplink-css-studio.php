@@ -4,7 +4,7 @@
  * Plugin URI: https://plugins.uplink.press/project/css-studio-for-bricks/
  * Update URI: https://github.com/stphnwlkr/uplink-css-studio/
  * Description: A code-first CSS workspace for Bricks with live sync, completion, visual value tools, recipes, and query helpers.
- * Version: 1.7.0
+ * Version: 1.7.1
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Tested up to: 7.1
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Plugin {
-	const VERSION = '1.7.0';
+	const VERSION = '1.7.1';
 	const MINIMUM_BRICKS_VERSION = '2.4';
 	const USER_RECIPES_META = '_uplink_css_studio_recipes';
 
@@ -166,15 +166,10 @@ final class Plugin {
 
 		require_once $library;
 
-		$checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-			'https://github.com/stphnwlkr/uplink-css-studio/',
+		\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+			'https://raw.githubusercontent.com/stphnwlkr/uplink-css-studio/main/update.json',
 			__FILE__,
 			'uplink-css-studio'
-		);
-		$checker->setBranch( 'main' );
-		$checker->getVcsApi()->enableReleaseAssets(
-			'/^uplink-css-studio\.zip$/i',
-			\YahnisElsts\PluginUpdateChecker\v5p7\Vcs\Api::REQUIRE_RELEASE_ASSETS
 		);
 	}
 

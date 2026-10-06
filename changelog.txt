@@ -1,6 +1,13 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.1
+-----
+Fixed update checks when GitHub rejects API requests.
+
+* Fetch update information from a public JSON file instead of GitHub API endpoints, avoiding API rate-limit failures.
+* Continue installing the official release ZIP and checking versions through WordPress.
+
 1.7.0
 -----
 Added CSS calculation tools and corrected header button sizing.

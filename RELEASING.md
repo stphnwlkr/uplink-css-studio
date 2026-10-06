@@ -10,7 +10,7 @@ Use semantic versioning for every distributable change:
 
 1. Update the plugin header and `Plugin::VERSION` in `uplink-css-studio.php`.
 2. Update `Stable tag` and the changelog in `readme.txt`.
-3. Add the release notes to `changelog.txt`.
+3. Add the release notes to `changelog.txt`. Update `update.json` with the same version, its exact release ZIP URL, and release notes.
 4. Run the JavaScript syntax check, PHP lint, and `git diff --check`.
 5. Install and verify the build on the Bricks test site.
 6. Build `uplink-css-studio.zip` without repository files, marketing assets, or a nested ZIP.
@@ -24,4 +24,4 @@ Use semantic versioning for every distributable change:
 
 Continue development on `main`. Do not add later fixes to an existing version branch.
 
-The bundled update checker only accepts the `uplink-css-studio.zip` asset from a non-prerelease GitHub Release. It will not install a repository source archive. WordPress decides whether that release is installed manually or through the site's per-plugin automatic-update setting.
+The bundled update checker reads public `update.json` from `main` without calling the GitHub API. The manifest must point to the versioned `uplink-css-studio.zip` asset from a published stable GitHub Release. It will not install a repository source archive. WordPress decides whether that release is installed manually or through the site's per-plugin automatic-update setting.

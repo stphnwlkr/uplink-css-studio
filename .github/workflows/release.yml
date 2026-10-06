@@ -22,6 +22,14 @@ jobs:
           grep -Fq "Version: ${RELEASE_VERSION}" uplink-css-studio.php
           grep -Fq "const VERSION = '${RELEASE_VERSION}';" uplink-css-studio.php
           grep -Fq "Stable tag: ${RELEASE_VERSION}" readme.txt
+          python3 - <<'PY'
+          import json, os
+          version = os.environ['RELEASE_VERSION']
+          with open('update.json') as file:
+              metadata = json.load(file)
+          assert metadata['version'] == version
+          assert metadata['download_url'] == f'https://github.com/stphnwlkr/uplink-css-studio/releases/download/{version}/uplink-css-studio.zip'
+          PY
 
       - name: Build the installable ZIP
         run: |
