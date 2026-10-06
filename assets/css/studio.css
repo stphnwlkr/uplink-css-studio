@@ -135,7 +135,7 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 }
 
 .uplink-css-studio-header, .uplink-css-studio-toolbar, .uplink-css-studio-footer { display: flex; align-items: center; }
-.uplink-css-studio-header { gap: 12px; padding: 0 12px 0 15px; border-bottom: 1px solid #363a43; background: #181a1f; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+.uplink-css-studio-header { gap: 8px; padding: 0 12px 0 15px; border-bottom: 1px solid #363a43; background: #181a1f; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
 .uplink-css-studio-header > * { flex: 0 0 auto; }
 .uplink-css-studio-brand { display: flex; align-items: center; gap: 8px; color: #f3f5f8; font-size: 12px; font-weight: 760; letter-spacing: .02em; white-space: nowrap; }
 .uplink-css-studio-brand .uplink-css-studio-svg { width: 21px; height: 21px; color: var(--uplink-css-studio-accent); }
@@ -616,3 +616,59 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
   .uplink-css-studio-html-head { align-items: flex-start; }
   .uplink-css-studio-html-note { white-space: normal; }
 }
+
+.uplink-css-studio-calculation-preview {
+  position: fixed;
+  z-index: 10020;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  max-width: calc(100vw - 16px);
+  padding: .4rem .65rem;
+  border: 1px solid var(--uplink-css-studio-border);
+  border-radius: 5px;
+  background: var(--uplink-css-studio-panel);
+  color: var(--uplink-css-studio-text);
+  box-shadow: 0 4px 16px #0005;
+  pointer-events: none;
+}
+.uplink-css-studio-calculation-preview[hidden] { display: none; }
+.uplink-css-studio-calculation-preview code {
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+.uplink-css-studio-calculation-preview span {
+  flex-shrink: 0;
+  color: var(--uplink-css-studio-accent);
+  font-size: .75rem;
+}
+
+.uplink-css-studio-calculation-preview { flex-wrap: wrap; }
+.uplink-css-studio-calculation-preview small {
+  flex-basis: 100%;
+  max-width: 38rem;
+  color: var(--uplink-css-studio-muted);
+  font-size: .75rem;
+}
+.uplink-css-studio-calculation-preview.is-invalid { border-color: var(--uplink-css-studio-danger); }
+.uplink-css-studio-calculation-preview.is-invalid span,
+.uplink-css-studio-calculation-preview.is-invalid small { color: var(--uplink-css-studio-danger); }
+
+.uplink-css-studio-header > .uplink-css-studio-icon-button { width: 32px; height: 32px; min-width: 32px; flex: 0 0 32px; padding: 0; }
+.uplink-css-studio-clamp-panel { width: min(420px, calc(100vw - 20px)); }
+.uplink-css-studio-clamp-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 14px; }
+.uplink-css-studio-clamp-fields label,
+.uplink-css-studio-clamp-result-label { display: grid; gap: 6px; color: var(--uplink-css-studio-text); font-size: 12px; }
+.uplink-css-studio-clamp-fields input,
+.uplink-css-studio-clamp-fields select,
+.uplink-css-studio-clamp-output { width: 100%; min-width: 0; box-sizing: border-box; padding: 8px; border: 1px solid var(--uplink-css-studio-border); border-radius: 5px; background: var(--uplink-css-studio-bg); color: var(--uplink-css-studio-text); }
+.uplink-css-studio-clamp-fields input,
+.uplink-css-studio-clamp-fields select { padding-block: 0; }
+.uplink-css-studio-clamp-result-label { margin: 0 14px; }
+.uplink-css-studio-clamp-output { resize: vertical; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.uplink-css-studio-clamp-message,
+.uplink-css-studio-clamp-help { display: block; margin: 10px 14px; color: var(--uplink-css-studio-muted); font-size: 11px; }
+.uplink-css-studio-clamp-message { color: var(--uplink-css-studio-danger); }
+.uplink-css-studio-clamp-message:empty { display: none; }
+.uplink-css-studio-clamp-insert { margin: 12px 14px 0; padding: 10px 14px; background: var(--uplink-css-studio-accent); color: var(--uplink-css-studio-accent-text); }

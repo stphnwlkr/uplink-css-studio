@@ -1,6 +1,17 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.0
+-----
+Added CSS calculation tools and corrected header button sizing.
+
+* Added a clamp calculator beside Style Manager with rem/px controls and insertion at the CSS cursor or selection.
+* Detect the maximum viewport from ACSS content width or the active Bricks Theme Style container width, with editable values and compact inputs.
+* Added calculation previews showing the result before pressing Tab to wrap arithmetic in calc().
+* Flatten nested calc() expressions while preserving arithmetic precedence.
+* Validate calculation units with the browser CSS engine and prevent Tab from applying confirmed invalid calculations.
+* Set header spacing to 8px and header buttons to 32px, including their flex sizing.
+
 1.6.0
 -----
 Added a keyboard shortcut for the CSS Target class field.

@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,9 @@ The in-editor value tools were inspired in particular by Elliot Bear's Drypoint 
 Uplink CSS Studio is an independent implementation. It does not include or derive from those projects' source code. It is not affiliated with or endorsed by Bricks, Drypoint, Etch, Strange Tech, Advanced Themer, Code2Bricks, or ACSS.
 
 == Features ==
+
+* Clamp calculator beside the Style Manager button, with rem/px values, editable root size, viewport limits, and insertion at the CSS cursor or selection.
+* Calculation previews use the browser to check resolved variable units. Invalid calculations show an explanation and are not applied by Tab; unresolved variables are reported as unverified.
 
 * Optional browser-saved preference to hide the canvas element-actions toolbar.
 
@@ -83,7 +86,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Control + Space in the HTML editor: Show HTML tag, attribute, or Bricks dynamic-data completion for the current cursor position.
 * Tab after a supported single-root HTML abbreviation such as `p.lead`, `a.button[href=/contact]`, or `span.label{New}`: Expand the abbreviation and place the caret in the element.
 * Tab after a property abbreviation or partial property name: Complete the property and insert `: ;`, leaving the caret between the colon and semicolon.
-* Tab after an arithmetic declaration value: Expand bare custom properties, wrap the expression in `calc(...)`, and keep the declaration's existing semicolon. A semicolon is added only when one is not already present.
+* Arithmetic declaration values show a calculation preview beside the cursor. Tab applies the preview, expands bare custom properties, and preserves an existing semicolon. Escape dismisses the preview.
 * Tab after `tr` plus a pixel number, such as `tr80`: Convert it to rem using the rendered Bricks HTML font size (`5rem` at `100%`, `8rem` at `62.5%`).
 * Type `@recipe-shortcut;`: Insert the matching ACSS or user recipe at the cursor.
 * Tab after an exact ACSS or user-recipe shortcut: Insert the recipe at the cursor.
@@ -149,6 +152,15 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public GitHub Releases page for updates.
 
 == Changelog ==
+
+= 1.7.0 =
+
+* Added a clamp calculator beside Style Manager with rem/px controls and insertion at the CSS cursor or selection.
+* Detect the maximum viewport from ACSS content width or the active Bricks Theme Style container width, with editable values and compact inputs.
+* Added calculation previews showing the result before pressing Tab to wrap arithmetic in calc().
+* Flatten nested calc() expressions while preserving arithmetic precedence.
+* Validate calculation units with the browser CSS engine and prevent Tab from applying confirmed invalid calculations.
+* Set header spacing to 8px and header buttons to 32px, including their flex sizing.
 
 = 1.6.0 =
 

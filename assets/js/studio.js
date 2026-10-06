@@ -380,6 +380,7 @@
     plus: '<path d="M12 5v14M5 12h14"/>',
     minus: '<path d="M5 12h14"/>',
     styleManager: '<path d="M5 3h14l-1.2 15L12 21l-5.8-3L5 3Z"/><path d="M8.5 7h7l-.3 3h-4.6l.2 2h4.2l-.4 4-2.6 1.2L9.4 16l-.2-1.7"/>',
+    calculator: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m4 0h2M8 15h2m4 0h2M8 18h2m4 0h2"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19 13.5v-3l-2-.7-.7-1.7.9-1.9-2.1-2.1-1.9.9-1.7-.7L10.5 2h-3l-.7 2-1.7.7-1.9-.9-2.1 2.1.9 1.9-.7 1.7-2 .7v3l2 .7.7 1.7-.9 1.9 2.1 2.1 1.9-.9 1.7.7.7 2h3l.7-2 1.7-.7 1.9.9 2.1-2.1-.9-1.9.7-1.7Z" transform="scale(.72) translate(4.7 4.7)"/>',
     search: '<circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/>',
     comment: '<path d="M5 5h14v11H9l-4 4Z"/><path d="M9 9h6M9 12h4"/>',
@@ -1146,6 +1147,7 @@
   }
 
   function setEditorMode(mode) {
+    hideCalculationPreview();
     state.mode = mode === 'html' ? 'html' : 'css';
     const windowElement = document.querySelector('.uplink-css-studio-window');
     const cssPanel = document.querySelector('[data-editor-panel="css"]');
@@ -1515,6 +1517,7 @@
             </div>
             <div class="uplink-css-studio-header-spacer"></div>
             <button class="uplink-css-studio-icon-button uplink-css-studio-style-manager" type="button" aria-label="Open Bricks Style Manager" data-tooltip="Bricks Style Manager · ⌘.">${icon('styleManager')}</button>
+            <button class="uplink-css-studio-icon-button uplink-css-studio-clamp-toggle" type="button" aria-label="Open clamp calculator" aria-expanded="false" data-tooltip="Clamp calculator">${icon('calculator')}</button>
             <button class="uplink-css-studio-icon-button uplink-css-studio-preferences-toggle" type="button" aria-label="CSS Studio preferences" data-tooltip="Preferences">${icon('settings')}</button>
             <button class="uplink-css-studio-icon-button uplink-css-studio-revert" type="button" aria-label="Revert session changes" data-tooltip="Revert session changes">${icon('undo')}</button>
             <button class="uplink-css-studio-icon-button uplink-css-studio-fullscreen" type="button" aria-label="Open full-screen editor" data-tooltip="Full-screen editor">${icon('fullscreen')}</button>
@@ -1653,6 +1656,21 @@
               <div class="uplink-css-studio-popover-head"><strong class="uplink-css-studio-value-title">CSS value</strong><button class="uplink-css-studio-popover-icon uplink-css-studio-value-close" type="button" aria-label="Close value editor">${icon('close')}</button></div>
               <div class="uplink-css-studio-value-body"></div>
             </aside>
+            <aside class="uplink-css-studio-popover uplink-css-studio-clamp-panel" hidden aria-label="Clamp calculator">
+              <div class="uplink-css-studio-popover-head"><strong>Clamp calculator</strong><span>Fluid typography & spacing</span></div>
+              <div class="uplink-css-studio-clamp-fields">
+                <label>Root font size (px)<input data-clamp="root" type="number" min="0.01" step="any" value="16"></label>
+                <label>Value units<select data-clamp="unit"><option value="rem">rem</option><option value="px">px</option></select></label>
+                <label>Min viewport (px)<input data-clamp="minWidth" type="number" min="0" step="any" value="320"></label>
+                <label>Max viewport (px)<input data-clamp="maxWidth" type="number" min="1" step="any" value="1366"></label>
+                <label>Minimum value<input data-clamp="min" type="number" step="any" value="1"></label>
+                <label>Maximum value<input data-clamp="max" type="number" step="any" value="1.5"></label>
+              </div>
+              <label class="uplink-css-studio-clamp-result-label">Your clamp() function<textarea class="uplink-css-studio-clamp-output" readonly aria-label="Generated clamp function" rows="3"></textarea></label>
+              <small class="uplink-css-studio-clamp-message" aria-live="polite"></small>
+              <button class="uplink-css-studio-action uplink-css-studio-clamp-insert" type="button">Insert into CSS</button>
+              <small class="uplink-css-studio-clamp-help">Replaces selected text, or inserts at the saved CSS cursor. Root font size is detected from the canvas when opened.</small>
+            </aside>
             <aside class="uplink-css-studio-popover uplink-css-studio-query-panel" hidden aria-label="Responsive query shortcuts">
               <div class="uplink-css-studio-popover-head"><strong class="uplink-css-studio-query-title">Media queries</strong><span class="uplink-css-studio-query-context">width</span></div>
               <div class="uplink-css-studio-query-list"></div>
@@ -1707,7 +1725,12 @@
     state.editor.on('cursorActivity', () => {
       updateCursorPosition();
       refreshLayoutTools();
+      updateCalculationPreview(state.editor);
     });
+    state.editor.on('blur', hideCalculationPreview);
+    state.editor.on('focus', () => updateCalculationPreview(state.editor));
+    state.editor.on('scroll', () => updateCalculationPreview(state.editor));
+    window.addEventListener('resize', () => updateCalculationPreview(state.editor));
     state.editor.on('gutterClick', toggleDeclarationAtLine);
     state.editor.getWrapperElement().addEventListener('pointerdown', handleValuePointerDown);
     state.editor.getWrapperElement().addEventListener('click', handleValueClick);
@@ -3120,6 +3143,9 @@
     document.querySelector('.uplink-css-studio-html-discard').addEventListener('click', discardHtmlEdits);
     document.querySelector('.uplink-css-studio-format').addEventListener('click', formatCss);
     document.querySelector('.uplink-css-studio-style-manager').addEventListener('click', openNativeStyleManager);
+    document.querySelector('.uplink-css-studio-clamp-toggle').addEventListener('click', (event) => { event.stopPropagation(); toggleClampCalculator(); });
+    document.querySelectorAll('[data-clamp]').forEach((input) => input.addEventListener('input', updateClampCalculator));
+    document.querySelector('.uplink-css-studio-clamp-insert').addEventListener('click', insertCalculatedClamp);
     document.querySelector('.uplink-css-studio-preferences-toggle').addEventListener('click', (event) => { event.stopPropagation(); togglePreferences(); });
     document.querySelector('.uplink-css-studio-shell').addEventListener('mousedown', (event) => { if (event.target.classList.contains('uplink-css-studio-shell')) close(); });
     document.querySelector('.uplink-css-studio-shell').addEventListener('pointerdown', beginPopoverDrag);
@@ -3351,7 +3377,7 @@
     document.querySelector('.uplink-css-studio-search').addEventListener('click', () => state.editor.execCommand('find'));
     document.querySelector('.uplink-css-studio-comment').addEventListener('click', () => state.editor.execCommand('toggleComment'));
     document.addEventListener('click', (event) => {
-      if (!event.target.closest('.uplink-css-studio-popover') && !event.target.closest('.uplink-css-studio-outline-toggle') && !event.target.closest('.uplink-css-studio-recipes-toggle') && !event.target.closest('.uplink-css-studio-shortcut-category') && !event.target.closest('.uplink-css-studio-colors-toggle') && !event.target.closest('.uplink-css-studio-targets-toggle') && !event.target.closest('.uplink-css-studio-media-toggle') && !event.target.closest('.uplink-css-studio-container-toggle') && !event.target.closest('.uplink-css-studio-states-toggle') && !event.target.closest('.uplink-css-studio-preferences-toggle')) closePopovers();
+      if (!event.target.closest('.uplink-css-studio-popover') && !event.target.closest('.uplink-css-studio-outline-toggle') && !event.target.closest('.uplink-css-studio-recipes-toggle') && !event.target.closest('.uplink-css-studio-shortcut-category') && !event.target.closest('.uplink-css-studio-colors-toggle') && !event.target.closest('.uplink-css-studio-targets-toggle') && !event.target.closest('.uplink-css-studio-media-toggle') && !event.target.closest('.uplink-css-studio-container-toggle') && !event.target.closest('.uplink-css-studio-states-toggle') && !event.target.closest('.uplink-css-studio-preferences-toggle') && !event.target.closest('.uplink-css-studio-clamp-toggle')) closePopovers();
     });
     bindTooltips();
     document.addEventListener('keydown', shortcuts, true);
@@ -3407,6 +3433,7 @@
     if (!change || change.origin !== '+input' || change.text.length !== 1 || change.text[0].length !== 1) return;
     const character = change.text[0];
     if (character === ';' && expandRecipeTrigger(editor)) return;
+    if (updateCalculationPreview(editor)) return;
     if (!/[a-zA-Z@():>-]/.test(character)) return;
     const cursor = editor.getCursor();
     const token = editor.getTokenAt(cursor);
@@ -3633,10 +3660,153 @@
     return normalized.trim();
   }
 
-  function completeCssCalculation(editor, cursor, beforeCursor, CodeMirror) {
-    const declaration = beforeCursor.match(/(?:^|[;{])(\s*[\w-]+\s*:\s*)([^;{}]+)$/);
-    if (!declaration) return false;
-    const rawValue = declaration[2];
+  function flattenCssCalculation(value) {
+    let index = 0;
+    let calcCount = 0;
+    const skipSpace = () => { while (/\s/.test(value[index] || '')) index += 1; };
+    const precedence = (node) => node.kind === 'binary' ? ('+-'.includes(node.operator) ? 1 : 2) : 3;
+    const render = (node) => {
+      if (node.kind === 'atom') return node.value;
+      if (node.kind === 'unary') return `${node.operator}(${render(node.child)})`;
+      const priority = precedence(node);
+      const left = render(node.left);
+      const right = render(node.right);
+      return `${precedence(node.left) < priority ? `(${left})` : left} ${node.operator} ${precedence(node.right) <= priority ? `(${right})` : right}`;
+    };
+    const operand = () => {
+      skipSpace();
+      if (value[index] === '(') {
+        index += 1;
+        const node = expression(0);
+        skipSpace();
+        if (!node || value[index++] !== ')') return null;
+        return node;
+      }
+      const start = index;
+      const name = value.slice(index).match(/^[a-z_][\w-]*/i)?.[0];
+      if (name) {
+        index += name.length;
+        skipSpace();
+        if (value[index] === '(') {
+          index += 1;
+          if (name.toLowerCase() === 'calc') {
+            calcCount += 1;
+            const node = expression(0);
+            skipSpace();
+            if (!node || value[index++] !== ')') return null;
+            return node;
+          }
+          let depth = 1;
+          let quote = '';
+          let comment = false;
+          while (index < value.length && depth) {
+            const character = value[index++];
+            const next = value[index];
+            if (comment) { if (character === '*' && next === '/') { index += 1; comment = false; } continue; }
+            if (quote) { if (character.charCodeAt(0) === 92) index += 1; else if (character === quote) quote = ''; continue; }
+            if (character === '/' && next === '*') { index += 1; comment = true; continue; }
+            if (character === '"' || character === "'") quote = character;
+            else if (character === '(') depth += 1;
+            else if (character === ')') depth -= 1;
+          }
+          if (depth || comment || quote) return null;
+        }
+        return { kind: 'atom', value: value.slice(start, index).trim() };
+      }
+      const number = value.slice(index).match(/^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?(?:[a-z%]+)?/i)?.[0];
+      if (number) { index += number.length; return { kind: 'atom', value: number }; }
+      if ('+-'.includes(value[index] || '\0')) {
+        const operator = value[index++];
+        const child = operand();
+        return child ? { kind: 'unary', operator, child } : null;
+      }
+      return null;
+    };
+    const expression = (minimum) => {
+      let left = operand();
+      if (!left) return null;
+      while (true) {
+        skipSpace();
+        const operator = value[index];
+        if (!operator || !'+-*/'.includes(operator)) break;
+        const priority = '+-'.includes(operator) ? 1 : 2;
+        if (priority < minimum) break;
+        index += 1;
+        const right = expression(priority + 1);
+        if (!right) return null;
+        left = { kind: 'binary', operator, left, right };
+      }
+      return left;
+    };
+    const node = expression(0);
+    skipSpace();
+    return node && index === value.length ? { value: render(node), calcCount } : null;
+  }
+
+  function resolveCalculationVariables(value, computedStyle, seen = new Set()) {
+    let output = '';
+    let cursor = 0;
+    const pattern = /\bvar\(/gi;
+    let match;
+    while ((match = pattern.exec(value))) {
+      output += value.slice(cursor, match.index);
+      let depth = 1;
+      let end = pattern.lastIndex;
+      let comma = -1;
+      let quote = '';
+      for (; end < value.length && depth; end += 1) {
+        const character = value[end];
+        if (quote) {
+          if (character.charCodeAt(0) === 92) end += 1;
+          else if (character === quote) quote = '';
+          continue;
+        }
+        if (character === '"' || character === "'") quote = character;
+        else if (character === '(') depth += 1;
+        else if (character === ')') depth -= 1;
+        else if (character === ',' && depth === 1 && comma < 0) comma = end;
+      }
+      if (depth) return null;
+      const name = value.slice(pattern.lastIndex, comma < 0 ? end - 1 : comma).trim();
+      if (!/^--[\w-]+$/.test(name) || seen.has(name)) return null;
+      let replacement = computedStyle?.getPropertyValue(name).trim() || '';
+      if (!replacement && comma >= 0) replacement = value.slice(comma + 1, end - 1).trim();
+      if (!replacement) return null;
+      const nestedSeen = new Set(seen);
+      nestedSeen.add(name);
+      replacement = resolveCalculationVariables(replacement, computedStyle, nestedSeen);
+      if (replacement == null) return null;
+      output += replacement;
+      cursor = end;
+      pattern.lastIndex = end;
+    }
+    return output + value.slice(cursor);
+  }
+
+  function validateCssCalculation(property, value) {
+    if (!window.CSS?.supports || property.startsWith('--')) return { kind: 'unknown', message: 'Type check unavailable' };
+    let computedStyle = null;
+    const node = canvasElementNode(state.context?.element);
+    const owner = node?.ownerDocument || state.canvasDocument;
+    try {
+      const target = node || owner?.documentElement;
+      if (target) computedStyle = owner.defaultView.getComputedStyle(target);
+    } catch (error) {}
+    const resolved = resolveCalculationVariables(value, computedStyle);
+    if (resolved == null || /\benv\(/i.test(resolved)) return { kind: 'unknown', message: 'Cannot verify unresolved variables' };
+    const valid = window.CSS.supports(property, resolved);
+    return valid ? { kind: 'valid', message: '' } : {
+      kind: 'invalid',
+      message: `Invalid ${property} calculation. Addition and subtraction need compatible units. A length needs a unit, such as 4px.`
+    };
+  }
+
+  function cssCalculationCompletion(editor, cursor, beforeCursor, CodeMirror) {
+    const declaration = beforeCursor.match(/(?:^|[;{])(\s*([\w-]+)\s*:\s*)([^;{}]+)$/);
+    if (!declaration) return null;
+    // Slash-separated shorthand values are not arithmetic.
+    if (/^(?:font|background(?:-.+)?|mask(?:-.+)?|border(?:-.+)?-radius|border-radius|border-image(?:-.+)?|grid(?:-.+)?|aspect-ratio)$/i.test(declaration[2])) return null;
+    const rawValue = declaration[3];
     const leading = rawValue.match(/^\s*/)?.[0] || '';
     let expression = rawValue.trim();
     let important = '';
@@ -3644,14 +3814,86 @@
       expression = expression.replace(/\s*!important\s*$/i, '').trimEnd();
       important = ' !important';
     }
-    const normalized = normalizeCssCalculationExpression(expandBareCustomProperties(expression));
-    if (!normalized) return false;
+    const expanded = expandBareCustomProperties(expression);
+    const normalized = normalizeCssCalculationExpression(expanded);
+    const flattened = flattenCssCalculation(normalized || expanded);
+    if ((!normalized && !flattened?.calcCount) || !cssMathOperandEnd(expression)) return null;
     const from = CodeMirror.Pos(cursor.line, cursor.ch - rawValue.length + leading.length);
     const afterCursor = editor.getLine(cursor.line).slice(cursor.ch);
     const hasSemicolon = /^\s*;/.test(afterCursor);
-    const replacement = `calc(${normalized})${important}${hasSemicolon ? '' : ';'}`;
-    editor.replaceRange(replacement, from, cursor, 'complete');
-    editor.setCursor({ line: from.line, ch: from.ch + replacement.length });
+    const value = `calc(${flattened?.value || normalized})${important}`;
+    return { from, to: cursor, value, property: declaration[2], needsExpansion: Boolean(normalized || flattened?.calcCount > 1), replacement: `${value}${hasSemicolon ? '' : ';'}` };
+  }
+
+  function hideCalculationPreview() {
+    const preview = document.querySelector('.uplink-css-studio-calculation-preview');
+    if (preview) preview.hidden = true;
+  }
+
+  function updateCalculationPreview(editor) {
+    const CodeMirror = window.wp?.CodeMirror;
+    if (!CodeMirror || !state.open || state.minimized || state.mode !== 'css' || !editor.hasFocus() || editor.somethingSelected()) {
+      hideCalculationPreview();
+      return false;
+    }
+    const cursor = editor.getCursor();
+    const line = editor.getLine(cursor.line);
+    const signature = `${cursor.line}:${cursor.ch}:${line}`;
+    if (state.dismissedCalculationPreview === signature || /comment|string/.test(editor.getTokenAt(cursor).type || '') || !/^\s*(?:;|$)/.test(line.slice(cursor.ch))) {
+      hideCalculationPreview();
+      return false;
+    }
+    const completion = cssCalculationCompletion(editor, cursor, line.slice(0, cursor.ch), CodeMirror);
+    const validation = completion ? validateCssCalculation(completion.property, completion.value.replace(/\s*!important\s*$/i, '')) : null;
+    if (!completion || (!completion.needsExpansion && validation.kind !== 'invalid')) {
+      hideCalculationPreview();
+      return false;
+    }
+    let preview = document.querySelector('.uplink-css-studio-calculation-preview');
+    if (!preview) {
+      preview = document.createElement('div');
+      preview.className = 'uplink-css-studio-calculation-preview';
+      preview.setAttribute('role', 'status');
+      preview.setAttribute('aria-live', 'polite');
+      document.querySelector('.uplink-css-studio-shell').appendChild(preview);
+    }
+    preview.replaceChildren();
+    const code = document.createElement('code');
+    code.textContent = completion.replacement;
+    const label = document.createElement('span');
+    label.textContent = validation.kind === 'invalid' ? 'Check units' : 'Tab to apply';
+    preview.classList.toggle('is-invalid', validation.kind === 'invalid');
+    preview.append(code, label);
+    if (validation.kind !== 'valid') {
+      const explanation = document.createElement('small');
+      explanation.textContent = validation.message;
+      preview.append(explanation);
+    }
+    preview.hidden = false;
+    const coords = editor.cursorCoords(cursor, 'window');
+    const rect = preview.getBoundingClientRect();
+    const left = Math.max(8, Math.min(coords.left, window.innerWidth - rect.width - 8));
+    const top = coords.bottom + rect.height + 8 <= window.innerHeight ? coords.bottom + 4 : Math.max(8, coords.top - rect.height - 4);
+    preview.style.left = `${left}px`;
+    preview.style.top = `${top}px`;
+    clearTimeout(state.autocompleteTimer);
+    editor.closeHint?.();
+    return true;
+  }
+
+  function completeCssCalculation(editor, cursor, beforeCursor, CodeMirror) {
+    const completion = cssCalculationCompletion(editor, cursor, beforeCursor, CodeMirror);
+    if (!completion) return false;
+    const validation = validateCssCalculation(completion.property, completion.value.replace(/\s*!important\s*$/i, ''));
+    if (validation.kind === 'invalid') {
+      updateCalculationPreview(editor);
+      setStatus(validation.message, 'dirty');
+      return true;
+    }
+    if (!completion.needsExpansion) return false;
+    hideCalculationPreview();
+    editor.replaceRange(completion.replacement, completion.from, completion.to, 'complete');
+    editor.setCursor({ line: completion.from.line, ch: completion.from.ch + completion.replacement.length });
     return true;
   }
 
@@ -4045,6 +4287,15 @@
       event.preventDefault(); event.stopPropagation(); toggleNumericScrubbing(); return;
     }
     if (event.key === 'Escape') {
+      const calculationPreview = document.querySelector('.uplink-css-studio-calculation-preview');
+      if (calculationPreview && !calculationPreview.hidden) {
+        const cursor = state.editor.getCursor();
+        state.dismissedCalculationPreview = `${cursor.line}:${cursor.ch}:${state.editor.getLine(cursor.line)}`;
+        hideCalculationPreview();
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (state.colorReturnPopover && !document.querySelector('.uplink-css-studio-colors-panel')?.hidden) returnFromNestedColorPicker();
       else if (document.querySelector('.uplink-css-studio-popover:not([hidden])')) closePopovers();
       else close();
@@ -4090,6 +4341,7 @@
   }
 
   function close() {
+    hideCalculationPreview();
     state.dismissedElementId = activeContext()?.element?.id || '';
     state.open = false;
     state.fullscreen = false;
@@ -4106,6 +4358,7 @@
   }
 
   function toggleMinimize() {
+    hideCalculationPreview();
     const shell = document.querySelector('.uplink-css-studio-shell');
     const preview = document.querySelector('#bricks-preview');
     const button = document.querySelector('.uplink-css-studio-minimize');
@@ -5563,6 +5816,82 @@
     }
   }
 
+  function calculateFluidClamp({ root, minWidth, maxWidth, min, max, unit }) {
+    if (![root, minWidth, maxWidth, min, max].every(Number.isFinite) || root <= 0 || minWidth < 0 || maxWidth <= minWidth || max < min || !['px', 'rem'].includes(unit)) return '';
+    const factor = unit === 'rem' ? root : 1;
+    const slope = (max - min) * factor / (maxWidth - minWidth);
+    const intercept = min - slope * minWidth / factor;
+    const format = (value) => String(Number(value.toFixed(6)));
+    const preferred = `${format(intercept)}${unit} ${slope < 0 ? '-' : '+'} ${format(Math.abs(slope) * 100)}vw`;
+    return `clamp(${format(min)}${unit}, ${preferred}, ${format(max)}${unit})`;
+  }
+
+  function updateClampCalculator() {
+    const panel = document.querySelector('.uplink-css-studio-clamp-panel');
+    const values = {};
+    panel.querySelectorAll('[data-clamp]').forEach((input) => { values[input.dataset.clamp] = input.dataset.clamp === 'unit' ? input.value : input.value.trim() === '' ? NaN : Number(input.value); });
+    const result = calculateFluidClamp(values);
+    panel.querySelector('.uplink-css-studio-clamp-output').value = result;
+    panel.querySelector('.uplink-css-studio-clamp-message').textContent = result ? '' : 'Enter finite values, a positive root size, a larger max viewport, and a maximum value at least as large as the minimum.';
+    panel.querySelector('.uplink-css-studio-clamp-insert').disabled = !result || !state.context;
+    requestAnimationFrame(positionActivePopover);
+  }
+
+  function clampWidthPixels(value, root, computedStyle) {
+    const resolved = resolveCalculationVariables(String(value ?? ''), computedStyle);
+    const match = resolved?.trim().match(/^([\d.]+)\s*(px|rem)?$/i);
+    if (!match) return null;
+    const pixels = Number(match[1]) * (match[2]?.toLowerCase() === 'rem' ? root : 1);
+    return Number.isFinite(pixels) && pixels > 0 ? pixels : null;
+  }
+
+  function detectedClampMaxWidth() {
+    const frameDocument = state.canvasDocument || document.querySelector('#bricks-builder-iframe, #bricks-preview iframe')?.contentDocument;
+    if (!frameDocument?.defaultView) return null;
+    const computedStyle = frameDocument.defaultView.getComputedStyle(frameDocument.documentElement);
+    const root = resolvedRootFontSizePx();
+    const acss = clampWidthPixels(computedStyle.getPropertyValue('--content-width'), root, computedStyle);
+    if (acss) return { pixels: acss, source: 'ACSS content width' };
+    const styles = activeThemeStyles(state.context).reverse();
+    for (const { style } of styles) {
+      const settings = style.settings || {};
+      for (const value of [settings.container?.width, settings.general?.containerMaxWidth]) {
+        const pixels = clampWidthPixels(value, root, computedStyle);
+        if (pixels) return { pixels, source: 'Bricks Theme Style container width' };
+      }
+    }
+    return null;
+  }
+
+  function toggleClampCalculator() {
+    const panel = document.querySelector('.uplink-css-studio-clamp-panel');
+    if (panel.hidden) {
+      setEditorMode('css');
+      state.clampInsertion = { from: state.editor.getCursor('from'), to: state.editor.getCursor('to'), source: state.editor.getValue() };
+      panel.querySelector('[data-clamp="root"]').value = String(resolvedRootFontSizePx());
+      const width = detectedClampMaxWidth();
+      panel.querySelector('[data-clamp="maxWidth"]').value = String(width?.pixels || 1366);
+      panel.querySelector('.uplink-css-studio-clamp-help').textContent = `Replaces selected text, or inserts at the saved CSS cursor. Root font size is detected from the canvas. Max viewport: ${width ? width.source : 'default'}. You can edit these values.`;
+      updateClampCalculator();
+    }
+    togglePopover('clamp');
+  }
+
+  function insertCalculatedClamp() {
+    const value = document.querySelector('.uplink-css-studio-clamp-output').value;
+    const insertion = state.clampInsertion;
+    if (!value || !insertion || !state.context) return;
+    if (state.editor.getValue() !== insertion.source) {
+      document.querySelector('.uplink-css-studio-clamp-message').textContent = 'CSS changed while the calculator was open. Reopen it to choose the insertion point.';
+      return;
+    }
+    state.editor.replaceRange(value, insertion.from, insertion.to, '+input');
+    state.editor.setCursor({ line: insertion.from.line, ch: insertion.from.ch + value.length });
+    closePopovers();
+    state.editor.focus();
+    setStatus('Clamp inserted into CSS', 'dirty');
+  }
+
   function togglePreferences() {
     const autoOpen = document.querySelector('.uplink-css-studio-auto-open');
     const firstAppliedClass = document.querySelector('.uplink-css-studio-first-class');
@@ -5993,7 +6322,7 @@
     if (state.popoverDrag) endPopoverDrag({ pointerId: state.popoverDrag.pointerId });
     document.querySelectorAll('.uplink-css-studio-popover').forEach((panel) => { panel.hidden = true; });
     document.querySelectorAll('.uplink-css-studio-popover').forEach((panel) => panel.classList.remove('is-dragging', 'is-user-positioned'));
-    document.querySelectorAll('.uplink-css-studio-outline-toggle, .uplink-css-studio-recipes-toggle, .uplink-css-studio-shortcut-category, .uplink-css-studio-colors-toggle, .uplink-css-studio-targets-toggle, .uplink-css-studio-media-toggle, .uplink-css-studio-container-toggle, .uplink-css-studio-states-toggle, .uplink-css-studio-preferences-toggle').forEach((button) => {
+    document.querySelectorAll('.uplink-css-studio-outline-toggle, .uplink-css-studio-recipes-toggle, .uplink-css-studio-shortcut-category, .uplink-css-studio-colors-toggle, .uplink-css-studio-targets-toggle, .uplink-css-studio-media-toggle, .uplink-css-studio-container-toggle, .uplink-css-studio-states-toggle, .uplink-css-studio-preferences-toggle, .uplink-css-studio-clamp-toggle').forEach((button) => {
       button.classList.remove('is-active');
       if (button.hasAttribute('aria-expanded')) button.setAttribute('aria-expanded', 'false');
     });
