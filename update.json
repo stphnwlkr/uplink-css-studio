@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.7.1/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.7.2/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.7.1</h4><p>Fixed update checks when GitHub rejects API requests by using public update metadata. Installs the official release ZIP.</p>"
+    "changelog": "<h4>1.7.2</h4><p>Fixed nested flex/grid toolbar edits changing parent controls. Keep layout edits scoped to nested selectors and conditional rules.</p>"
   }
 }

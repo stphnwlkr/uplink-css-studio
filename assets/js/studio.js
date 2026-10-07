@@ -5300,12 +5300,15 @@
   }
 
   function selectorBlockForLayout(source, cursorIndex) {
-    const active = openBlocksAt(source, cursorIndex)
-      .filter((block) => block.prelude && !block.prelude.startsWith('@'))
-      .pop();
+    const blocks = openBlocksAt(source, cursorIndex);
+    // Declarations in nested conditional rules belong to that condition, not
+    // to the surrounding selector's unconditional declarations.
+    const active = blocks[blocks.length - 1];
     if (active) {
+      if (active.prelude.startsWith('@') && (!/^@(media|container|supports|layer|starting-style)\b/i.test(active.prelude) || !blocks.some((block) => block.prelude && !block.prelude.startsWith('@')))) return null;
       const close = matchingBrace(source, active.open);
       if (close !== -1) return { ...active, close };
+      return null;
     }
 
     let quote = '';
@@ -5334,6 +5337,17 @@
       if (close !== -1) return { open: index, close, prelude };
     }
     return null;
+  }
+
+  function isRootLayoutContext() {
+    if (!state.editor || state.context?.kind === 'Theme style') return false;
+    const doc = state.editor.getDoc();
+    const source = doc.getValue();
+    if (!source.trim()) return true;
+    const block = selectorBlockForLayout(source, doc.indexFromPos(doc.getCursor()));
+    if (!block) return false;
+    const ancestors = openBlocksAt(source, block.open);
+    return ancestors.length === 0 && ['%root%', contextRootSelector(state.context)].filter(Boolean).includes(block.prelude);
   }
 
   function maskNestedCss(body) {
@@ -5409,6 +5423,8 @@
   }
 
   function computedLayoutContext() {
+    // The selected canvas element is not the target of a nested selector.
+    if (!isRootLayoutContext()) return {};
     const ctx = state.context;
     if (!ctx?.element?.id) return {};
     let frameDocument = state.canvasDocument;
@@ -5510,6 +5526,7 @@
   }
 
   function syncNativeSelectControl(controlKey, value) {
+    if (!isRootLayoutContext()) return;
     const marker = document.querySelector(`[control-key="${controlKey}"]`);
     const control = marker?.closest?.('[data-control="select"]');
     if (!control || control.querySelector('.input-value')?.textContent?.trim() === value) return;
@@ -5519,6 +5536,7 @@
   }
 
   function syncNativeGridTemplateInputs(declarations, attempt = 0) {
+    if (!isRootLayoutContext()) return;
     const ids = {
       'grid-template-columns': '_gridTemplateColumns',
       'grid-template-rows': '_gridTemplateRows'

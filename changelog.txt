@@ -1,6 +1,14 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.2
+-----
+Fixed layout toolbar edits in nested CSS.
+
+* Keep nested flex/grid toolbar edits from changing the parent element’s native Bricks controls.
+* Scope layout declarations to nested media, container, and other conditional blocks.
+* Avoid using the parent’s computed layout for nested selectors.
+
 1.7.1
 -----
 Fixed update checks when GitHub rejects API requests.
