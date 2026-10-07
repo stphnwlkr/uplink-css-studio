@@ -1,6 +1,13 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.3
+-----
+Fixed generated alignment cleanup after nested rules.
+
+* Remove generated align-items: initial declarations after nested CSS blocks.
+* Preserve other alignment values, comments, strings, and explicit !important declarations.
+
 1.7.2
 -----
 Fixed layout toolbar edits in nested CSS.

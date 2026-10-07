@@ -5114,7 +5114,7 @@
   function stripGeneratedAlignmentDefaults(css) {
     const source = String(css || '');
     const masked = cssWithoutCommentsAndStrings(source);
-    const pattern = /(^|[;{])([ \t\r\n]*)align-items\s*:\s*initial[ \t]*;?(?:[ \t]*(?:\r\n|\r|\n))?/gi;
+    const pattern = /(^|[;{}])([ \t\r\n]*)align-items\s*:\s*initial[ \t]*(?:;|(?=[}\r\n]|$))(?:[ \t]*(?:\r\n|\r|\n))?/gi;
     const replacements = [];
     let match;
     while ((match = pattern.exec(masked))) {
