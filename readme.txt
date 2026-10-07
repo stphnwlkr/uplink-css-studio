@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.7.4
+Stable tag: 1.7.5
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,8 +90,8 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Tab after `tr` plus a pixel number, such as `tr80`: Convert it to rem using the rendered Bricks HTML font size (`5rem` at `100%`, `8rem` at `62.5%`).
 * Type `@recipe-shortcut;`: Insert the matching ACSS or user recipe at the cursor.
 * Tab after an exact ACSS or user-recipe shortcut: Insert the recipe at the cursor.
-* `r` + Tab in an otherwise empty editor: Insert `%root%`.
-* `R` + Tab in an otherwise empty editor: Insert a `%root%` rule and place the caret inside it.
+* `R` + Tab in an otherwise empty editor: Insert `%root%`.
+* `r` + Tab in an otherwise empty editor: Insert a `%root%` rule and place the caret inside it.
 * Escape: Close the active Studio panel; when no panel is open, close CSS Studio.
 
 == Typical workflow ==
@@ -152,6 +152,13 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public update metadata for updates.
 
 == Changelog ==
+
+= 1.7.5 =
+
+* Swap root shortcuts: lowercase r + Tab inserts the empty rule; uppercase R + Tab inserts only the selector.
+* Restore CSS-to-control synchronization across Bricks builds with different internal module IDs.
+* Clear native style settings when CSS is removed while the sync engine is starting.
+* Refresh native input controls on every sync update, including rapid consecutive edits.
 
 = 1.7.4 =
 

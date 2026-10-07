@@ -1689,7 +1689,7 @@
           <footer class="uplink-css-studio-footer">
             <span class="uplink-css-studio-status">Ready</span>
             <span class="uplink-css-studio-position">Ln 1, Col 1</span>
-            <span class="uplink-css-studio-shortcuts"><kbd>@recipe;</kbd> insert recipe &nbsp; <kbd>tr80 Tab</kbd> rem &nbsp; <kbd>r Tab</kbd> %root% &nbsp; <kbd>⌘⌥X</kbd> scrub</span>
+            <span class="uplink-css-studio-shortcuts"><kbd>@recipe;</kbd> insert recipe &nbsp; <kbd>tr80 Tab</kbd> rem &nbsp; <kbd>r Tab</kbd> %root% rule &nbsp; <kbd>⌘⌥X</kbd> scrub</span>
             <span class="uplink-css-studio-shortcuts uplink-css-studio-html-shortcuts" hidden><kbd>Tab</kbd> expand &nbsp; <kbd>Ctrl Space</kbd> complete &nbsp; <kbd>⌘/Ctrl ]</kbd> apply</span>
           </footer>
         </section>
@@ -3901,7 +3901,7 @@
     const end = { line: lastLine, ch: doc.getLine(lastLine).length };
     const outsideToken = doc.getRange(start, from) + doc.getRange(to, end);
     if (outsideToken.trim()) return '';
-    return token === 'R' ? 'rule' : 'selector';
+    return token === 'r' ? 'rule' : 'selector';
   }
 
   function insertRootShortcut(editor, from, to, mode) {
@@ -3917,7 +3917,7 @@
     if (!mode) return null;
     return {
       text: mode === 'rule' ? rootRule : '%root%',
-      displayText: mode === 'rule' ? 'R  →  %root% rule' : 'r  →  %root%',
+      displayText: mode === 'rule' ? 'r  →  %root% rule' : 'R  →  %root%',
       className: 'uplink-css-studio-hint-abbreviation',
       hint: (cm, data) => insertRootShortcut(cm, data.from, data.to, mode)
     };
@@ -5162,7 +5162,14 @@
     let webpackRequire;
     try {
       chunks.push([[`uplink-css-studio-css-sync-${Date.now()}`], {}, (runtime) => { webpackRequire = runtime; }]);
-      const cssSyncModule = webpackRequire?.(15000);
+      // Bricks' generated module IDs change between builds. Locate the engine
+      // by its methods instead of depending on one build's numeric ID.
+      const entry = Object.entries(webpackRequire?.m || {}).find(([, module]) => {
+        const source = Function.prototype.toString.call(module);
+        return source.includes('handleCssInput') && source.includes('flushCssInput')
+          && source.includes('refreshControls');
+      });
+      const cssSyncModule = entry ? webpackRequire(entry[0]) : null;
       if (typeof cssSyncModule?.vK === 'function') bricksCssSyncFactoryCache = cssSyncModule.vK;
     } catch (error) {
       bricksCssSyncFactoryCache = undefined;
@@ -5186,13 +5193,14 @@
     const factory = bricksCssSyncFactory();
     if (!factory) return null;
     const target = ctx.target;
+    const initialCss = String(target.settings?.[ctx.key] || '');
     const manager = factory({
       state: ctx.s,
       getSettings: () => target.settings,
       getElementName: () => String(ctx.element?.name || ''),
       getCssId: () => contextRootSelector(ctx, null),
       replaceRoot: (from, to, css) => replaceContextRoot(ctx, from, to, css),
-      refreshControls: () => { ctx.s.cssSyncControlRefresh = Date.now(); }
+      refreshControls: () => { ctx.s.cssSyncControlRefresh = (Number(ctx.s.cssSyncControlRefresh) || 0) + 1; }
     });
     state.cssSyncManager = manager;
     state.cssSyncSignature = signature;
@@ -5201,7 +5209,12 @@
       state.cssSyncReady = Boolean(manager.isActive?.());
       const pending = state.cssSyncPending;
       state.cssSyncPending = null;
-      if (state.cssSyncReady && pending) manager.flushCssInput?.(pending.value);
+      if (state.cssSyncReady && pending) {
+        // Init can finish after the editor has replaced the stored CSS. Seed the
+        // original properties so deleting them also clears their native inputs.
+        if (initialCss !== pending.value) manager.flushCssInput?.(initialCss);
+        manager.flushCssInput?.(pending.value);
+      }
     }).catch(() => {
       if (state.cssSyncManager === manager) destroyCssSyncManager();
     });

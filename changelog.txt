@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.5
+-----
+Fixed bidirectional style synchronization and native input clearing.
+
+* Swap root shortcuts: lowercase r + Tab inserts the empty rule; uppercase R + Tab inserts only the selector.
+* Restore CSS-to-control synchronization across Bricks builds with different internal module IDs.
+* Clear native style settings when CSS is removed while the sync engine is starting.
+* Refresh native input controls on every sync update, including rapid consecutive edits.
+
 1.7.4
 -----
 Fixed display settings cleanup and layout synchronization.

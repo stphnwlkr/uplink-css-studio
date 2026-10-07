@@ -35,6 +35,7 @@ jobs:
         run: |
           node --check assets/js/studio.js
           node tests/layout-regression.cjs
+          node tests/sync-regression.cjs
           php -l uplink-css-studio.php
 
       - name: Build the installable ZIP
