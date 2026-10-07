@@ -65,7 +65,6 @@
     renderSequence: 0,
     breadcrumbSignature: '',
     applying: false,
-    syncingNativeLayoutInput: false,
     prefs: readPrefs()
   };
 
@@ -3210,17 +3209,8 @@
           ? Object.fromEntries(Object.keys(declarations).map((property) => [property, '']))
           : declarations;
         upsertLayoutDeclarations(values);
-        syncNativeGridTemplateInputs(values);
       }
     });
-    document.addEventListener('input', (event) => {
-      const input = event.target?.closest?.('input#_gridTemplateColumns, input#_gridTemplateRows');
-      if (!input || event.isComposing || state.syncingNativeLayoutInput || !state.open || !state.context) return;
-      const property = input.id === '_gridTemplateRows' ? 'grid-template-rows' : 'grid-template-columns';
-      upsertLayoutDeclarations({ [property]: input.value }, { focus: false });
-      clearTimeout(state.timer);
-      writeToBricks(false, { syncNativeControl: false, renderCanvas: false });
-    }, true);
     document.querySelector('.uplink-css-studio-toolbar').addEventListener('click', (event) => {
       const alignment = event.target.closest('[data-alignment-axis]');
       if (alignment) {
@@ -5389,29 +5379,35 @@
         continue;
       }
       if (char === '{') { depth += 1; chars[index] = ' '; continue; }
-      if (char === '}') { depth = Math.max(0, depth - 1); chars[index] = ' '; continue; }
+      if (char === '}') { depth = Math.max(0, depth - 1); chars[index] = depth ? ' ' : '}'; continue; }
       if (depth && char !== '\n') chars[index] = ' ';
     }
     return chars.join('');
   }
 
-  function directDeclarations(body) {
+  function directDeclarationEntries(body) {
     const masked = maskNestedCss(body);
-    const declarations = new Map();
-    const pattern = /(^|[;\n])([ \t]*)([-_a-zA-Z][\w-]*)\s*:\s*([^;{}]*)(;?)/gm;
+    const declarations = [];
+    // Leave the separator available for the next match, including compact CSS.
+    const pattern = /(^|[;\n}])([ \t\r\n]*)([-_a-zA-Z][\w-]*)\s*:\s*([^;{}]*)(?=;|}|$)/gm;
     let match;
     while ((match = pattern.exec(masked))) {
       const property = match[3].toLowerCase();
-      const leadingLength = match[1].length + match[2].length;
-      declarations.set(property, {
+      const start = match.index + match[1].length + match[2].length;
+      const valueEnd = match.index + match[0].length;
+      const valueStart = masked.indexOf(':', start) + 1;
+      declarations.push({
         property,
-        value: match[4].trim(),
-        start: match.index + leadingLength,
-        end: match.index + match[0].length
+        value: body.slice(valueStart, valueEnd).trim(),
+        start,
+        end: valueEnd + (masked[valueEnd] === ';' ? 1 : 0)
       });
-      if (!match[0].length) pattern.lastIndex += 1;
     }
     return declarations;
+  }
+
+  function directDeclarations(body) {
+    return new Map(directDeclarationEntries(body).map((entry) => [entry.property, entry]));
   }
 
   function declarationsAtLayoutContext() {
@@ -5470,6 +5466,7 @@
       if (!lines) return;
       doc.setValue(`%root% {\n${lines}\n}`);
       doc.setCursor({ line: Math.max(1, doc.lineCount() - 1), ch: 0 });
+      commitLayoutEdit();
       if (shouldFocus) state.editor.focus();
       return;
     }
@@ -5480,19 +5477,23 @@
         .filter(([, value]) => String(value || '').trim())
         .map(([property, value]) => `${property}: ${value};`)
         .join('\n');
-      if (css) insertDeclarations(css, options);
+      if (css) { insertDeclarations(css, options); commitLayoutEdit(); }
       return;
     }
 
     let body = source.slice(block.open + 1, block.close);
-    const current = directDeclarations(body);
+    const current = directDeclarationEntries(body);
     const replacements = [];
     const missing = [];
     Object.entries(declarations).forEach(([property, value]) => {
       const cleanValue = String(value || '').trim();
-      const existing = current.get(property);
-      if (existing) replacements.push({ start: existing.start, end: existing.end, text: cleanValue ? `${property}: ${cleanValue};` : '' });
-      else if (cleanValue) missing.push([property, cleanValue]);
+      const existing = current.filter((entry) => entry.property === property);
+      existing.forEach((entry, index) => replacements.push({
+        start: entry.start,
+        end: entry.end,
+        text: cleanValue && index === existing.length - 1 ? `${property}: ${cleanValue};` : ''
+      }));
+      if (!existing.length && cleanValue) missing.push([property, cleanValue]);
     });
     replacements.sort((a, b) => b.start - a.start).forEach((replacement) => {
       body = body.slice(0, replacement.start) + replacement.text + body.slice(replacement.end);
@@ -5505,14 +5506,27 @@
       const lines = missing.map(([property, value]) => `${indent}${property}: ${value};`).join('\n');
       if (!body.trim()) body = `\n${lines}\n${baseIndent}`;
       else {
+        // CSS permits a final declaration without a semicolon until we append another.
+        const entries = directDeclarationEntries(body);
+        const last = entries[entries.length - 1];
+        if (last && body[last.end - 1] !== ';' && !body.slice(last.end).trim()) {
+          body = body.slice(0, last.end) + ';' + body.slice(last.end);
+        }
         const core = body.replace(/\s*$/, '');
         body = `${core}${core.endsWith('\n') ? '' : '\n'}${lines}\n${baseIndent}`;
       }
     }
 
     doc.replaceRange(body, doc.posFromIndex(block.open + 1), doc.posFromIndex(block.close), 'layout-preset');
+    commitLayoutEdit();
     if (shouldFocus) state.editor.focus();
     refreshLayoutTools();
+  }
+
+  function commitLayoutEdit() {
+    // Send the complete CSS through one sync path before another control can edit it.
+    clearTimeout(state.timer);
+    writeToBricks(true);
   }
 
   function applyLayoutPreset(preset, remove = false) {
@@ -5520,49 +5534,14 @@
     if (!declarations) return;
     const values = remove
       ? Object.fromEntries(Object.keys(declarations).map((property) => [property, '']))
-      : declarations;
+      : { ...declarations };
+    const display = remove ? '' : declarations.display;
+    const flexContainer = ['flex-direction', 'flex-wrap', 'flex-flow'];
+    const gridContainer = ['grid', 'grid-template', 'grid-template-columns', 'grid-template-rows',
+      'grid-template-areas', 'grid-auto-columns', 'grid-auto-rows', 'grid-auto-flow'];
+    if (display !== 'flex') flexContainer.forEach((property) => { values[property] = ''; });
+    if (display !== 'grid') gridContainer.forEach((property) => { values[property] = ''; });
     upsertLayoutDeclarations(values);
-    if (!remove && declarations.display) syncNativeSelectControl('_display', declarations.display);
-  }
-
-  function syncNativeSelectControl(controlKey, value) {
-    if (!isRootLayoutContext()) return;
-    const marker = document.querySelector(`[control-key="${controlKey}"]`);
-    const control = marker?.closest?.('[data-control="select"]');
-    if (!control || control.querySelector('.input-value')?.textContent?.trim() === value) return;
-    const option = [...control.querySelectorAll('.dropdown li')]
-      .find((item) => item.textContent.trim() === value);
-    option?.click();
-  }
-
-  function syncNativeGridTemplateInputs(declarations, attempt = 0) {
-    if (!isRootLayoutContext()) return;
-    const ids = {
-      'grid-template-columns': '_gridTemplateColumns',
-      'grid-template-rows': '_gridTemplateRows'
-    };
-    const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-    let waitingForControl = false;
-    state.syncingNativeLayoutInput = true;
-    try {
-      Object.entries(declarations).forEach(([property, value]) => {
-        const input = document.getElementById(ids[property]);
-        if (!input) {
-          waitingForControl = true;
-          return;
-        }
-        const nextValue = String(value || '');
-        if (input.value === nextValue) return;
-        if (valueSetter) valueSetter.call(input, nextValue);
-        else input.value = nextValue;
-        input.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, inputType: 'insertText', data: nextValue }));
-      });
-    } finally {
-      state.syncingNativeLayoutInput = false;
-    }
-    if (waitingForControl && attempt < 6) {
-      setTimeout(() => syncNativeGridTemplateInputs(declarations, attempt + 1), 50 * (attempt + 1));
-    }
   }
 
   function normalizeAlignmentValue(value) {

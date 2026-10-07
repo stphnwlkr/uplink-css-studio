@@ -31,6 +31,12 @@ jobs:
           assert metadata['download_url'] == f'https://github.com/stphnwlkr/uplink-css-studio/releases/download/{version}/uplink-css-studio.zip'
           PY
 
+      - name: Check layout regressions
+        run: |
+          node --check assets/js/studio.js
+          node tests/layout-regression.cjs
+          php -l uplink-css-studio.php
+
       - name: Build the installable ZIP
         run: |
           mkdir -p build/uplink-css-studio
@@ -39,6 +45,7 @@ jobs:
             --exclude '.github/' \
             --exclude '.gitignore' \
             --exclude 'assets/images/' \
+            --exclude 'tests/' \
             --exclude 'build/' \
             --exclude '*.zip'
           cd build

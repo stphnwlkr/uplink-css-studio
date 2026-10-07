@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.4
+-----
+Fixed display settings cleanup and layout synchronization.
+
+* Remove incompatible flex and grid container declarations when changing display presets.
+* Sync complete layout edits immediately without competing native control events.
+* Preserve display when editing grid templates, including compact CSS and declarations without a final semicolon.
+* Handle repeated declarations and preserve nested rule scope when updating layout styles.
+
 1.7.3
 -----
 Fixed generated alignment cleanup after nested rules.
