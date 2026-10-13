@@ -1,6 +1,13 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.6
+-----
+Fixed sync-engine discovery in Bricks 2.4.3.
+
+* Continue searching past editor components that reference the sync methods but do not export the engine factory.
+* Add regression coverage for an editor component appearing before the sync engine.
+
 1.7.5
 -----
 Fixed bidirectional style synchronization and native input clearing.

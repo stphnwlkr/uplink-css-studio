@@ -38,6 +38,14 @@ function engineModule() { return { handleCssInput() {}, flushCssInput() {}, refr
     passed++;
   }
   console.log('PASS sync discovery survives shuffled webpack IDs');
+  const actualFactory = () => {};
+  const decoy = context({ 3561: engineModule, 14255: engineModule }, {
+    3561: { default: {} }, 14255: { vK: actualFactory }
+  });
+  assert.equal(decoy.sandbox.bricksCssSyncFactory(), actualFactory);
+  assert.deepEqual(decoy.required, ['3561', '14255']);
+  passed++;
+  console.log('PASS editor component before engine does not block discovery');
   const missing = context({ 1: function unrelated() {} }, {});
   assert.equal(missing.sandbox.bricksCssSyncFactory(), null);
   assert.deepEqual(missing.required, []);

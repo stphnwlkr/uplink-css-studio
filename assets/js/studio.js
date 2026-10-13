@@ -5164,13 +5164,24 @@
       chunks.push([[`uplink-css-studio-css-sync-${Date.now()}`], {}, (runtime) => { webpackRequire = runtime; }]);
       // Bricks' generated module IDs change between builds. Locate the engine
       // by its methods instead of depending on one build's numeric ID.
-      const entry = Object.entries(webpackRequire?.m || {}).find(([, module]) => {
+      const candidates = Object.entries(webpackRequire?.m || {}).filter(([, module]) => {
         const source = Function.prototype.toString.call(module);
         return source.includes('handleCssInput') && source.includes('flushCssInput')
           && source.includes('refreshControls');
       });
-      const cssSyncModule = entry ? webpackRequire(entry[0]) : null;
-      if (typeof cssSyncModule?.vK === 'function') bricksCssSyncFactoryCache = cssSyncModule.vK;
+      // Editor components also reference these methods. Only an engine module
+      // exports the factory; a component's lower ID must not stop discovery.
+      for (const [id] of candidates) {
+        try {
+          const cssSyncModule = webpackRequire(id);
+          if (typeof cssSyncModule?.vK === 'function') {
+            bricksCssSyncFactoryCache = cssSyncModule.vK;
+            break;
+          }
+        } catch (error) {
+          // An unavailable component must not hide a later engine module.
+        }
+      }
     } catch (error) {
       bricksCssSyncFactoryCache = undefined;
     }
