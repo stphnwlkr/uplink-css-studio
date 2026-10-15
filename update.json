@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.7.6/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.7.7/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.7.6</h4><p>Restore bidirectional CSS synchronization in Bricks 2.4.3 by finding the sync engine when editor components match the same method names.</p>"
+    "changelog": "<h4>1.7.7</h4><p>Keep canvas content accessible above the CSS panel at every zoom level and after resizing, minimizing, or restoring the editor. Preserve native Bricks preview and full-screen sizing.</p>"
   }
 }

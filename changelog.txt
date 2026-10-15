@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.7.7
+-----
+Fixed canvas content being obscured by the CSS panel.
+
+* Measure the visible space above the panel and account for canvas scaling when setting the iframe height.
+* Keep the canvas accessible after resizing, minimizing, and restoring the editor.
+* Restore native canvas sizing when the editor closes or enters full-screen mode, and preserve Bricks preview modes.
+* Add canvas sizing regression checks to release validation.
+
 1.7.6
 -----
 Fixed sync-engine discovery in Bricks 2.4.3.

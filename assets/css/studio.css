@@ -97,15 +97,13 @@ body:has(#preview-scale[readonly]) #bricks-preview:not(.is-previewing):not(.canv
   margin-inline: auto !important;
 }
 
-#bricks-preview.uplink-css-studio-dock-open #bricks-builder-iframe-wrapper {
-  height: calc(100% - var(--uplink-css-studio-dock-height, 48%));
-  transition: height .16s ease;
+/* Bricks sets an inline, unscaled height for zoomed canvases. Reserve the
+   measured dock space in screen pixels, then convert back to canvas pixels. */
+#bricks-preview.uplink-css-studio-dock-open:not(.is-previewing):not(.canvas-preview-active):not(.uplink-css-studio-studio-fullscreen) #bricks-builder-iframe-wrapper {
+  height: var(--uplink-css-studio-canvas-height, calc(100% - max(280px, var(--uplink-css-studio-dock-height, 48%)))) !important;
 }
-#bricks-preview.uplink-css-studio-dock-open.uplink-css-studio-is-resizing #bricks-builder-iframe-wrapper { transition: none; }
 #bricks-preview.uplink-css-studio-is-resizing iframe { pointer-events: none; }
 body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select: none !important; }
-#bricks-preview.uplink-css-studio-dock-open.uplink-css-studio-dock-minimized #bricks-builder-iframe-wrapper { height: calc(100% - 46px); }
-#bricks-preview.uplink-css-studio-dock-open.uplink-css-studio-studio-fullscreen #bricks-builder-iframe-wrapper { height: 100%; }
 .uplink-css-studio-shell.is-minimized { height: 46px; min-height: 46px; }
 .uplink-css-studio-shell.is-fullscreen { inset: 0; width: 100%; height: 100%; min-height: 0; }
 .uplink-css-studio-shell.is-fullscreen .uplink-css-studio-resizer { display: none; }

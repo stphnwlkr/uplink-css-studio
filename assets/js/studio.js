@@ -4442,7 +4442,29 @@
     if (firstGroup && firstGroup !== group) list.insertBefore(group, firstGroup);
   }
 
+  function syncDockCanvasHeight() {
+    const preview = document.querySelector('#bricks-preview');
+    const wrapper = document.querySelector('#bricks-builder-iframe-wrapper');
+    const shell = document.querySelector('.uplink-css-studio-shell');
+    if (!preview || !wrapper || !shell) return;
+    if (!state.open || shell.hidden || state.fullscreen
+      || preview.matches('.is-previewing, .canvas-preview-active')) {
+      preview.style.removeProperty('--uplink-css-studio-canvas-height');
+      return;
+    }
+    const transform = getComputedStyle(wrapper).transform;
+    const scale = transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).d;
+    if (!Number.isFinite(scale) || scale <= 0) return;
+    const top = wrapper.getBoundingClientRect().top;
+    const bottom = Math.min(shell.getBoundingClientRect().top, preview.getBoundingClientRect().bottom);
+    const height = `${Math.max(1, (bottom - top) / scale).toFixed(3)}px`;
+    if (preview.style.getPropertyValue('--uplink-css-studio-canvas-height') !== height) {
+      preview.style.setProperty('--uplink-css-studio-canvas-height', height);
+    }
+  }
+
   function mountCanvasResizers() {
+    syncDockCanvasHeight();
     const handles = document.querySelector('.uplink-css-studio-canvas-resizers');
     if (!handles) return;
     if (!state.prefs.viewportHandles) {
@@ -4460,6 +4482,7 @@
   }
 
   function syncCanvasResizerGeometry() {
+    syncDockCanvasHeight();
     const wrapper = document.querySelector('#bricks-builder-iframe-wrapper');
     const preview = document.querySelector('#bricks-preview');
     const shell = document.querySelector('.uplink-css-studio-shell');
@@ -4593,6 +4616,7 @@
         const value = `${Math.round(height)}px`;
         shell.style.setProperty('--uplink-css-studio-dock-height', value);
         preview.style.setProperty('--uplink-css-studio-dock-height', value);
+        syncCanvasResizerGeometry();
       };
       const onMove = (moveEvent) => {
         if (moveEvent.pointerId !== pointerId) return;
