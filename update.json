@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.8.0/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.8.1/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.8.0</h4><p>Insert mobile-first media and container queries inside the root at the current canvas width. Visual tools follow matching width queries, including ancestor container widths. Disable Follow canvas width to restore Bricks breakpoint choices, or Shift-click either query icon. Direct typing remains at the cursor.</p><p>Thanks to Mario Peischl for the reminder to include this.</p>"
+    "changelog": "<h4>1.8.1</h4><p>Fix base styles being reset during viewport resizing or routine editor refreshes. Preserve native alignment settings so Bricks does not regenerate unrelated root declarations. Grid, variable gaps, and nested queries remain intact while intentional control edits and CSS deletions stay synchronized.</p>"
   }
 }

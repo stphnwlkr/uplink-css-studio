@@ -90,5 +90,21 @@ function engineModule() { return { handleCssInput() {}, flushCssInput() {}, refr
   assert.equal(ctx.s.cssSyncControlRefresh, before + 2);
   passed++;
   console.log('PASS rapid updates each trigger native input refresh');
+  const authored = '%root% { display: grid; gap: var(--grid-gap); @media (width >= 841px) { grid-template-columns: 1fr 1fr; } }';
+  for (const pendingWrite of [false, true]) {
+    let writes = 0;
+    const settings = {_cssCustom: authored, _alignItems: 'initial', '_alignItems:tablet': 'initial', _display:'grid', _gridGap:'var(--grid-gap)'};
+    const before = JSON.stringify(settings);
+    const passive = vm.createContext({ state: {editor: {getValue: () => authored}, pendingWrite, ignoreExternalUntil: 0},
+      renderBreadcrumbs() {}, setStatus() {}, syncHtmlEditorFromBricks() {}, toDisplayCss: (ctx, css) => css,
+      writeToBricks() {writes++;} });
+    const cleanup = source.includes('  function removeGeneratedAlignmentSettings(') ? extract('removeGeneratedAlignmentSettings') : '';
+    vm.runInContext(cleanup + '\n' + ['cssWithoutCommentsAndStrings', 'stripGeneratedAlignmentDefaults', 'syncEditorFromBricks'].map(extract).join('\n'), passive);
+    passive.syncEditorFromBricks({kind:'Element', target:{settings}, key:'_cssCustom'});
+    assert.equal(JSON.stringify(settings), before, 'passive refresh must not trigger native setting watchers');
+    assert.equal(writes, 0);
+    passed++;
+  }
+  console.log('PASS passive refresh preserves native defaults and authored responsive CSS, including during pending writes');
   console.log(`${passed} sync regression checks passed.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -4679,13 +4679,14 @@
     empty.hidden = true;
     const signature = contextSignature(ctx);
     const storedValue = String(ctx.target.settings[ctx.key] || '');
+    // Refreshing the editor must not delete native settings. Their watchers can
+    // regenerate the whole root rule and discard authored base declarations.
     const cleanedStoredValue = ctx.kind === 'Theme style' ? storedValue : stripGeneratedAlignmentDefaults(storedValue);
     const value = String(toDisplayCss(ctx, cleanedStoredValue));
     if (!state.originals.has(signature)) state.originals.set(signature, value);
     state.original = state.originals.get(signature);
     state.applying = true; state.editor.setValue(value); state.applying = false;
-    const removedAlignmentSetting = ctx.kind === 'Theme style' ? false : removeGeneratedAlignmentSettings(ctx);
-    if (cleanedStoredValue !== storedValue || removedAlignmentSetting) {
+    if (cleanedStoredValue !== storedValue) {
       writeToBricks(false, { syncNativeControl: false });
     }
     state.lastSyncedValue = value;
@@ -5042,9 +5043,10 @@
     renderBreadcrumbs(ctx);
     syncHtmlEditorFromBricks(ctx);
     const storedValue = String(ctx.target.settings[ctx.key] || '');
+    // Refreshing the editor must not delete native settings. Their watchers can
+    // regenerate the whole root rule and discard authored base declarations.
     const cleanedStoredValue = ctx.kind === 'Theme style' ? storedValue : stripGeneratedAlignmentDefaults(storedValue);
-    const removedAlignmentSetting = ctx.kind === 'Theme style' ? false : removeGeneratedAlignmentSettings(ctx);
-    const removedGeneratedDefault = cleanedStoredValue !== storedValue || removedAlignmentSetting;
+    const removedGeneratedDefault = cleanedStoredValue !== storedValue;
     const value = String(toDisplayCss(ctx, cleanedStoredValue));
     if (state.pendingWrite || Date.now() < state.ignoreExternalUntil) return;
     if (value === state.editor.getValue()) {
@@ -5153,24 +5155,6 @@
       (value, replacement) => value.slice(0, replacement.start) + replacement.text + value.slice(replacement.end),
       source
     );
-  }
-
-  function removeGeneratedAlignmentSettings(ctx) {
-    const targets = [ctx?.target];
-    if (ctx?.kind === 'Class' && ctx.target?.id) {
-      targets.push((ctx.s.globalClasses || []).find((item) => item?.id === ctx.target.id));
-      if (ctx.s.activeClass?.id === ctx.target.id) targets.push(ctx.s.activeClass);
-    }
-    let removed = false;
-    [...new Set(targets.filter(Boolean))].forEach((target) => {
-      if (!target.settings || Array.isArray(target.settings)) return;
-      Object.keys(target.settings).forEach((key) => {
-        if (!/^_alignItems(?::|$)/.test(key) || String(target.settings[key]).trim() !== 'initial') return;
-        delete target.settings[key];
-        removed = true;
-      });
-    });
-    return removed;
   }
 
   function mirrorClassCssValue(ctx, storedValue) {

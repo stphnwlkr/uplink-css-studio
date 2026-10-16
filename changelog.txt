@@ -1,6 +1,14 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.8.1
+-----
+Fixed styling being reset during viewport resizing.
+
+* Stop deleting native alignment defaults during context selection and passive editor refreshes. These deletions triggered Bricks to regenerate unrelated root declarations.
+* Preserve authored base styles and nested queries while retaining intentional native-control edits and CSS-to-control removal.
+* Add regression checks that passive refreshes do not mutate native settings, including while an editor write is pending.
+
 1.8.0
 -----
 Thanks to Mario Peischl for the reminder to include this.
