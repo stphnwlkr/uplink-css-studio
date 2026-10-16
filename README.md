@@ -8,7 +8,7 @@ Version 1.1 adds a constrained HTML view for the selected element. Its lightweig
 
 [Product page and full introduction](https://plugins.uplink.press/project/css-studio-for-bricks/)
 
-With **Follow canvas width** enabled, visual tools edit the last matching width query in the active root CSS. Media queries follow the canvas viewport; width container queries follow the actual ancestor container. The header shows the target, and Preferences can restore manual cursor-based editing. Direct typing remains at the cursor.
+**Follow canvas width** controls query insertion: query icons use the current canvas width when enabled, or registered Bricks breakpoint choices when disabled. Visual tools and declaration shortcuts always edit the rule containing the cursor. A cursor outside a query never sends edits into it. The header shows the editing scope. CSS synchronization keeps root declarations in the base control settings regardless of the preview breakpoint.
 
 CSS Studio does not edit Bricks' breakpoint-specific style-control values. It keeps responsive behavior in the Custom CSS stylesheet through `@media` and `@container` rules. Its query tools use registered Bricks breakpoint widths to help author those rules. The breakpoint label in the header reports builder context only.
 

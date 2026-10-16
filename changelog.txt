@@ -1,6 +1,15 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.8.2
+-----
+Fixed the remaining style reset when resizing across Bricks breakpoints.
+
+* Use a dedicated CSS synchronization manager that interprets the base Custom CSS stylesheet against base control keys, regardless of the preview breakpoint. This prevents root display and gap values from being moved to tablet or mobile controls and then removed on returning to desktop.
+* Keep visual edits and declaration shortcuts in the rule containing the cursor. A cursor outside a media or container query never redirects edits into that query.
+* Keep current-canvas-width query insertion, nested root placement, and the preference for registered Bricks breakpoint choices.
+* Add regressions for base control keys at multiple preview widths, native-manager bypass, cursor positions, and query insertion.
+
 1.8.1
 -----
 Fixed styling being reset during viewport resizing.

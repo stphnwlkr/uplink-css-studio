@@ -106,5 +106,32 @@ function engineModule() { return { handleCssInput() {}, flushCssInput() {}, refr
     passed++;
   }
   console.log('PASS passive refresh preserves native defaults and authored responsive CSS, including during pending writes');
+  let engineOptions;
+  const baseManager = {init:()=>Promise.resolve(),isActive:()=>true,flushCssInput(css){
+    const suffix = engineOptions.state.breakpointActive === 'desktop' ? '' : ':'+engineOptions.state.breakpointActive;
+    const settings = engineOptions.getSettings();
+    for (const key of ['_display','_gridGap']) {
+      delete settings[key];
+      settings[key+suffix] = key === '_display' ? 'grid' : 'var(--grid-gap)';
+    }
+  }};
+  const pinned = context({11433:engineModule},{11433:{vK:options=>{engineOptions=options;return baseManager;}}}).sandbox;
+  const pinnedContext = {kind:'Element',key:'_cssCustom',s:{breakpointActive:'tablet_portrait',pseudoClassActive:''},element:{id:'test'},target:{settings:{_cssCustom:authored}}};
+  pinned.state.context = pinnedContext;
+  pinned.nativeCssControl = () => ({cssSyncManager:{isActive:()=>true,flushCssInput(){throw new Error('must not use viewport-scoped native manager');}}});
+  pinned.ensureCssSyncManager(pinnedContext);
+  for (const breakpoint of ['tablet_portrait','mobile_portrait','desktop','mobile_landscape']) {
+    pinnedContext.s.breakpointActive = breakpoint;
+    pinned.syncBricksCssControls(authored,true);
+    assert.equal(pinnedContext.target.settings._display,'grid');
+    assert.equal(pinnedContext.target.settings._gridGap,'var(--grid-gap)');
+    assert.equal(engineOptions.state.breakpointActive,'desktop');
+    assert.equal(pinnedContext.s.breakpointActive,breakpoint,'preview breakpoint must remain unchanged');
+    assert.deepEqual(Object.keys(pinnedContext.target.settings).sort(),['_cssCustom','_display','_gridGap']);
+  }
+  pinnedContext.s.pseudoClassActive = ':hover';
+  assert.equal(engineOptions.state.pseudoClassActive,':hover','other context remains live');
+  passed++;
+  console.log('PASS CSS sync keeps base control keys at every preview breakpoint and bypasses viewport-scoped native manager');
   console.log(`${passed} sync regression checks passed.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -2,8 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync('assets/js/studio.js', 'utf8');
-const names = ['openBlocksAt', 'matchingBrace', 'selectorBlockForLayout', 'containerWidthMatches',
-  'responsiveConditionMatches', 'cleanRulePrelude', 'responsiveLayoutBlock', 'maskNestedCss', 'directDeclarationEntries',
+const names = ['openBlocksAt', 'matchingBrace', 'selectorBlockForLayout', 'cleanRulePrelude', 'responsiveLayoutBlock', 'maskNestedCss', 'directDeclarationEntries',
   'directDeclarations', 'upsertLayoutDeclarations', 'insertDeclarations', 'activateQueryTool', 'insertQueryRule'];
 const functions = names.map(name => {
   const start = source.indexOf(`  function ${name}(`);
@@ -11,14 +10,8 @@ const functions = names.map(name => {
   const end = source.slice(start + 1).search(/\n  (?:function |const |if \(document.readyState)/);
   return source.slice(start, end < 0 ? undefined : start + 1 + end);
 }).join('\n');
-let viewport = 500;
-const style = { containerType: 'inline-size', containerName: 'cards', fontSize: '20px', paddingLeft: '20px', paddingRight: '20px' };
-const container = { clientWidth: 640, parentElement: null };
-const document = { documentElement: {} };
-const node = { parentElement: container, ownerDocument: document };
-const view = { getComputedStyle: el => el === container ? style : { fontSize: '16px' },
-  CSS: { supports: () => true }, matchMedia: query => ({ matches: context.containerWidthMatches(query, viewport, 16, 16) }) };
-document.defaultView = view;
+const view = {innerWidth:500};
+const node = {ownerDocument:{defaultView:view}};
 const context = vm.createContext({ state: { context: { element: {} }, prefs: {} },
   canvasElementNode: () => node, contextRootSelector: () => '#brxe-test',
   commitLayoutEdit() {}, refreshLayoutTools() {} });
@@ -31,76 +24,55 @@ check('mobile width uses base and never inserts a one-column grid template', () 
   assert.equal(target(css).prelude, '%root%');
   assert.doesNotMatch(css, /grid-template-columns/);
 });
-check('canvas width selects the matching media block despite a base cursor', () => {
-  viewport = 900; assert.equal(target(css).prelude, '@media (width >= 767px)');
+check('canvas width never redirects a cursor outside media or container queries', () => {
+  for (const kind of ['media', 'container']) {
+    const text = `%root% { display:grid; @${kind} (width >= 767px) { gap:2rem; } color:red; }`;
+    for (const width of [500,900,1400]) {
+      view.innerWidth = width;
+      for (const cursor of [0,text.indexOf('display'),text.indexOf('color'),text.length]) {
+        assert.equal(target(text,cursor).prelude,'%root%');
+      }
+      assert.equal(target(text,text.indexOf('2rem')).prelude,`@${kind} (width >= 767px)`);
+    }
+  }
 });
-check('last matching rule wins in source order', () => {
-  viewport = 1400; assert.equal(target(css).prelude, '@media (width >= 1100px)');
+check('outside a query-only stylesheet requests a base rule instead of entering the query', () => {
+  const text = '@media (width >= 767px) { %root% { gap:2rem; } }';
+  assert.equal(target(text,0).createBase,true);
+  assert.equal(target(text,text.length).createBase,true);
+  assert.equal(target(text,text.indexOf('2rem')).prelude,'%root%');
 });
-check('shrinking canvas leaves an inactive query even with the cursor inside it', () => {
-  viewport = 500; assert.equal(target(css, css.indexOf('3rem')).prelude, '%root%');
+check('nested child and pseudo selectors stay at the cursor', () => {
+  const text = '%root% { @media (width >= 767px) { &:hover {color:red;} } }';
+  assert.equal(target(text,text.indexOf('color')).prelude,'&:hover');
 });
-check('top-level media query routes to its root selector', () => {
-  viewport = 900;
-  const text = '%root% { gap: 1rem; } @media (width >= 767px) { %root% {gap: 2rem;} }';
-  assert.ok(target(text).open > text.indexOf('@media'));
+check('preference changes query insertion widths without changing editing scope', () => {
+  for (const enabled of [false,true]) {
+    context.state.prefs.responsiveTools = enabled;
+    assert.equal(target(css).prelude,'%root%');
+    assert.equal(target(css,css.indexOf('2rem')).prelude,'@media (width >= 767px)');
+  }
 });
-check('all enclosing queries must match', () => {
-  viewport = 900;
-  assert.equal(target('%root% { @media (width >= 1100px) { @media (width <= 1000px) {gap:2rem;} } }').prelude, '%root%');
-});
-check('container queries use content width rather than viewport width', () => {
-  viewport = 1400;
-  assert.equal(target('%root% { @container (inline-size >= 620px) { gap:2rem; } }').prelude, '%root%');
-  container.clientWidth = 700;
-  assert.equal(target('%root% { @container (inline-size >= 620px) { gap:2rem; } }').prelude, '@container (inline-size >= 620px)');
-});
-check('named container must exist and rem/em units use their respective fonts', () => {
-  assert.equal(context.responsiveConditionMatches('@container missing (width >= 1px)', node, view), false);
-  assert.equal(context.responsiveConditionMatches('@container cards (inline-size >= 40rem)', node, view), true);
-  assert.equal(context.responsiveConditionMatches('@container cards (inline-size >= 40em)', node, view), false);
-});
-check('fractional content-box widths exclude padding and borders', () => {
-  Object.assign(style, { width: '640.5px', boxSizing: 'border-box', borderLeftWidth: '1px', borderRightWidth: '1px' });
-  assert.equal(context.responsiveConditionMatches('@container cards (width >= 599px)', node, view), false);
-  assert.equal(context.responsiveConditionMatches('@container cards (width >= 598.5px)', node, view), true);
-  delete style.width; delete style.boxSizing; delete style.borderLeftWidth; delete style.borderRightWidth;
-});
-check('range syntax, legacy conditions and inclusive edges work', () => {
-  assert.equal(context.containerWidthMatches('(500px <= inline-size < 700px)', 600, 16, 16), true);
-  assert.equal(context.containerWidthMatches('(min-width: 600px) and (max-width: 700px)', 600, 16, 16), true);
-  assert.equal(context.containerWidthMatches('(inline-size < 600px)', 600, 16, 16), false);
-  assert.equal(context.containerWidthMatches('(aspect-ratio: 1/1)', 600, 16, 16), false);
-});
-check('explicit child/pseudo selectors remain cursor scoped', () => {
-  const text = '%root% { @media (width >= 767px) { gap:2rem; } &:hover {color:red;} }';
-  assert.equal(target(text, text.indexOf('color')).prelude, '&:hover');
-});
-check('preference restores manual cursor routing', () => {
-  context.state.prefs.responsiveTools = false;
-  assert.equal(target(css).prelude, '%root%'); context.state.prefs.responsiveTools = true;
-});
-check('inactive-only stylesheet requests a base rule instead of editing inactive CSS', () => {
-  viewport = 500;
-  assert.equal(target('@media (width >= 767px) { %root% { gap:2rem; } }', 40).createBase, true);
-});
-check('comments and quoted braces do not confuse responsive scope detection', () => {
-  viewport = 900;
-  assert.equal(context.cleanRulePrelude(target('/* heading */ %root% { content:"{x}"; /* responsive */ @media (width >= 767px) {gap:2rem;} }')), '@media (width >= 767px)');
-});
-check('visual edits update only the matching query and preserve base CSS', () => {
-  viewport = 900;
-  let value = css;
-  const doc = { getValue: () => value, getCursor: () => ({line:0,ch:8}), indexFromPos: pos => pos.ch,
-    posFromIndex: index => ({line:0,ch:index}), replaceRange: (text, from, to) => { value = value.slice(0,from.ch)+text+value.slice(to?.ch ?? from.ch); } };
-  context.state.editor = { getDoc: () => doc, getSelection: () => '', focus() {} };
-  context.upsertLayoutDeclarations({gap:'4rem'});
-  assert.ok(value.startsWith('%root% { display: grid; @media (width >= 767px) { gap: 4rem;'));
-  assert.match(value, /width >= 1100px\) \{ gap: 3rem;/);
-  context.insertDeclarations('color: red;');
-  const selected = target(value);
-  assert.match(value.slice(selected.open + 1, selected.close), /color: red;/);
-  assert.doesNotMatch(value.slice(0, selected.open), /color: red;/);
+check('visual tools and shortcuts edit only the cursor rule at every viewport', () => {
+  for (const width of [500,900,1400]) {
+    view.innerWidth = width;
+    for (const inside of [false,true]) {
+      let value = css;
+      let cursor = inside ? css.indexOf('2rem') : css.indexOf('display');
+      const doc = {getValue:()=>value,getCursor:()=>({ch:cursor}),indexFromPos:pos=>pos.ch,
+        posFromIndex:index=>({ch:index}),replaceRange:(text,from,to)=>{value=value.slice(0,from.ch)+text+value.slice(to?.ch??from.ch);}};
+      context.state.editor = {getDoc:()=>doc,getSelection:()=>'',focus(){}};
+      context.upsertLayoutDeclarations({gap:'4rem'});
+      cursor = inside ? value.indexOf('4rem') : value.indexOf('display');
+      context.insertDeclarations('color:red;');
+      const blocks=[];context.openBlocksAt(value,value.length,blocks);
+      const query=blocks.find(block=>block.prelude.includes('767px'));
+      const queryBody=value.slice(query.open+1,query.close);
+      if (inside) {assert.match(queryBody,/gap: 4rem;/);assert.match(queryBody,/color:red;/);}
+      else {assert.match(queryBody,/gap: 2rem;/);assert.doesNotMatch(queryBody,/color:red;/);assert.match(value.slice(query.close+1),/gap: 4rem;/);}
+      assert.match(value,/width >= 1100px\) \{ gap: 3rem;/);
+    }
+  }
 });
 check('media and container insertion always nests in the base root regardless of cursor', () => {
   for (const kind of ['media', 'container']) {

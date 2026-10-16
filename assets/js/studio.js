@@ -1647,7 +1647,7 @@
               <div class="uplink-css-studio-popover-head"><strong>Preferences</strong><span>Saved in this browser</span></div>
               <label class="uplink-css-studio-switch-row"><span><strong>Open on element selection</strong><small>Show the editor when an element is clicked in the canvas or Structure panel.</small></span><input class="uplink-css-studio-auto-open" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Select first applied class</strong><small>Edit the first unlocked global class when moving to another element.</small></span><input class="uplink-css-studio-first-class" type="checkbox"></label>
-              <label class="uplink-css-studio-switch-row"><span><strong>Follow canvas width</strong><small>Query icons use the canvas width; visual tools edit the matching query. Turn off to use Bricks breakpoint choices. Typing stays at the cursor.</small></span><input class="uplink-css-studio-responsive-tools" type="checkbox"></label>
+              <label class="uplink-css-studio-switch-row"><span><strong>Follow canvas width</strong><small>Query icons use the canvas width. Turn off to use Bricks breakpoint choices. Editing tools stay in the cursor’s rule.</small></span><input class="uplink-css-studio-responsive-tools" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Viewport resize handles</strong><small>Show width controls on the left and right edges of the visible canvas.</small></span><input class="uplink-css-studio-viewport-handles" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Hide element actions</strong><small>Hide the blue action toolbar on canvas elements.</small></span><input class="uplink-css-studio-hide-element-actions" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Numeric scrubbing</strong><small>Drag numeric CSS values horizontally. Toggle with Cmd/Ctrl+Alt+X.</small></span><input class="uplink-css-studio-numeric-scrubbing" type="checkbox"></label>
@@ -5222,7 +5222,11 @@
     const target = ctx.target;
     const initialCss = String(target.settings?.[ctx.key] || '');
     const manager = factory({
-      state: ctx.s,
+      // This editor owns the base Custom CSS stylesheet. Canvas resizing must
+      // not reinterpret its root declarations as breakpoint control values.
+      state: new Proxy(ctx.s, {
+        get: (target, key) => key === 'breakpointActive' ? 'desktop' : Reflect.get(target, key)
+      }),
       getSettings: () => target.settings,
       getElementName: () => String(ctx.element?.name || ''),
       getCssId: () => contextRootSelector(ctx, null),
@@ -5250,8 +5254,7 @@
 
   function syncBricksCssControls(storedValue, explicit) {
     const control = nativeCssControl();
-    let manager = control?.cssSyncManager;
-    if (!manager?.isActive?.()) manager = ensureCssSyncManager();
+    const manager = ensureCssSyncManager();
     if (!manager) return;
     if (!manager.isActive?.()) {
       state.cssSyncPending = { value: storedValue, explicit: Boolean(explicit) };
@@ -5259,8 +5262,7 @@
     }
     clearTimeout(state.nativeSyncTimer);
     state.nativeSyncTimer = null;
-    const usingNativeControl = Boolean(control && control.cssSyncManager === manager);
-    if (usingNativeControl) control.cssSyncHasPendingChanges = false;
+    if (control) control.cssSyncHasPendingChanges = false;
     if (explicit && manager.flushCssInput) {
       manager.flushCssInput(storedValue);
       return;
@@ -5269,11 +5271,7 @@
     if (manager.flushCssInput) {
       state.nativeSyncTimer = setTimeout(() => {
         state.nativeSyncTimer = null;
-        if (usingNativeControl) {
-          const currentControl = nativeCssControl();
-          if (currentControl !== control || currentControl?.cssSyncManager !== manager) return;
-          control.cssSyncHasPendingChanges = false;
-        } else if (state.cssSyncManager !== manager) return;
+        if (state.cssSyncManager !== manager) return;
         if (!manager.isActive?.()) return;
         manager.flushCssInput(storedValue);
         requestCanvasRender();
@@ -5388,93 +5386,18 @@
     refreshLayoutTools();
   }
 
-  function containerWidthMatches(condition, width, em, rem) {
-    const dimension = (token) => {
-      const match = token.trim().match(/^(\d*\.?\d+)(px|em|rem)?$/i);
-      if (!match || (!match[2] && Number(match[1]) !== 0)) return null;
-      return Number(match[1]) * (match[2]?.toLowerCase() === 'rem' ? rem : match[2]?.toLowerCase() === 'em' ? em : 1);
-    };
-    const compare = (left, operator, right) => operator === '<' ? left < right : operator === '<=' ? left <= right
-      : operator === '>' ? left > right : operator === '>=' ? left >= right : left === right;
-    // Only width conditions are routed automatically. Unknown features must not
-    // silently turn a non-matching container rule into an editing target.
-    return condition.split(/\s+or\s+|,/i).some((group) => group.split(/\s+and\s+/i).every((part) => {
-      const expression = part.replace(/[()]/g, '').trim();
-      const legacy = expression.match(/^(min-|max-)?(?:width|inline-size)\s*:\s*(.+)$/i);
-      if (legacy) {
-        const value = dimension(legacy[2]);
-        return value !== null && compare(width, legacy[1] === 'min-' ? '>=' : legacy[1] === 'max-' ? '<=' : '=', value);
-      }
-      const tokens = expression.split(/\s*(<=|>=|<|>|=)\s*/);
-      if (tokens.length !== 3 && tokens.length !== 5) return false;
-      const values = tokens.filter((_, index) => index % 2 === 0).map((token) => /^(width|inline-size)$/i.test(token) ? width : dimension(token));
-      if (values.some((value) => value === null) || !/\b(width|inline-size)\b/i.test(expression)) return false;
-      return compare(values[0], tokens[1], values[1]) && (tokens.length === 3 || compare(values[1], tokens[3], values[2]));
-    }));
-  }
-
-  function responsiveConditionMatches(prelude, node, view) {
-    const clean = prelude.replace(/\/\*[\s\S]*?\*\//g, '').trim();
-    if (/^@media\b/i.test(clean)) return Boolean(view?.matchMedia?.(clean.replace(/^@media\s*/i, ''))?.matches);
-    if (/^@supports\b/i.test(clean)) return Boolean(view?.CSS?.supports(clean.replace(/^@supports\s*/i, '')));
-    if (/^@layer\b/i.test(clean)) return true;
-    const container = clean.match(/^@container\s*(?:([\w-]+)\s*)?(\([\s\S]+)$/i);
-    if (!container || !node || !view) return false;
-    for (let parent = node.parentElement; parent; parent = parent.parentElement) {
-      const style = view.getComputedStyle(parent);
-      if (!/^(inline-size|size)$/.test(style.containerType)) continue;
-      if (container[1] && !style.containerName.split(/\s+/).includes(container[1])) continue;
-      const vertical = /^(vertical|sideways)/.test(style.writingMode);
-      const inline = /\binline-size\b/i.test(container[2]);
-      const useHeight = inline && vertical;
-      const padding = (parseFloat(useHeight ? style.paddingTop : style.paddingLeft) || 0)
-        + (parseFloat(useHeight ? style.paddingBottom : style.paddingRight) || 0);
-      const border = (parseFloat(useHeight ? style.borderTopWidth : style.borderLeftWidth) || 0)
-        + (parseFloat(useHeight ? style.borderBottomWidth : style.borderRightWidth) || 0);
-      const measured = parseFloat(useHeight ? style.height : style.width);
-      const width = Number.isFinite(measured)
-        ? measured - (style.boxSizing === 'border-box' ? padding + border : 0)
-        : (useHeight ? parent.clientHeight : parent.clientWidth) - padding;
-      const em = parseFloat(style.fontSize) || 16;
-      const rem = parseFloat(view.getComputedStyle(node.ownerDocument.documentElement).fontSize) || 16;
-      return containerWidthMatches(container[2], width, em, rem);
-    }
-    return false;
-  }
-
   function cleanRulePrelude(block) {
     return block.prelude.replace(/\/\*[\s\S]*?\*\//g, '').trim();
   }
 
   function responsiveLayoutBlock(source, cursorIndex) {
+    // Canvas width determines new query thresholds, never the cursor's scope.
     const current = selectorBlockForLayout(source, cursorIndex);
-    if (!state.context || state.prefs?.responsiveTools === false) return current;
-    const rootSelectors = ['%root%', contextRootSelector(state.context)].filter(Boolean);
-    const isRoot = (block) => rootSelectors.includes(cleanRulePrelude(block));
-    const currentChain = current ? [...openBlocksAt(source, current.open), current] : [];
-    const selectors = currentChain.filter((block) => !cleanRulePrelude(block).startsWith('@'));
-    // Keep explicit child and pseudo selectors under the cursor's control.
-    if (selectors.some((block) => !isRoot(block))) return current;
-    const node = canvasElementNode(state.context.element);
-    const view = node?.ownerDocument?.defaultView || state.canvasDocument?.defaultView;
-    if (!view) return current;
-    if (state.responsiveSource !== source) {
-      state.responsiveSource = source;
-      state.responsiveBlocks = [];
-      openBlocksAt(source, source.length, state.responsiveBlocks);
+    if (current && !openBlocksAt(source, cursorIndex).length
+      && openBlocksAt(source, current.open).some((block) => /^@(media|container)\b/i.test(cleanRulePrelude(block)))) {
+      return { open: -1, close: -1, prelude: '%root%', createBase: true };
     }
-    const roots = state.responsiveBlocks.filter((block) => isRoot(block));
-    const candidates = state.responsiveBlocks.filter((block) => {
-      const chain = [...block.ancestors, block];
-      const selectorChain = chain.filter((item) => !cleanRulePrelude(item).startsWith('@'));
-      if (selectorChain.length !== 1 || !isRoot(selectorChain[0])) return false;
-      const conditions = chain.filter((item) => cleanRulePrelude(item).startsWith('@'));
-      if (!conditions.some((item) => /^@(media|container)\b/i.test(cleanRulePrelude(item)) && /\b(width|inline-size)\b/i.test(cleanRulePrelude(item)))) return false;
-      return conditions.every((item) => responsiveConditionMatches(item.prelude, node, view));
-    });
-    const target = candidates.sort((a, b) => a.open - b.open).pop()
-      || roots.filter((block) => !block.ancestors.length).pop();
-    return target || (roots.length ? { open: -1, close: -1, prelude: '%root%', createBase: true } : current);
+    return current;
   }
 
   function isRootLayoutContext() {
@@ -5739,7 +5662,7 @@
     if (query) {
       const chain = target ? [...openBlocksAt(doc.getValue(), target.open), target] : [];
       const conditions = chain.filter((item) => /^@(media|container)\b/i.test(cleanRulePrelude(item))).map(cleanRulePrelude);
-      const label = conditions.join(' · ') || (state.prefs?.responsiveTools === false ? 'Cursor' : 'Base');
+      const label = conditions.join(' · ') || 'Base';
       if (query.textContent !== label) query.textContent = label;
       if (query.title !== `Visual edits: ${label}`) query.title = `Visual edits: ${label}`;
     }

@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,9 +26,9 @@ ACSS is optional. When it is active, CSS Studio can expose compatible ACSS varia
 
 CSS Studio is a code-first editor for the active Bricks Custom CSS field. It does not read or write Bricks' breakpoint-specific style-control values, and changing the active Bricks breakpoint does not open a separate CSS document.
 
-With **Follow canvas width** enabled, visual tools and declaration shortcuts edit the last matching width query in the active root stylesheet. Media queries use the actual canvas viewport. Container queries use the nearest eligible ancestor, or the named ancestor, and its content width. Width comparisons and ranges in `px`, `em`, and `rem` are supported for containers. Unsupported container conditions are left for manual editing.
+With **Follow canvas width** enabled, query icons insert a mobile-first media or container query at the actual canvas width. Turn it off to use registered Bricks breakpoint choices, or Shift-click a query icon while enabled to access those choices.
 
-If no query matches, visual edits go into the base root rule. CSS Studio does not create breakpoint rules or add a single-column grid template automatically. Direct typing and selected text remain cursor-based, as do explicit child and pseudo selectors. The header shows the visual editing scope. Disable **Follow canvas width** in Preferences to use the cursor for all visual edits.
+Visual tools and declaration shortcuts always edit the rule containing the cursor. Outside a query, edits remain outside it even when its width condition matches the preview. Direct typing and selections also stay at the cursor. The header shows the editing scope. CSS synchronization keeps root declarations in base control settings regardless of the preview breakpoint. CSS Studio does not add a single-column grid template automatically.
 
 For responsive styling, write `@media` and `@container` rules in the CSS itself. The query tools use the site's registered Bricks breakpoint widths to help create those rules. The breakpoint and state labels in the Studio header report the current builder context; they do not imply separate breakpoint storage.
 
@@ -156,6 +156,13 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public update metadata for updates.
 
 == Changelog ==
+
+= 1.8.2 =
+
+* Fix root CSS being moved into breakpoint control values when resizing the canvas. Keep root synchronization tied to base controls without changing the preview breakpoint.
+* Keep visual tools and declaration shortcuts in the cursor's rule. A matching query no longer receives edits when the cursor is outside it.
+* Keep Follow canvas width for inserting nested queries at the current canvas width, with Bricks breakpoint choices when disabled.
+* Add regression coverage for breakpoint-independent synchronization and cursor-based query editing.
 
 = 1.8.1 =
 
