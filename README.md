@@ -4,6 +4,10 @@ Uplink CSS Studio is a code-first CSS workspace inside the Bricks builder. It ed
 
 Version 1.3 adds root-aware pixel-to-rem expansion. Type an abbreviation such as `tr80` in a CSS declaration and press Tab; CSS Studio reads the rendered Bricks HTML font size and inserts `5rem` for a `100%` root or `8rem` for a `62.5%` root.
 
+The `tr` shortcut also works in media and container query thresholds, including nested queries and range syntax. For example, `@media (width >= tr800)` becomes `@media (width >= 50rem)` with a 16px browser initial font size. Media thresholds use that initial size as required by CSS; declarations inside the query still use the rendered HTML root font size.
+
+Right-click a numeric length to open **Convert units**. Computable equivalents are labelled **converted**; replacements without a known basis are labelled **unit swap**. Select an option to replace only that value. The menu also works with numeric scrubbing disabled; Enter or Shift+F10 on a focused numeric token opens it from the keyboard.
+
 Version 1.1 adds a constrained HTML view for the selected element. Its lightweight HTML code editor includes syntax highlighting, line numbers, matching tags, context-aware tag and attribute completion, and single-root Emmet-style Tab expansion. It can update supported tags, simple text, IDs, attributes including inline styles, links, image fields, and Bricks global classes while leaving nested structure and builder-only settings under Bricks' control. Opening and closing tags are linked for one-step renaming. Adding text to an empty Block converts it in place to Basic Text and preserves the existing element data. The CSS breadcrumbs can also switch directly between element CSS and every assigned global class.
 
 [Product page and full introduction](https://plugins.uplink.press/project/css-studio-for-bricks/)

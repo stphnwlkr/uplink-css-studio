@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.8.2
+Stable tag: 1.9.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -155,7 +155,19 @@ No. ACSS integration is optional. CSS Studio includes its own per-user recipe ed
 
 Element CSS remains in Bricks. Custom recipes are stored in the current WordPress user's metadata, and interface preferences are stored locally in the browser. CSS Studio does not send site or editor data to an external service. WordPress periodically checks the plugin's public update metadata for updates.
 
+The `tr` + Tab shortcut works in media and container query thresholds as well as declarations inside their bodies. Media-query thresholds use the browser's initial font size; declaration values and container-query thresholds use the rendered HTML root font size. With a 16px initial size, `@media (width >= tr800)` expands to `@media (width >= 50rem)`.
+
+Right-click a numeric CSS length to open Convert units. Converted options preserve the length at the current canvas size. Unit swap options keep the number and change only its unit. Selecting an option changes only that token; Escape dismisses the menu. This works with numeric scrubbing disabled. On a focused numeric token, Enter or Shift+F10 also opens the menu.
+
 == Changelog ==
+
+= 1.9.0 =
+
+* Add a right-click unit conversion menu for numeric CSS lengths, including media and container query thresholds. Distinguish calculated conversions from unit-only swaps.
+* Expand tr + Tab in query thresholds, including nested queries, ranges, and multiline media conditions. Media thresholds use the browser's initial font size; declarations keep the rendered HTML root basis.
+* Keep contextual conversion available when numeric scrubbing is disabled, and use the text cursor instead of the scrubber pointer.
+* Add keyboard access, cancellation, and stale-value protection for contextual conversion.
+* Add rem and conversion regression checks to release validation.
 
 = 1.8.2 =
 

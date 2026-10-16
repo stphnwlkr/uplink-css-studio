@@ -1735,6 +1735,10 @@
     state.editor.on('gutterClick', toggleDeclarationAtLine);
     state.editor.getWrapperElement().addEventListener('pointerdown', handleValuePointerDown);
     state.editor.getWrapperElement().addEventListener('click', handleValueClick);
+    state.editor.getWrapperElement().addEventListener('contextmenu', handleNumericContextMenu, true);
+    state.editor.getWrapperElement().addEventListener('keydown', (event) => {
+      if ((event.key === 'Enter' || event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) && valueTargetFromEvent(event)?.kind === 'number') handleNumericContextMenu(event);
+    }, true);
 
     const htmlSettings = $.extend(true, {}, config.htmlEditorSettings || config.editorSettings || {}, {
       codemirror: {
@@ -3522,18 +3526,46 @@
     return String(Object.is(rounded, -0) ? 0 : rounded);
   }
 
+  function resolvedMediaFontSizePx() {
+    let frameDocument = state.canvasDocument;
+    if (!frameDocument) {
+      try { frameDocument = document.querySelector('#bricks-builder-iframe, #bricks-preview iframe')?.contentDocument; } catch (error) {}
+    }
+    if (!frameDocument?.documentElement) return 16;
+    const probe = frameDocument.createElement('span');
+    probe.style.cssText = 'all:initial!important;font-size:initial!important;display:none!important';
+    try {
+      frameDocument.documentElement.appendChild(probe);
+      const value = parseFloat(frameDocument.defaultView?.getComputedStyle(probe).fontSize || '');
+      return Number.isFinite(value) && value > 0 ? value : 16;
+    } finally { probe.remove(); }
+  }
+
   function expandToRemShortcut(editor, cursor, beforeCursor, CodeMirror) {
+    const match = beforeCursor.match(/\btr(-?(?:\d+(?:\.\d*)?|\.\d+))$/i);
+    if (!match) return false;
+    const doc = editor.getDoc();
+    const source = doc.getValue();
+    const index = doc.indexFromPos(cursor);
+    const prefix = cssWithoutCommentsAndStrings(source.slice(0, index));
+    const query = prefix.match(/@(media|container)\b[^{};]*$/i);
     const declaration = beforeCursor.match(/(?:^|[;{])\s*[\w-]+\s*:[^;{}]*\btr(-?(?:\d+(?:\.\d*)?|\.\d+))$/i);
-    if (!declaration) return false;
-    const pixels = Number(declaration[1]);
+    if (query) {
+      const beforeToken = query[0].slice(0, -match[0].length);
+      const feature = '(?:width|height|inline-size|block-size)';
+      const valueAfterFeature = new RegExp(`(?:\\b(?:min-|max-)?${feature}\\s*:\\s*|\\b${feature}\\s*(?:<=|>=|<|>|=)\\s*)$`, 'i');
+      const featureAfterValue = new RegExp(`^\\s*(?:<=|>=|<|>|=)\\s*${feature}\\b`, 'i');
+      if (!valueAfterFeature.test(beforeToken) && !featureAfterValue.test(source.slice(index))) return false;
+    } else if (!declaration) return false;
+    const pixels = Number(match[1]);
     if (!Number.isFinite(pixels)) return false;
-    const token = `tr${declaration[1]}`;
-    const from = CodeMirror.Pos(cursor.line, cursor.ch - token.length);
-    const rootPixels = resolvedRootFontSizePx();
+    const from = CodeMirror.Pos(cursor.line, cursor.ch - match[0].length);
+    const mediaThreshold = query?.[1].toLowerCase() === 'media';
+    const rootPixels = mediaThreshold ? resolvedMediaFontSizePx() : resolvedRootFontSizePx();
     const replacement = `${formatRemNumber(pixels / rootPixels)}rem`;
     editor.replaceRange(replacement, from, cursor, 'complete');
     editor.setCursor({ line: from.line, ch: from.ch + replacement.length });
-    setStatus(`${pixels}px → ${replacement} (${formatRemNumber(rootPixels)}px HTML root)`, 'dirty');
+    setStatus(`${pixels}px → ${replacement} (${formatRemNumber(rootPixels)}px ${mediaThreshold ? 'media query basis' : 'HTML root'})`, 'dirty');
     return true;
   }
 
@@ -4723,7 +4755,7 @@
   const declarationLineDisabled = /^(\s*)\/\*\s*([-a-zA-Z][\w-]*\s*:\s*[^;{}]+;?)\s*\*\/(\s*)$/;
   const queryOperatorCycle = { '>': '<', '>=': '<=', '<': '>', '<=': '>=' };
   const anglePattern = /-?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|rad|grad|turn)\b/gi;
-  const numberPattern = /-?(?:\d+(?:\.\d*)?|\.\d+)(?:px|rem|em|%|vw|vh|svw|svh|dvw|dvh|vmin|vmax|ch|ex|lh|rlh|s|ms)?\b/gi;
+  const numberPattern = /-?(?:\d+(?:\.\d*)?|\.\d+)(?:px|rem|em|%|vw|vh|svw|svh|dvw|dvh|vmin|vmax|ch|ex|lh|rlh|pt|s|ms)?(?![\w%])/gi;
   const easePattern = /cubic-bezier\(\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*-?[\d.]+\s*\)|\b(?:ease-in-out|ease-in|ease-out|ease|linear)\b/gi;
   const gradientPattern = /(?:repeating-)?(?:linear|radial|conic)-gradient\(/gi;
   const colorVariablePattern = /var\(/gi;
@@ -4802,9 +4834,9 @@
     const token = state.editor.getTokenAt({ line, ch: Math.min(end, start + 1) });
     if (/comment|string/.test(token.type || '')) return;
     const id = String(++state.valueTargetSequence);
-    const className = `uplink-css-studio-value-token uplink-css-studio-value-${kind}${extra.active ? ' is-active' : ''}`;
+    const className = `uplink-css-studio-value-token uplink-css-studio-value-${kind}${kind === 'number' && state.prefs.numericScrubbing ? ' is-scrubbable' : ''}${extra.active ? ' is-active' : ''}`;
     const title = extra.title || ({
-      number: 'Drag to change value', angle: 'Edit angle', ease: 'Edit easing', color: 'Edit color',
+      number: state.prefs.numericScrubbing ? 'Drag to change value · Right-click to convert units' : 'Right-click to convert units', angle: 'Edit angle', ease: 'Edit easing', color: 'Edit color',
       shadow: 'Edit shadow', gradient: 'Edit gradient', pseudo: 'Preview pseudo-state', operator: 'Flip comparison operator'
     }[kind] || 'Edit value');
     const mark = state.editor.markText(
@@ -4897,10 +4929,8 @@
         }
         anglePattern.lastIndex = 0;
         while ((match = anglePattern.exec(text))) reserve('angle', match.index, match.index + match[0].length, match[0], { gradientDirection: gradientDirectionAt(text, match.index) });
-        if (state.prefs.numericScrubbing) {
-          numberPattern.lastIndex = 0;
-          while ((match = numberPattern.exec(text))) reserve('number', match.index, match.index + match[0].length, match[0]);
-        }
+        numberPattern.lastIndex = 0;
+        while ((match = numberPattern.exec(text))) reserve('number', match.index, match.index + match[0].length, match[0]);
       }
     });
   }
@@ -4925,6 +4955,90 @@
     scheduleValueDecorations();
   }
 
+  function unitConversionOptions(value, metrics) {
+    const parsed = String(value).match(/^(-?(?:\d+(?:\.\d*)?|\.\d+))(px|rem|em|vw|vh|vmin|vmax|svw|svh|dvw|dvh|ch|pt|%)$/i);
+    if (!parsed) return [];
+    const number = Number(parsed[1]);
+    const unit = parsed[2].toLowerCase();
+    const factors = { px: 1, rem: metrics.root, em: metrics.font, vw: metrics.width / 100,
+      vh: metrics.height / 100, vmin: Math.min(metrics.width, metrics.height) / 100,
+      vmax: Math.max(metrics.width, metrics.height) / 100, pt: 96 / 72 };
+    const pixels = number * factors[unit];
+    return ['rem', 'em', 'px', 'vw', 'vh', 'vmin', 'vmax', '%', 'ch', 'svw', 'svh', 'dvw', 'dvh', 'pt']
+      .filter((next) => next !== unit).map((next) => {
+        const converted = Number.isFinite(pixels) && Number.isFinite(factors[next]) && factors[next] > 0;
+        return { value: `${formatRemNumber(converted ? pixels / factors[next] : number)}${next}`,
+          label: converted ? 'converted' : 'unit swap' };
+      });
+  }
+
+  function numericConversionMetrics(target) {
+    const doc = state.editor.getDoc();
+    const prefix = cssWithoutCommentsAndStrings(doc.getValue().slice(0, doc.indexFromPos({ line: target.line, ch: target.start })));
+    if (/[\w-]$/.test(prefix)) return null;
+    const query = prefix.match(/@(media|container)\b[^{};]*$/i);
+    const declaration = prefix.slice(Math.max(prefix.lastIndexOf('{'), prefix.lastIndexOf('}'), prefix.lastIndexOf(';')) + 1);
+    if (query) {
+      // Only length query features have meaningful length conversions.
+      const feature = '(?:width|height|inline-size|block-size)';
+      const before = new RegExp(`\\b(?:min-|max-)?${feature}\\s*(?::|<=|>=|<|>|=)\\s*$`, 'i');
+      const after = new RegExp(`^\\s*(?:<=|>=|<|>|=)\\s*${feature}\\b`, 'i');
+      const suffix = doc.getValue().slice(doc.indexFromPos({ line: target.line, ch: target.end }));
+      if (!before.test(query[0]) && !after.test(suffix)) return null;
+    } else if (!/^\s*[\w-]+\s*:/.test(declaration)) return null;
+    const node = canvasElementNode(state.context?.element);
+    const view = node?.ownerDocument?.defaultView || state.canvasDocument?.defaultView;
+    const media = query?.[1].toLowerCase() === 'media';
+    const root = media ? resolvedMediaFontSizePx() : resolvedRootFontSizePx();
+    let font = root;
+    if (!media && node && view) {
+      let reference = node;
+      if (query) {
+        const name = query[0].match(/^@container\s+([\w-]+)\s*\(/i)?.[1];
+        reference = null;
+        for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+          const style = view.getComputedStyle(parent);
+          if (/^(inline-size|size)$/.test(style.containerType) && (!name || style.containerName.split(/\s+/).includes(name))) { reference = parent; break; }
+        }
+      }
+      font = reference ? parseFloat(view.getComputedStyle(reference).fontSize) || root : NaN;
+    }
+    return { root, font, width: view?.innerWidth || NaN, height: view?.innerHeight || NaN };
+  }
+
+  function handleNumericContextMenu(event) {
+    const target = valueTargetFromEvent(event);
+    if (!target || target.kind !== 'number') return;
+    const metrics = numericConversionMetrics(target);
+    const options = metrics ? unitConversionOptions(target.value, metrics) : [];
+    if (!options.length) return;
+    event.preventDefault();
+    event.stopPropagation();
+    target.anchor = event.target.closest('[data-uplink-value-id]');
+    const body = showValuePanel(target, 'Convert units', `<div class="uplink-css-studio-unit-options">${options.map((option, index) =>
+      `<button type="button" data-unit-option="${index}"><code>${escapeHtml(option.value)}</code><span>${option.label}</span></button>`).join('')}</div>`);
+    if (!body) return;
+    body.addEventListener('click', (click) => {
+      const button = click.target.closest('[data-unit-option]');
+      if (!button) return;
+      const range = target.mark?.find?.();
+      const from = range?.from || { line: target.line, ch: target.start };
+      const to = range?.to || { line: target.line, ch: target.end };
+      if (state.editor.getRange(from, to) === target.value) replaceValueTarget(target, options[Number(button.dataset.unitOption)].value);
+      closeValuePanel();
+    });
+    const buttons = Array.from(body.querySelectorAll('[data-unit-option]'));
+    body.addEventListener('keydown', (key) => {
+      if (key.key === 'Escape') { key.preventDefault(); closeValuePanel(); }
+      if (key.key === 'ArrowDown' || key.key === 'ArrowUp') {
+        key.preventDefault();
+        const index = buttons.indexOf(document.activeElement);
+        buttons[(index + (key.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length]?.focus();
+      }
+    });
+    buttons[0]?.focus({ preventScroll: true });
+  }
+
   function handleValuePointerDown(event) {
     const target = valueTargetFromEvent(event);
     if (!target || target.kind !== 'number' || !state.prefs.numericScrubbing || event.button !== 0) return;
@@ -4939,7 +5053,8 @@
       startValue: Number(parsed[1]),
       unit: parsed[2] || '',
       decimals: (parsed[1].split('.')[1] || '').length,
-      lastValue: target.value
+      lastValue: target.value,
+      changed: false
     };
     event.target.setPointerCapture?.(event.pointerId);
     document.body.classList.add('uplink-css-studio-is-scrubbing');
@@ -4965,10 +5080,12 @@
     target.end = target.start + value.length;
     target.value = value;
     scrub.lastValue = value;
+    scrub.changed = true;
   }
 
   function finishNumericScrub(event) {
     if (!state.scrub || event.pointerId !== state.scrub.pointerId) return;
+    const changed = state.scrub.changed;
     state.scrub = null;
     document.body.classList.remove('uplink-css-studio-is-scrubbing');
     document.removeEventListener('pointermove', scrubNumericValue, true);

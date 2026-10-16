@@ -1,6 +1,17 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.9.0
+-----
+Added contextual unit conversion and query-aware tr expansion.
+
+* Right-click a numeric CSS length to choose a conversion. Computed equivalents are labelled converted; replacements without a known reference are labelled unit swap. Only the selected token changes.
+* Support rem, em, px, viewport and point conversions, plus explicit unit swaps. Media thresholds use the browser's initial font size. Declaration em conversions use the selected element's font; named container thresholds use the eligible container font.
+* Expand tr + Tab inside media/container query thresholds, including nested rules, ranges, legacy syntax, and multiline conditions. Declarations inside query bodies retain HTML-root conversion.
+* Keep contextual conversion available with scrubbing disabled. Show the text cursor in that mode and the scrubber pointer only when dragging is enabled.
+* Support keyboard access and Escape cancellation, reject stale token replacements, and avoid converting custom-property identifiers.
+* Add rem and conversion regression checks to release validation.
+
 1.8.2
 -----
 Fixed the remaining style reset when resizing across Bricks breakpoints.

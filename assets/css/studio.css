@@ -244,7 +244,8 @@ body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select:
 .uplink-css-studio-outline-highlight { background: rgb(245 184 0 / 13%); }
 .uplink-css-studio-value-token { border-bottom: 1px dotted #697382; border-radius: 2px; cursor: pointer; }
 .uplink-css-studio-value-token:hover { background: rgb(245 184 0 / 12%); border-bottom-color: var(--uplink-css-studio-accent); }
-.uplink-css-studio-value-number { cursor: ew-resize; }
+.uplink-css-studio-value-number { cursor: text; }
+.uplink-css-studio-value-number.is-scrubbable { cursor: ew-resize; }
 .uplink-css-studio-value-color { border-bottom-color: #78d5ff; }
 .uplink-css-studio-value-angle, .uplink-css-studio-value-ease { border-bottom-color: #c6a0f6; }
 .uplink-css-studio-value-gradient, .uplink-css-studio-value-shadow { border-bottom-color: #f5a97f; }
@@ -672,3 +673,10 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
 .uplink-css-studio-clamp-insert { margin: 12px 14px 0; padding: 10px 14px; background: var(--uplink-css-studio-accent); color: var(--uplink-css-studio-accent-text); }
 
 .uplink-css-studio-query-target { max-width: 240px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.uplink-css-studio-value-panel[data-tool="number"] { width: min(320px, calc(100vw - 20px)); }
+.uplink-css-studio-unit-options { display: grid; max-height: min(380px, calc(100vh - 90px)); overflow-y: auto; padding: 6px; }
+.uplink-css-studio-unit-options button { display: flex; align-items: baseline; gap: 16px; width: 100%; padding: 9px 12px; border: 0; border-radius: 4px; background: transparent; color: #e8eaf0; text-align: left; cursor: pointer; }
+.uplink-css-studio-unit-options button:hover, .uplink-css-studio-unit-options button:focus-visible { background: #353b40; outline: 1px solid #74828c; outline-offset: -1px; }
+.uplink-css-studio-unit-options code { min-width: 90px; padding: 0; background: transparent; color: inherit; font-size: 14px; }
+.uplink-css-studio-unit-options span { color: #a8adb7; font-size: 12px; }

@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.8.2/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.9.0/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.8.2</h4><p>Fix the remaining style reset across preview breakpoints by keeping root CSS synchronization tied to base controls. Visual tools and declaration shortcuts now stay in the cursor\u2019s rule, even when another query matches the canvas width. Current-width nested query insertion and Bricks breakpoint choices remain available.</p>"
+    "changelog": "<h4>1.9.0</h4><p>Right-click numeric CSS lengths to choose unit conversions or labelled unit swaps. Expand tr + Tab in nested media and container query thresholds, with the correct media-query font basis. Conversion remains available when scrubbing is disabled, and numeric values then show the text cursor. Includes keyboard access, cancellation, and stale-token protection.</p>"
   }
 }
