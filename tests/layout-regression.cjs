@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const source = fs.readFileSync(process.env.STUDIO_SOURCE || path.join(__dirname, '../assets/js/studio.js'), 'utf8');
-const names = ['openBlocksAt', 'matchingBrace', 'selectorBlockForLayout', 'maskNestedCss',
+const names = ['openBlocksAt', 'matchingBrace', 'selectorBlockForLayout', 'responsiveLayoutBlock', 'maskNestedCss',
   'directDeclarationEntries', 'directDeclarations', 'upsertLayoutDeclarations', 'commitLayoutEdit',
   'applyLayoutPreset', 'syncBricksCssControls'];
 const functions = names.map((name) => {

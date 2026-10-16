@@ -670,3 +670,5 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
 .uplink-css-studio-clamp-message { color: var(--uplink-css-studio-danger); }
 .uplink-css-studio-clamp-message:empty { display: none; }
 .uplink-css-studio-clamp-insert { margin: 12px 14px 0; padding: 10px 14px; background: var(--uplink-css-studio-accent); color: var(--uplink-css-studio-accent-text); }
+
+.uplink-css-studio-query-target { max-width: 240px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

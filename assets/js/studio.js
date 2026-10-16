@@ -399,7 +399,7 @@
   }
 
   function readPrefs() {
-    const defaults = { autoOpen: true, firstAppliedClass: true, viewportHandles: true, hideElementActions: false, numericScrubbing: true, minimized: false, dockHeight: '', colorMode: 'hex' };
+    const defaults = { autoOpen: true, firstAppliedClass: true, responsiveTools: true, viewportHandles: true, hideElementActions: false, numericScrubbing: true, minimized: false, dockHeight: '', colorMode: 'hex' };
     try { return Object.assign(defaults, JSON.parse(localStorage.getItem(storeKey)) || {}); } catch (e) { return defaults; }
   }
 
@@ -1510,6 +1510,7 @@
               <span class="uplink-css-studio-context-divider uplink-css-studio-editing-divider" hidden>·</span>
               <span class="uplink-css-studio-chip uplink-css-studio-editing-target" hidden><strong></strong><select class="uplink-css-studio-class-switcher" aria-label="CSS target" hidden></select></span>
               <span class="uplink-css-studio-context-divider">/</span>
+              <span class="uplink-css-studio-chip uplink-css-studio-query-target" aria-label="Visual editing scope">Base</span>
               <span class="uplink-css-studio-chip uplink-css-studio-breakpoint"><strong>—</strong></span>
               <span class="uplink-css-studio-context-divider">/</span>
               <span class="uplink-css-studio-chip uplink-css-studio-state"><strong>—</strong></span>
@@ -1534,8 +1535,8 @@
               <button class="uplink-css-studio-tool uplink-css-studio-recipes-toggle" type="button" aria-label="Open recipe manager" data-tooltip="Recipe manager">${icon('shortcuts')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" aria-keyshortcuts="${navigator.platform.toLowerCase().includes('mac') ? 'Meta+Alt+G' : 'Control+Alt+G'}" data-tooltip="%root%, class, ID & HTML · ${navigator.platform.toLowerCase().includes('mac') ? '⌘⌥G' : 'Ctrl+Alt+G'}">${icon('target')}</button>
               <button class="uplink-css-studio-tool" type="button" data-recipe="parent" aria-label="Has me selector" data-tooltip="Has me selector :has(> &)">${icon('parent')}</button>
-              <button class="uplink-css-studio-tool uplink-css-studio-container-toggle" type="button" aria-label="Container queries" data-tooltip="Container queries">${icon('container')}</button>
-              <button class="uplink-css-studio-tool uplink-css-studio-media-toggle" type="button" aria-label="Media queries" data-tooltip="Media queries">${icon('media')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-container-toggle" type="button" aria-label="Container queries" data-tooltip="Container query at canvas width · Shift-click for Bricks breakpoints">${icon('container')}</button>
+              <button class="uplink-css-studio-tool uplink-css-studio-media-toggle" type="button" aria-label="Media queries" data-tooltip="Media query at canvas width · Shift-click for Bricks breakpoints">${icon('media')}</button>
               <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
               <button class="uplink-css-studio-tool uplink-css-studio-layout-action uplink-css-studio-display-block" type="button" data-layout-preset="block" aria-label="Display block" aria-pressed="false" data-tooltip="Display: Block" hidden>${icon('displayBlock')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-layout-action" type="button" data-layout-preset="flex-row" aria-label="Display flex row" aria-pressed="false" data-tooltip="Display: Flex row">${icon('flexRow')}</button>
@@ -1646,6 +1647,7 @@
               <div class="uplink-css-studio-popover-head"><strong>Preferences</strong><span>Saved in this browser</span></div>
               <label class="uplink-css-studio-switch-row"><span><strong>Open on element selection</strong><small>Show the editor when an element is clicked in the canvas or Structure panel.</small></span><input class="uplink-css-studio-auto-open" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Select first applied class</strong><small>Edit the first unlocked global class when moving to another element.</small></span><input class="uplink-css-studio-first-class" type="checkbox"></label>
+              <label class="uplink-css-studio-switch-row"><span><strong>Follow canvas width</strong><small>Query icons use the canvas width; visual tools edit the matching query. Turn off to use Bricks breakpoint choices. Typing stays at the cursor.</small></span><input class="uplink-css-studio-responsive-tools" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Viewport resize handles</strong><small>Show width controls on the left and right edges of the visible canvas.</small></span><input class="uplink-css-studio-viewport-handles" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Hide element actions</strong><small>Hide the blue action toolbar on canvas elements.</small></span><input class="uplink-css-studio-hide-element-actions" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Numeric scrubbing</strong><small>Drag numeric CSS values horizontally. Toggle with Cmd/Ctrl+Alt+X.</small></span><input class="uplink-css-studio-numeric-scrubbing" type="checkbox"></label>
@@ -3306,8 +3308,8 @@
     document.querySelector('.uplink-css-studio-class-input').addEventListener('keydown', (event) => applyTargetOnEnter(event, assignClassTarget));
     document.querySelector('.uplink-css-studio-id-input').addEventListener('keydown', (event) => applyTargetOnEnter(event, assignIdTarget));
     document.querySelector('.uplink-css-studio-html-input').addEventListener('keydown', (event) => applyTargetOnEnter(event, openHtmlTarget));
-    document.querySelector('.uplink-css-studio-media-toggle').addEventListener('click', (event) => { event.stopPropagation(); toggleQueryPanel('media'); });
-    document.querySelector('.uplink-css-studio-container-toggle').addEventListener('click', (event) => { event.stopPropagation(); toggleQueryPanel('container'); });
+    document.querySelector('.uplink-css-studio-media-toggle').addEventListener('click', (event) => { event.stopPropagation(); activateQueryTool('media', event); });
+    document.querySelector('.uplink-css-studio-container-toggle').addEventListener('click', (event) => { event.stopPropagation(); activateQueryTool('container', event); });
     document.querySelector('.uplink-css-studio-states-toggle').addEventListener('click', (event) => { event.stopPropagation(); togglePopover('states'); });
     document.querySelector('.uplink-css-studio-states-list').addEventListener('click', (event) => {
       const item = event.target.closest('[data-state-selector]');
@@ -3331,6 +3333,11 @@
         if (state.open && next) setContext(next);
       }
       setStatus(state.prefs.firstAppliedClass ? 'First applied class selection enabled' : 'First applied class selection disabled', 'synced');
+    });
+    document.querySelector('.uplink-css-studio-responsive-tools').addEventListener('change', (event) => {
+      state.prefs.responsiveTools = Boolean(event.target.checked);
+      savePrefs();
+      refreshLayoutTools();
     });
     document.querySelector('.uplink-css-studio-viewport-handles').addEventListener('change', (event) => {
       state.prefs.viewportHandles = Boolean(event.target.checked);
@@ -4432,6 +4439,7 @@
       return;
     }
     syncEditorFromBricks(next);
+    refreshResponsiveTools();
   }
 
   function promoteNativeCssGroup() {
@@ -5323,9 +5331,16 @@
       }
       const cursor = doc.getCursor();
       const cursorIndex = doc.indexFromPos(cursor);
-      const activeOpen = source.lastIndexOf('{', cursorIndex);
-      const activeClose = source.indexOf('}', cursorIndex);
-      let insertIndex = activeOpen !== -1 && activeClose !== -1 && activeOpen < cursorIndex ? activeClose : firstBlockEnd(source);
+      const responsive = responsiveLayoutBlock(source, cursorIndex);
+      if (responsive?.createBase) {
+        const lines = css.split('\n').map((line) => line ? `  ${line}` : '').join('\n');
+        doc.replaceRange(`\n%root% {\n${lines}\n}\n`, doc.posFromIndex(source.length));
+        if (shouldFocus) editor.focus();
+        return;
+      }
+      const activeOpen = responsive?.open ?? source.lastIndexOf('{', cursorIndex);
+      const activeClose = responsive?.close ?? source.indexOf('}', cursorIndex);
+      let insertIndex = activeOpen !== -1 && activeClose !== -1 && (responsive || activeOpen < cursorIndex) ? activeClose : firstBlockEnd(source);
       if (insertIndex !== -1) {
         const indented = css.split('\n').map((line) => line ? `  ${line}` : '').join('\n');
         const prefix = source.slice(0, insertIndex).endsWith('\n') ? '' : '\n';
@@ -5377,15 +5392,117 @@
     return null;
   }
 
+  function refreshResponsiveTools() {
+    const node = canvasElementNode(state.context?.element);
+    const view = node?.ownerDocument?.defaultView;
+    if (!view) return;
+    const dimensions = [view.innerWidth, view.innerHeight];
+    for (let parent = node.parentElement; parent; parent = parent.parentElement) dimensions.push(parent.clientWidth, parent.clientHeight);
+    const signature = dimensions.join(':');
+    if (signature === state.responsiveDimensions) return;
+    state.responsiveDimensions = signature;
+    refreshLayoutTools();
+  }
+
+  function containerWidthMatches(condition, width, em, rem) {
+    const dimension = (token) => {
+      const match = token.trim().match(/^(\d*\.?\d+)(px|em|rem)?$/i);
+      if (!match || (!match[2] && Number(match[1]) !== 0)) return null;
+      return Number(match[1]) * (match[2]?.toLowerCase() === 'rem' ? rem : match[2]?.toLowerCase() === 'em' ? em : 1);
+    };
+    const compare = (left, operator, right) => operator === '<' ? left < right : operator === '<=' ? left <= right
+      : operator === '>' ? left > right : operator === '>=' ? left >= right : left === right;
+    // Only width conditions are routed automatically. Unknown features must not
+    // silently turn a non-matching container rule into an editing target.
+    return condition.split(/\s+or\s+|,/i).some((group) => group.split(/\s+and\s+/i).every((part) => {
+      const expression = part.replace(/[()]/g, '').trim();
+      const legacy = expression.match(/^(min-|max-)?(?:width|inline-size)\s*:\s*(.+)$/i);
+      if (legacy) {
+        const value = dimension(legacy[2]);
+        return value !== null && compare(width, legacy[1] === 'min-' ? '>=' : legacy[1] === 'max-' ? '<=' : '=', value);
+      }
+      const tokens = expression.split(/\s*(<=|>=|<|>|=)\s*/);
+      if (tokens.length !== 3 && tokens.length !== 5) return false;
+      const values = tokens.filter((_, index) => index % 2 === 0).map((token) => /^(width|inline-size)$/i.test(token) ? width : dimension(token));
+      if (values.some((value) => value === null) || !/\b(width|inline-size)\b/i.test(expression)) return false;
+      return compare(values[0], tokens[1], values[1]) && (tokens.length === 3 || compare(values[1], tokens[3], values[2]));
+    }));
+  }
+
+  function responsiveConditionMatches(prelude, node, view) {
+    const clean = prelude.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+    if (/^@media\b/i.test(clean)) return Boolean(view?.matchMedia?.(clean.replace(/^@media\s*/i, ''))?.matches);
+    if (/^@supports\b/i.test(clean)) return Boolean(view?.CSS?.supports(clean.replace(/^@supports\s*/i, '')));
+    if (/^@layer\b/i.test(clean)) return true;
+    const container = clean.match(/^@container\s*(?:([\w-]+)\s*)?(\([\s\S]+)$/i);
+    if (!container || !node || !view) return false;
+    for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+      const style = view.getComputedStyle(parent);
+      if (!/^(inline-size|size)$/.test(style.containerType)) continue;
+      if (container[1] && !style.containerName.split(/\s+/).includes(container[1])) continue;
+      const vertical = /^(vertical|sideways)/.test(style.writingMode);
+      const inline = /\binline-size\b/i.test(container[2]);
+      const useHeight = inline && vertical;
+      const padding = (parseFloat(useHeight ? style.paddingTop : style.paddingLeft) || 0)
+        + (parseFloat(useHeight ? style.paddingBottom : style.paddingRight) || 0);
+      const border = (parseFloat(useHeight ? style.borderTopWidth : style.borderLeftWidth) || 0)
+        + (parseFloat(useHeight ? style.borderBottomWidth : style.borderRightWidth) || 0);
+      const measured = parseFloat(useHeight ? style.height : style.width);
+      const width = Number.isFinite(measured)
+        ? measured - (style.boxSizing === 'border-box' ? padding + border : 0)
+        : (useHeight ? parent.clientHeight : parent.clientWidth) - padding;
+      const em = parseFloat(style.fontSize) || 16;
+      const rem = parseFloat(view.getComputedStyle(node.ownerDocument.documentElement).fontSize) || 16;
+      return containerWidthMatches(container[2], width, em, rem);
+    }
+    return false;
+  }
+
+  function cleanRulePrelude(block) {
+    return block.prelude.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+  }
+
+  function responsiveLayoutBlock(source, cursorIndex) {
+    const current = selectorBlockForLayout(source, cursorIndex);
+    if (!state.context || state.prefs?.responsiveTools === false) return current;
+    const rootSelectors = ['%root%', contextRootSelector(state.context)].filter(Boolean);
+    const isRoot = (block) => rootSelectors.includes(cleanRulePrelude(block));
+    const currentChain = current ? [...openBlocksAt(source, current.open), current] : [];
+    const selectors = currentChain.filter((block) => !cleanRulePrelude(block).startsWith('@'));
+    // Keep explicit child and pseudo selectors under the cursor's control.
+    if (selectors.some((block) => !isRoot(block))) return current;
+    const node = canvasElementNode(state.context.element);
+    const view = node?.ownerDocument?.defaultView || state.canvasDocument?.defaultView;
+    if (!view) return current;
+    if (state.responsiveSource !== source) {
+      state.responsiveSource = source;
+      state.responsiveBlocks = [];
+      openBlocksAt(source, source.length, state.responsiveBlocks);
+    }
+    const roots = state.responsiveBlocks.filter((block) => isRoot(block));
+    const candidates = state.responsiveBlocks.filter((block) => {
+      const chain = [...block.ancestors, block];
+      const selectorChain = chain.filter((item) => !cleanRulePrelude(item).startsWith('@'));
+      if (selectorChain.length !== 1 || !isRoot(selectorChain[0])) return false;
+      const conditions = chain.filter((item) => cleanRulePrelude(item).startsWith('@'));
+      if (!conditions.some((item) => /^@(media|container)\b/i.test(cleanRulePrelude(item)) && /\b(width|inline-size)\b/i.test(cleanRulePrelude(item)))) return false;
+      return conditions.every((item) => responsiveConditionMatches(item.prelude, node, view));
+    });
+    const target = candidates.sort((a, b) => a.open - b.open).pop()
+      || roots.filter((block) => !block.ancestors.length).pop();
+    return target || (roots.length ? { open: -1, close: -1, prelude: '%root%', createBase: true } : current);
+  }
+
   function isRootLayoutContext() {
     if (!state.editor || state.context?.kind === 'Theme style') return false;
     const doc = state.editor.getDoc();
     const source = doc.getValue();
     if (!source.trim()) return true;
-    const block = selectorBlockForLayout(source, doc.indexFromPos(doc.getCursor()));
+    const block = responsiveLayoutBlock(source, doc.indexFromPos(doc.getCursor()));
     if (!block) return false;
     const ancestors = openBlocksAt(source, block.open);
-    return ancestors.length === 0 && ['%root%', contextRootSelector(state.context)].filter(Boolean).includes(block.prelude);
+    const selectors = [...ancestors, block].filter((item) => !cleanRulePrelude(item).startsWith('@'));
+    return selectors.length === 1 && ['%root%', contextRootSelector(state.context)].filter(Boolean).includes(cleanRulePrelude(selectors[0]));
   }
 
   function maskNestedCss(body) {
@@ -5462,8 +5579,8 @@
     if (!state.editor) return new Map();
     const doc = state.editor.getDoc();
     const source = doc.getValue();
-    const block = selectorBlockForLayout(source, doc.indexFromPos(doc.getCursor()));
-    return block ? directDeclarations(source.slice(block.open + 1, block.close)) : new Map();
+    const block = responsiveLayoutBlock(source, doc.indexFromPos(doc.getCursor()));
+    return block && !block.createBase ? directDeclarations(source.slice(block.open + 1, block.close)) : new Map();
   }
 
   function computedLayoutContext() {
@@ -5519,7 +5636,16 @@
       return;
     }
 
-    const block = selectorBlockForLayout(source, doc.indexFromPos(doc.getCursor()));
+    const block = responsiveLayoutBlock(source, doc.indexFromPos(doc.getCursor()));
+    if (block?.createBase) {
+      const lines = Object.entries(declarations).filter(([, value]) => String(value || '').trim())
+        .map(([property, value]) => `  ${property}: ${value};`).join('\n');
+      if (!lines) return;
+      doc.replaceRange(`\n%root% {\n${lines}\n}\n`, doc.posFromIndex(source.length));
+      commitLayoutEdit();
+      if (shouldFocus) state.editor.focus();
+      return;
+    }
     if (!block) {
       const css = Object.entries(declarations)
         .filter(([, value]) => String(value || '').trim())
@@ -5618,6 +5744,21 @@
     if (!state.editor) return;
     const declarations = declarationsAtLayoutContext();
     const computed = computedLayoutContext();
+    const doc = state.editor.getDoc();
+    const target = responsiveLayoutBlock(doc.getValue(), doc.indexFromPos(doc.getCursor()));
+    for (const kind of ['media', 'container']) {
+      const button = document.querySelector(`.uplink-css-studio-${kind}-toggle`);
+      const label = `${kind === 'media' ? 'Media' : 'Container'} quer${state.prefs?.responsiveTools === false ? 'ies · Bricks breakpoints' : 'y at canvas width · Shift-click for Bricks breakpoints'}`;
+      if (button && button.dataset.tooltip !== label) button.dataset.tooltip = label;
+    }
+    const query = document.querySelector('.uplink-css-studio-query-target');
+    if (query) {
+      const chain = target ? [...openBlocksAt(doc.getValue(), target.open), target] : [];
+      const conditions = chain.filter((item) => /^@(media|container)\b/i.test(cleanRulePrelude(item))).map(cleanRulePrelude);
+      const label = conditions.join(' · ') || (state.prefs?.responsiveTools === false ? 'Cursor' : 'Base');
+      if (query.textContent !== label) query.textContent = label;
+      if (query.title !== `Visual edits: ${label}`) query.title = `Visual edits: ${label}`;
+    }
     const display = layoutContextValue(declarations, computed, 'display');
     const direction = layoutContextValue(declarations, computed, 'flex-direction', 'row');
     const placeItems = layoutContextValue(declarations, computed, 'place-items');
@@ -5719,7 +5860,7 @@
     state.editor.focus();
   }
 
-  function openBlocksAt(source, cursorIndex) {
+  function openBlocksAt(source, cursorIndex, completed = null) {
     const stack = [];
     let quote = '';
     let comment = false;
@@ -5742,10 +5883,11 @@
       if (char === '"' || char === "'") { quote = char; continue; }
       if (char === '{') {
         const prelude = source.slice(boundary, index).trim();
-        stack.push({ open: index, prelude });
+        stack.push(completed ? { open: index, prelude, ancestors: stack.slice() } : { open: index, prelude });
         boundary = index + 1;
       } else if (char === '}') {
-        stack.pop();
+        const block = stack.pop();
+        if (completed && block) completed.push({ ...block, close: index });
         boundary = index + 1;
       } else if (char === ';') boundary = index + 1;
     }
@@ -5938,6 +6080,8 @@
   }
 
   function togglePreferences() {
+    const responsiveTools = document.querySelector('.uplink-css-studio-responsive-tools');
+    if (responsiveTools) responsiveTools.checked = state.prefs.responsiveTools !== false;
     const autoOpen = document.querySelector('.uplink-css-studio-auto-open');
     const firstAppliedClass = document.querySelector('.uplink-css-studio-first-class');
     const viewportHandles = document.querySelector('.uplink-css-studio-viewport-handles');
@@ -6222,6 +6366,23 @@
     setStatus(`Editing ${themeStyleTarget.style.label || themeStyleTarget.id} Theme Style`, 'synced');
   }
 
+  function activateQueryTool(kind, event) {
+    if (state.prefs?.responsiveTools === false || event?.shiftKey) {
+      toggleQueryPanel(kind);
+      return;
+    }
+    const node = canvasElementNode(state.context?.element);
+    const view = node?.ownerDocument?.defaultView || state.canvasDocument?.defaultView;
+    const width = Number(view?.innerWidth) || Number(document.querySelector('#preview-width')?.value);
+    if (!Number.isFinite(width) || width <= 0) {
+      toggleQueryPanel(kind);
+      return;
+    }
+    closePopovers();
+    hideTooltip();
+    insertQueryRule(kind, 'gte', Math.round(width), NaN);
+  }
+
   function toggleQueryPanel(type) {
     const panel = document.querySelector('.uplink-css-studio-query-panel');
     const button = document.querySelector(`.uplink-css-studio-${type}-toggle`);
@@ -6434,12 +6595,19 @@
     const doc = editor.getDoc();
     const source = doc.getValue();
     const cursorIndex = doc.indexFromPos(doc.getCursor());
-    const selectorBlock = openBlocksAt(source, cursorIndex)
-      .reverse()
-      .find((block) => block.prelude && !block.prelude.startsWith('@'));
+    const roots = ['%root%', contextRootSelector(state.context)].filter(Boolean);
+    const blocks = [];
+    openBlocksAt(source, source.length, blocks);
+    const rootBlocks = blocks.filter((block) => !block.ancestors.length && roots.includes(cleanRulePrelude(block)));
+    const selectorBlock = rootBlocks.find((block) => block.open < cursorIndex && cursorIndex <= block.close)
+      || rootBlocks.sort((a, b) => a.open - b.open).pop();
 
     if (!selectorBlock) {
-      insertRule(`${atRule} (${condition}) {\n  %root% {\n    \n  }\n}`);
+      const prefix = source.trim() ? '\n\n' : '';
+      const insertion = `${prefix}%root% {\n  ${atRule} (${condition}) {\n    \n  }\n}\n`;
+      doc.replaceRange(insertion, doc.posFromIndex(source.length));
+      doc.setCursor(doc.posFromIndex(source.length + insertion.indexOf('\n    ') + 5));
+      editor.focus();
       return;
     }
 

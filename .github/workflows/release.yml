@@ -37,6 +37,7 @@ jobs:
           node tests/layout-regression.cjs
           node tests/sync-regression.cjs
           node tests/canvas-regression.cjs
+          node tests/responsive-regression.cjs
           php -l uplink-css-studio.php
 
       - name: Build the installable ZIP

@@ -1,6 +1,18 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.8.0
+-----
+Thanks to Mario Peischl for the reminder to include this.
+
+Added responsive query insertion and visual editing that follow the canvas width.
+
+* Insert media and container queries inside the base root, including when the cursor is outside the root or inside another query.
+* Use the current canvas width for mobile-first query insertion. Disable Follow canvas width to use registered Bricks breakpoint choices, or Shift-click either icon while enabled.
+* Apply visual edits to the last matching width query, using actual ancestor content width for container queries.
+* Keep direct typing, selected text, and child or pseudo selectors at the cursor. Show the visual editing target in the header.
+* Add responsive routing and nested insertion regression checks to release validation.
+
 1.7.7
 -----
 Fixed canvas content being obscured by the CSS panel.

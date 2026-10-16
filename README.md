@@ -8,6 +8,8 @@ Version 1.1 adds a constrained HTML view for the selected element. Its lightweig
 
 [Product page and full introduction](https://plugins.uplink.press/project/css-studio-for-bricks/)
 
+With **Follow canvas width** enabled, visual tools edit the last matching width query in the active root CSS. Media queries follow the canvas viewport; width container queries follow the actual ancestor container. The header shows the target, and Preferences can restore manual cursor-based editing. Direct typing remains at the cursor.
+
 CSS Studio does not edit Bricks' breakpoint-specific style-control values. It keeps responsive behavior in the Custom CSS stylesheet through `@media` and `@container` rules. Its query tools use registered Bricks breakpoint widths to help author those rules. The breakpoint label in the header reports builder context only.
 
 ## Requirements
@@ -38,3 +40,5 @@ The plugin is licensed under GPL-2.0-or-later. The bundled CSS property catalog 
 The in-editor value tools were inspired in particular by Elliot Bear's Drypoint and Strange Tech's Etch Enhancements. Advanced Themer and Code2Bricks also influenced the broader in-builder workflow.
 
 CSS Studio takes a different, code-first approach. It keeps Bricks Custom CSS as the source of truth instead of acting as an editor for Bricks' breakpoint-specific style values. It is an independent implementation and does not include or derive from the source code of the projects named above.
+
+Media and container query shortcuts always nest inside the base `%root%` rule, even when the cursor is outside it or inside another query. If needed, CSS Studio creates the root wrapper. With **Follow canvas width** enabled, click the media or container query icon to insert a mobile-first query at the current canvas width. Shift-click opens the registered Bricks breakpoint choices. When disabled, both icons open those Bricks choices directly.
