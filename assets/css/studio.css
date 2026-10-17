@@ -303,21 +303,27 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
   border: 1px solid #4b505b !important;
   border-radius: 8px !important;
   background: #202228 !important;
+  color: #e5e8ee !important;
+  color-scheme: dark;
   box-shadow: 0 16px 42px rgb(0 0 0 / 52%) !important;
   font: 14px/1.55 "SFMono-Regular", "Cascadia Code", Consolas, monospace !important;
 }
-.uplink-css-studio-shell .CodeMirror-hint { padding: 4px 8px !important; border-radius: 4px !important; color: #e5e8ee !important; }
-.uplink-css-studio-shell li.CodeMirror-hint-active { background: #f5b800 !important; color: #17181c !important; }
-.uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-abbreviation { color: #9edcff !important; }
-.uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-catalog { color: #e5e8ee !important; }
-.uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-unsupported { color: #aeb6c4 !important; }
-.uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-html-tag { color: #ffad7d !important; }
-.uplink-css-studio-shell .CodeMirror-hint.uplink-css-studio-hint-html-attribute { color: #7dd7ff !important; }
-.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-abbreviation { color: #17181c !important; }
-.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-catalog,
-.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-unsupported,
-.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-html-tag,
-.uplink-css-studio-shell li.CodeMirror-hint-active.uplink-css-studio-hint-html-attribute { color: #17181c !important; }
+.uplink-css-studio-shell .CodeMirror-hints .CodeMirror-hint { padding: 4px 8px !important; border-radius: 4px !important; color: #e5e8ee !important; }
+.uplink-css-studio-shell .CodeMirror-hints li.CodeMirror-hint-active { background: #f5b800 !important; color: #17181c !important; }
+.uplink-css-studio-shell .CodeMirror-hints .CodeMirror-hint.uplink-css-studio-hint-abbreviation { color: #9edcff !important; }
+.uplink-css-studio-shell .CodeMirror-hints .CodeMirror-hint.uplink-css-studio-hint-catalog { color: #e5e8ee !important; }
+.uplink-css-studio-shell .CodeMirror-hints .CodeMirror-hint.uplink-css-studio-hint-unsupported { color: #aeb6c4 !important; }
+.uplink-css-studio-shell .CodeMirror-hints .CodeMirror-hint.uplink-css-studio-hint-html-tag { color: #ffad7d !important; }
+.uplink-css-studio-shell .CodeMirror-hints .CodeMirror-hint.uplink-css-studio-hint-html-attribute { color: #7dd7ff !important; }
+.uplink-css-studio-shell .CodeMirror-hints li.CodeMirror-hint-active.uplink-css-studio-hint-abbreviation { color: #17181c !important; }
+.uplink-css-studio-shell .CodeMirror-hints li.CodeMirror-hint-active.uplink-css-studio-hint-catalog,
+.uplink-css-studio-shell .CodeMirror-hints li.CodeMirror-hint-active.uplink-css-studio-hint-unsupported,
+.uplink-css-studio-shell .CodeMirror-hints li.CodeMirror-hint-active.uplink-css-studio-hint-html-tag,
+.uplink-css-studio-shell .CodeMirror-hints li.CodeMirror-hint-active.uplink-css-studio-hint-html-attribute { color: #17181c !important; }
+
+/* Keep builder extensions' theme-dependent hover colors off this dark popup. */
+.uplink-css-studio-shell .CodeMirror-hints .CodeMirror-hint:not(.CodeMirror-hint-active):hover { color: #e5e8ee !important; }
+.uplink-css-studio-shell .CodeMirror-hints li.CodeMirror-hint-active:hover { color: #17181c !important; }
 
 .uplink-css-studio-popover { position: fixed; z-index: 100020; top: 10px; width: min(340px, calc(100vw - 20px)); max-height: calc(100vh - 20px); overflow: auto; overscroll-behavior: contain; border: 1px solid #444750; border-radius: 9px; background: #24262c; box-shadow: 0 18px 46px rgb(0 0 0 / 48%); }
 .uplink-css-studio-outline-panel { left: 10px; }

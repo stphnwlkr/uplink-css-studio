@@ -1,6 +1,14 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.9.1
+-----
+Fixed autocomplete contrast in the Bricks light editor.
+
+* Keep suggestions readable on CSS Studio's dark autocomplete popup in both Bricks editor themes.
+* Prevent Advanced Themer's theme-dependent suggestion and hover colors from overriding Studio's text and selected-row colors.
+* Scope the fix to CSS Studio autocomplete lists.
+
 1.9.0
 -----
 Added contextual unit conversion and query-aware tr expansion.

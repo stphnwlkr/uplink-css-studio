@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.9.0/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.9.1/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.9.0</h4><p>Right-click numeric CSS lengths to choose unit conversions or labelled unit swaps. Expand tr + Tab in nested media and container query thresholds, with the correct media-query font basis. Conversion remains available when scrubbing is disabled, and numeric values then show the text cursor. Includes keyboard access, cancellation, and stale-token protection.</p>"
+    "changelog": "<h4>1.9.1</h4><p>Fix autocomplete suggestion contrast in the Bricks light editor, including when Advanced Themer is active. Keep suggestion, hover, and selection colors readable in both editor themes. The fix is scoped to CSS Studio autocomplete lists.</p>"
   }
 }
