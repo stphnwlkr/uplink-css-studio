@@ -358,12 +358,24 @@
     gridRows: '<rect x="4" y="4" width="16" height="5" rx="1"/><rect x="4" y="10" width="16" height="5" rx="1"/><rect x="4" y="16" width="16" height="4" rx="1"/>',
     displayBlock: '<rect x="4" y="5" width="16" height="14" rx="1"/><path d="M7 9h10M7 12h10M7 15h7"/>',
     center: '<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M12 8v8M8 12h8"/>',
-    alignHStart: '<path d="M4 3v18"/><rect x="8" y="6" width="8" height="4" rx="1"/><rect x="8" y="14" width="12" height="4" rx="1"/>',
-    alignHCenter: '<path d="M12 3v18"/><rect x="5" y="6" width="14" height="4" rx="1"/><rect x="7" y="14" width="10" height="4" rx="1"/>',
-    alignHEnd: '<path d="M20 3v18"/><rect x="8" y="6" width="8" height="4" rx="1"/><rect x="4" y="14" width="12" height="4" rx="1"/>',
-    alignVStart: '<path d="M3 4h18"/><rect x="6" y="8" width="4" height="8" rx="1"/><rect x="14" y="8" width="4" height="12" rx="1"/>',
-    alignVCenter: '<path d="M3 12h18"/><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="7" width="4" height="10" rx="1"/>',
-    alignVEnd: '<path d="M3 20h18"/><rect x="6" y="8" width="4" height="8" rx="1"/><rect x="14" y="4" width="4" height="12" rx="1"/>',
+    alignMainHStart: '<path d="M3 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="7" width="3" height="10" rx="1"/><rect x="11" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></g>',
+    alignMainHCenter: '<path d="M12 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></g>',
+    alignMainHEnd: '<path d="M21 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="10" y="7" width="3" height="10" rx="1"/><rect x="15" y="7" width="3" height="10" rx="1"/></g>',
+    alignMainHBetween: '<path d="M2 3v18M22 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="4" y="7" width="3" height="10" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="17" y="7" width="3" height="10" rx="1"/></g>',
+    alignMainHAround: '<path d="M2 3v18M22 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="7" width="3" height="10" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15" y="7" width="3" height="10" rx="1"/></g>',
+    alignVStart: '<path d="M3 3h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="6" width="3" height="13" rx="1"/><rect x="11" y="6" width="3" height="7" rx="1"/><rect x="16" y="6" width="3" height="10" rx="1"/></g>',
+    alignVCenter: '<path d="M3 12h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="5.5" width="3" height="13" rx="1"/><rect x="11" y="8.5" width="3" height="7" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></g>',
+    alignVEnd: '<path d="M3 21h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="5" width="3" height="13" rx="1"/><rect x="11" y="11" width="3" height="7" rx="1"/><rect x="16" y="8" width="3" height="10" rx="1"/></g>',
+    alignVStretch: '<path d="M3 3h18M3 21h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="6" width="3" height="12" rx="1"/><rect x="11" y="6" width="3" height="12" rx="1"/><rect x="16" y="6" width="3" height="12" rx="1"/></g>',
+    alignMainVStart: '<g transform="matrix(0 1 1 0 0 0)"><path d="M3 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="7" width="3" height="10" rx="1"/><rect x="11" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></g></g>',
+    alignMainVCenter: '<g transform="matrix(0 1 1 0 0 0)"><path d="M12 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></g></g>',
+    alignMainVEnd: '<g transform="matrix(0 1 1 0 0 0)"><path d="M21 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="10" y="7" width="3" height="10" rx="1"/><rect x="15" y="7" width="3" height="10" rx="1"/></g></g>',
+    alignMainVBetween: '<g transform="matrix(0 1 1 0 0 0)"><path d="M2 3v18M22 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="4" y="7" width="3" height="10" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="17" y="7" width="3" height="10" rx="1"/></g></g>',
+    alignMainVAround: '<g transform="matrix(0 1 1 0 0 0)"><path d="M2 3v18M22 3v18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="7" width="3" height="10" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15" y="7" width="3" height="10" rx="1"/></g></g>',
+    alignHStart: '<g transform="matrix(0 1 1 0 0 0)"><path d="M3 3h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="6" width="3" height="13" rx="1"/><rect x="11" y="6" width="3" height="7" rx="1"/><rect x="16" y="6" width="3" height="10" rx="1"/></g></g>',
+    alignHCenter: '<g transform="matrix(0 1 1 0 0 0)"><path d="M3 12h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="5.5" width="3" height="13" rx="1"/><rect x="11" y="8.5" width="3" height="7" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></g></g>',
+    alignHEnd: '<g transform="matrix(0 1 1 0 0 0)"><path d="M3 21h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="5" width="3" height="13" rx="1"/><rect x="11" y="11" width="3" height="7" rx="1"/><rect x="16" y="8" width="3" height="10" rx="1"/></g></g>',
+    alignHStretch: '<g transform="matrix(0 1 1 0 0 0)"><path d="M3 3h18M3 21h18" opacity=".5" stroke-width="1.5"/><g fill="currentColor" stroke="none"><rect x="6" y="6" width="3" height="12" rx="1"/><rect x="11" y="6" width="3" height="12" rx="1"/><rect x="16" y="6" width="3" height="12" rx="1"/></g></g>',
     queryBelow: '<path d="M19.9432 19.0137L19.4843 20.4414L4.05652 15.4824L4.5155 14.0547L19.9432 19.0137ZM19.9432 4.98242L5.89441 9.49805L19.9432 14.0137L19.4843 15.4414L4.24988 10.5449L4.24988 8.45117L19.4843 3.55469L19.9432 4.98242Z" fill="currentColor" stroke="none"/>',
     queryAbove: '<path d="M19.9432 15.4824L4.5155 20.4414L4.05652 19.0137L19.4843 14.0547L19.9432 15.4824ZM19.7499 8.45117V10.5449L4.5155 15.4414L4.05652 14.0137L18.1044 9.49805L4.05652 4.98242L4.5155 3.55469L19.7499 8.45117Z" fill="currentColor" stroke="none"/>',
     queryBetween: '<path d="M4 5v14M20 5v14M8 12h8M9 9l-3 3 3 3M15 9l3 3-3 3"/>',
@@ -1551,10 +1563,13 @@
                 <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="start" aria-label="Main axis: start" aria-pressed="false" data-tooltip="Main axis: start"></button>
                 <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="center" aria-label="Main axis: center" aria-pressed="false" data-tooltip="Main axis: center"></button>
                 <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="end" aria-label="Main axis: end" aria-pressed="false" data-tooltip="Main axis: end"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="space-between" aria-label="Main axis: space-between" aria-pressed="false" data-tooltip="Main axis: space-between"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="main" data-alignment-value="space-around" aria-label="Main axis: space-around" aria-pressed="false" data-tooltip="Main axis: space-around"></button>
                 <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
                 <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="start" aria-label="Cross axis: start" aria-pressed="false" data-tooltip="Cross axis: start"></button>
                 <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="center" aria-label="Cross axis: center" aria-pressed="false" data-tooltip="Cross axis: center"></button>
                 <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="end" aria-label="Cross axis: end" aria-pressed="false" data-tooltip="Cross axis: end"></button>
+                <button class="uplink-css-studio-tool uplink-css-studio-alignment-action" type="button" data-alignment-axis="cross" data-alignment-value="stretch" aria-label="Cross axis: stretch" aria-pressed="false" data-tooltip="Cross axis: stretch"></button>
                 <button class="uplink-css-studio-tool uplink-css-studio-place-alignment" type="button" data-place-value="center" aria-label="Place center" aria-pressed="false" data-tooltip="Place center">${icon('center')}</button>
               </span>
               <span class="uplink-css-studio-toolbar-divider" aria-hidden="true"></span>
@@ -5495,7 +5510,8 @@
     const node = canvasElementNode(state.context?.element);
     const view = node?.ownerDocument?.defaultView;
     if (!view) return;
-    const dimensions = [view.innerWidth, view.innerHeight];
+    const layout = computedLayoutContext();
+    const dimensions = [view.innerWidth, view.innerHeight, layout.display || '', layout['flex-direction'] || ''];
     for (let parent = node.parentElement; parent; parent = parent.parentElement) dimensions.push(parent.clientWidth, parent.clientHeight);
     const signature = dimensions.join(':');
     if (signature === state.responsiveDimensions) return;
@@ -5642,6 +5658,40 @@
     return declarations.get(property)?.value || computed[property] || fallback;
   }
 
+  function layoutToolContext(declarations, computed) {
+    // Conditional blocks share their enclosing selector's layout. A child
+    // selector starts a new context because display is not inherited.
+    const inherited = new Map();
+    if (state.editor) {
+      const doc = state.editor.getDoc();
+      const source = doc.getValue();
+      const target = responsiveLayoutBlock(source, doc.indexFromPos(doc.getCursor()));
+      if (target && !target.createBase && cleanRulePrelude(target).startsWith('@')) {
+        const ancestors = openBlocksAt(source, target.open);
+        let selector = ancestors.length;
+        for (let index = ancestors.length - 1; index >= 0; index--) {
+          if (!cleanRulePrelude(ancestors[index]).startsWith('@')) { selector = index; break; }
+        }
+        for (const block of ancestors.slice(selector)) {
+          const close = matchingBrace(source, block.open);
+          if (close !== -1) directDeclarations(source.slice(block.open + 1, close)).forEach((entry, property) => inherited.set(property, entry));
+        }
+      }
+    }
+    declarations.forEach((entry, property) => inherited.set(property, entry));
+    const normalize = (value) => String(value || '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s*!important\s*$/i, '').trim().toLowerCase();
+    const value = (property, fallback = '') => {
+      const declared = normalize(inherited.get(property)?.value);
+      return !declared || /^(?:var|env)\(/.test(declared) || /^(initial|inherit|unset|revert|revert-layer)$/.test(declared)
+        ? normalize(computed[property]) || declared || fallback : declared;
+    };
+    const display = value('display');
+    const direction = value('flex-direction', 'row');
+    const type = /^(?:(?:inline|block) )?grid$|^inline-grid$/.test(display) ? 'grid'
+      : /^(?:(?:inline|block) )?flex$|^inline-flex$/.test(display) ? 'flex' : '';
+    return { display, direction, type };
+  }
+
   function upsertLayoutDeclarations(declarations, options = {}) {
     if (!state.editor || !declarations || !Object.keys(declarations).length) return;
     const shouldFocus = options.focus !== false;
@@ -5748,19 +5798,19 @@
     return value;
   }
 
-  function alignmentIconName(orientation, value) {
-    const suffix = value === 'center' ? 'Center' : value === 'end' ? 'End' : 'Start';
-    return `align${orientation}${suffix}`;
+  function alignmentIconName(orientation, value, axis = 'cross') {
+    const suffix = { center: 'Center', end: 'End', 'space-between': 'Between', 'space-around': 'Around', stretch: 'Stretch' }[value] || 'Start';
+    return `align${axis === 'main' ? 'Main' : ''}${orientation}${suffix}`;
   }
 
   function applyPlaceAlignment(value, remove = false) {
     const declarations = declarationsAtLayoutContext();
     const computed = computedLayoutContext();
-    const display = layoutContextValue(declarations, computed, 'display');
-    if (/grid/.test(display)) upsertLayoutDeclarations(remove
+    const { type } = layoutToolContext(declarations, computed);
+    if (type === 'grid') upsertLayoutDeclarations(remove
       ? { 'place-items': '', 'justify-items': '', 'align-items': '' }
       : { 'place-items': value });
-    else if (/flex/.test(display)) upsertLayoutDeclarations({ 'justify-content': remove ? '' : value, 'align-items': remove ? '' : value });
+    else if (type === 'flex') upsertLayoutDeclarations({ 'justify-content': remove ? '' : value, 'align-items': remove ? '' : value });
     refreshLayoutTools();
   }
 
@@ -5783,8 +5833,7 @@
       if (query.textContent !== label) query.textContent = label;
       if (query.title !== `Visual edits: ${label}`) query.title = `Visual edits: ${label}`;
     }
-    const display = layoutContextValue(declarations, computed, 'display');
-    const direction = layoutContextValue(declarations, computed, 'flex-direction', 'row');
+    const { type: layoutType, direction } = layoutToolContext(declarations, computed);
     const placeItems = layoutContextValue(declarations, computed, 'place-items');
     const justifyContent = layoutContextValue(declarations, computed, 'justify-content');
     const justifyItems = layoutContextValue(declarations, computed, 'justify-items');
@@ -5808,7 +5857,6 @@
       blockButton.hidden = !state.context || /^(section|container)$/.test(elementName);
     }
 
-    const layoutType = /grid/.test(display) ? 'grid' : /flex/.test(display) ? 'flex' : '';
     const gridTemplateTools = document.querySelector('.uplink-css-studio-grid-template-tools');
     if (gridTemplateTools) gridTemplateTools.hidden = layoutType !== 'grid';
     document.querySelectorAll('[data-grid-template]').forEach((button) => {
@@ -5833,8 +5881,9 @@
         ? (axis === 'main' ? 'Inline axis' : 'Block axis')
         : (axis === 'main' ? 'Main axis' : 'Cross axis');
       const value = button.dataset.alignmentValue;
+      button.hidden = value.startsWith('space-') && layoutType !== 'flex';
       button.dataset.alignmentProperty = property;
-      button.innerHTML = icon(alignmentIconName(orientation, value));
+      button.innerHTML = icon(alignmentIconName(orientation, value, layoutType === 'flex' ? axis : 'cross'));
       button.setAttribute('aria-label', `${axisLabel}: ${value}`);
       button.dataset.tooltip = `${axisLabel}: ${value} · ${property}`;
       const shorthandValue = layoutType === 'grid' && declarations.has('place-items')

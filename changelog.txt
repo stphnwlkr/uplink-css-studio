@@ -1,6 +1,17 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.9.2
+-----
+Fixed missing alignment options and toolbar context updates.
+
+* Add space-between and space-around for the flex main axis, and stretch for cross-axis alignment.
+* Replace alignment icons with solid bars and guide lines that follow the flex direction.
+* Refresh toolbar visibility when Bricks or class layouts change without resizing the canvas element. Show alignment for flex and grid, grid templates only for grid, and spacing alignment only for flex.
+* Keep the enclosing selector layout inside media and container queries without inheriting display from parent selectors.
+* Recognize inline and two-keyword flex/grid display values, important declarations, and resolved display variables.
+* Add eight contextual toolbar regression checks to release validation.
+
 1.9.1
 -----
 Fixed autocomplete contrast in the Bricks light editor.
