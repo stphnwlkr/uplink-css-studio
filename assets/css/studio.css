@@ -686,3 +686,8 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
 .uplink-css-studio-unit-options button:hover, .uplink-css-studio-unit-options button:focus-visible { background: #353b40; outline: 1px solid #74828c; outline-offset: -1px; }
 .uplink-css-studio-unit-options code { min-width: 90px; padding: 0; background: transparent; color: inherit; font-size: 14px; }
 .uplink-css-studio-unit-options span { color: #a8adb7; font-size: 12px; }
+
+.uplink-css-studio-target-help { margin: -5px 0 0; color: #aeb5c2; font-size: 11px; line-height: 1.5; }
+.uplink-css-studio-target-field > .uplink-css-studio-assigned-classes { display: flex; flex-wrap: wrap; gap: 6px; }
+.uplink-css-studio-assigned-classes button { max-width: 100%; padding: 5px 8px; border: 1px solid #50545f; border-radius: 5px; background: #1c1e23; color: #dfe5ee; overflow-wrap: anywhere; font: 12px/1.4 "SFMono-Regular", Consolas, monospace; cursor: pointer; }
+.uplink-css-studio-assigned-classes button:hover, .uplink-css-studio-assigned-classes button[aria-pressed="true"] { border-color: var(--uplink-css-studio-accent); color: var(--uplink-css-studio-accent); }

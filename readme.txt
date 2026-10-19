@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.9.2
+Stable tag: 1.10.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,8 @@ The in-editor value tools were inspired in particular by Elliot Bear's Drypoint 
 Uplink CSS Studio is an independent implementation. It does not include or derive from those projects' source code. It is not affiliated with or endorsed by Bricks, Drypoint, Etch, Strange Tech, Advanced Themer, Code2Bricks, or ACSS.
 
 == Features ==
+
+* Edit the selected element's CSS ID and plain CSS classes in the CSS target panel. View assigned global classes separately and click a class to edit its stylesheet. Plain CSS class edits do not create or rename reusable global classes.
 
 * Clamp calculator beside the Style Manager button, with rem/px values, editable root size, viewport limits, and insertion at the CSS cursor or selection.
 * Calculation previews use the browser to check resolved variable units. Invalid calculations show an explanation and are not applied by Tab; unresolved variables are reported as unverified.
@@ -160,6 +162,13 @@ The `tr` + Tab shortcut works in media and container query thresholds as well as
 Right-click a numeric CSS length to open Convert units. Converted options preserve the length at the current canvas size. Unit swap options keep the number and change only its unit. Selecting an option changes only that token; Escape dismisses the menu. This works with numeric scrubbing disabled. On a focused numeric token, Enter or Shift+F10 also opens the menu.
 
 == Changelog ==
+
+= 1.10.0 =
+* Add editable element CSS classes and CSS ID to the target panel, with save buttons, Enter to apply, and Escape to discard a field draft.
+* Show global class assignment first, with assigned classes listed separately. Click an assigned class to edit its stylesheet.
+* Group element fields under Element CSS & ID and move the target button first after the CSS/HTML tabs.
+* Preserve plain class names and dynamic tag syntax without creating or renaming global classes. Allow clearing classes and ID without changing authored CSS.
+* Keep field drafts during refreshes, refresh native changes, and reset fields on element changes. Add nine target-panel regression checks.
 
 = 1.9.2 =
 * Add the missing space-between, space-around, and cross-axis stretch alignment controls.

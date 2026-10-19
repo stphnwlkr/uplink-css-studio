@@ -1,6 +1,18 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.10.0
+------
+Added element CSS classes and ID editing to the target panel.
+
+* Put global class assignment first and show assigned global classes as buttons that open their stylesheets.
+* Add an Element CSS & ID section for plain element class names and the CSS ID. Save with the check button or Enter; discard a field draft with Escape.
+* Preserve case, utility class names, and dynamic tag syntax. Element class edits do not create or rename reusable global classes.
+* Allow clearing the CSS ID or element classes without changing the stylesheet or global class assignments.
+* Keep unfinished field edits during refreshes and reset values when selecting another element.
+* Move the target button to the first toolbar position after CSS/HTML.
+* Add nine target-panel regression checks to release validation.
+
 1.9.2
 -----
 Fixed missing alignment options and toolbar context updates.

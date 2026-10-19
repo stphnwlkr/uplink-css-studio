@@ -40,6 +40,7 @@ jobs:
           node tests/responsive-regression.cjs
           node tests/rem-regression.cjs
           node tests/toolbar-regression.cjs
+          node tests/targets-regression.cjs
           php -l uplink-css-studio.php
 
       - name: Build the installable ZIP

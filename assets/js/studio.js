@@ -1543,9 +1543,9 @@
             </div>
             <span class="uplink-css-studio-toolbar-divider uplink-css-studio-mode-divider" aria-hidden="true"></span>
             <div class="uplink-css-studio-toolbar-scroll" role="group" aria-label="CSS tools, scroll horizontally" tabindex="0">
+              <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" aria-keyshortcuts="${navigator.platform.toLowerCase().includes('mac') ? 'Meta+Alt+G' : 'Control+Alt+G'}" data-tooltip="%root%, class, ID & HTML · ${navigator.platform.toLowerCase().includes('mac') ? '⌘⌥G' : 'Ctrl+Alt+G'}">${icon('target')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-outline-toggle" type="button" aria-label="Toggle stylesheet outline" data-tooltip="Outline · ⌘⇧O">${icon('outline')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-recipes-toggle" type="button" aria-label="Open recipe manager" data-tooltip="Recipe manager">${icon('shortcuts')}</button>
-              <button class="uplink-css-studio-tool uplink-css-studio-targets-toggle" type="button" aria-label="CSS selector target" aria-keyshortcuts="${navigator.platform.toLowerCase().includes('mac') ? 'Meta+Alt+G' : 'Control+Alt+G'}" data-tooltip="%root%, class, ID & HTML · ${navigator.platform.toLowerCase().includes('mac') ? '⌘⌥G' : 'Ctrl+Alt+G'}">${icon('target')}</button>
               <button class="uplink-css-studio-tool" type="button" data-recipe="parent" aria-label="Has me selector" data-tooltip="Has me selector :has(> &)">${icon('parent')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-container-toggle" type="button" aria-label="Container queries" data-tooltip="Container query at canvas width · Shift-click for Bricks breakpoints">${icon('container')}</button>
               <button class="uplink-css-studio-tool uplink-css-studio-media-toggle" type="button" aria-label="Media queries" data-tooltip="Media query at canvas width · Shift-click for Bricks breakpoints">${icon('media')}</button>
@@ -1647,8 +1647,12 @@
               <div class="uplink-css-studio-popover-head"><strong>CSS target</strong><span>Element or site-wide HTML</span></div>
               <div class="uplink-css-studio-targets-body">
                 <button class="uplink-css-studio-root-rule" type="button"><code>%root%</code><span>Insert the active element selector</span>${icon('target')}</button>
-                <label class="uplink-css-studio-target-field"><span>Global class</span><div><input class="uplink-css-studio-class-input" type="text" placeholder="feature-card" autocomplete="off"><button class="uplink-css-studio-assign-class" type="button" aria-label="Create or attach global class" data-tooltip="Create or attach global class">${icon('target')}</button></div></label>
-                <label class="uplink-css-studio-target-field"><span>ID</span><div><input class="uplink-css-studio-id-input" type="text" placeholder="features" autocomplete="off"><button class="uplink-css-studio-assign-id" type="button" aria-label="Assign ID and insert root selector" data-tooltip="Assign ID & insert %root%">${icon('target')}</button></div></label>
+                <label class="uplink-css-studio-target-field"><span>Add global class</span><div><input class="uplink-css-studio-class-input" type="text" placeholder="feature-card" autocomplete="off"><button class="uplink-css-studio-assign-class" type="button" aria-label="Create or attach global class" data-tooltip="Create or attach global class">${icon('target')}</button></div></label>
+                <div class="uplink-css-studio-target-field"><span>Assigned global classes</span><div class="uplink-css-studio-assigned-classes" aria-label="Assigned global classes"></div></div>
+                <div class="uplink-css-studio-target-separator" role="separator"><span>Element CSS &amp; ID</span></div>
+                <label class="uplink-css-studio-target-field"><span>CSS classes</span><div><input class="uplink-css-studio-element-classes-input" type="text" placeholder="hero-section direct" autocomplete="off" aria-describedby="uplink-css-studio-element-classes-help"><button class="uplink-css-studio-save-element-classes" type="button" aria-label="Save CSS classes" data-tooltip="Save CSS classes">${icon('check')}</button></div></label>
+                <p class="uplink-css-studio-target-help" id="uplink-css-studio-element-classes-help">Class names on this element. Separate with spaces.</p>
+                <label class="uplink-css-studio-target-field"><span>CSS ID</span><div><input class="uplink-css-studio-id-input" type="text" placeholder="features" autocomplete="off"><button class="uplink-css-studio-assign-id" type="button" aria-label="Save CSS ID" data-tooltip="Save CSS ID">${icon('check')}</button></div></label>
                 <div class="uplink-css-studio-target-separator" role="separator"><span>Site-wide HTML</span></div>
                 <label class="uplink-css-studio-target-field"><span>HTML selector</span><div><input class="uplink-css-studio-html-input" type="text" placeholder="address, dl, dt, dd" autocomplete="off"><button class="uplink-css-studio-open-html-target" type="button" aria-label="Edit HTML selector in the active Theme Style" data-tooltip="Edit in Theme Style stylesheet">${icon('styleManager')}</button></div></label>
                 <p>HTML tags are edited in the applicable site-wide <strong>Theme Style → Stylesheet</strong>. CSS Studio opens that native stylesheet here and adds the selector when needed.</p>
@@ -3323,9 +3327,26 @@
     document.querySelector('.uplink-css-studio-root-rule').addEventListener('click', () => { leaveSiteWideContext(); insertRule('%root% {\n  \n}'); closePopovers(); });
     document.querySelector('.uplink-css-studio-assign-class').addEventListener('click', assignClassTarget);
     document.querySelector('.uplink-css-studio-assign-id').addEventListener('click', assignIdTarget);
+    document.querySelector('.uplink-css-studio-save-element-classes').addEventListener('click', saveElementClasses);
+    document.querySelector('.uplink-css-studio-assigned-classes').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-target-class-id]');
+      if (!button) return;
+      switchCssTarget(button.dataset.targetClassId);
+      closePopovers();
+    });
     document.querySelector('.uplink-css-studio-open-html-target').addEventListener('click', openHtmlTarget);
     document.querySelector('.uplink-css-studio-class-input').addEventListener('keydown', (event) => applyTargetOnEnter(event, assignClassTarget));
     document.querySelector('.uplink-css-studio-id-input').addEventListener('keydown', (event) => applyTargetOnEnter(event, assignIdTarget));
+    document.querySelector('.uplink-css-studio-element-classes-input').addEventListener('keydown', (event) => applyTargetOnEnter(event, saveElementClasses));
+    document.querySelectorAll('.uplink-css-studio-id-input, .uplink-css-studio-element-classes-input').forEach((input) => {
+      input.addEventListener('input', () => { input.dataset.dirty = 'true'; });
+      input.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        event.preventDefault(); event.stopPropagation();
+        input.dataset.dirty = 'false';
+        renderTargetValues();
+      });
+    });
     document.querySelector('.uplink-css-studio-html-input').addEventListener('keydown', (event) => applyTargetOnEnter(event, openHtmlTarget));
     document.querySelector('.uplink-css-studio-media-toggle').addEventListener('click', (event) => { event.stopPropagation(); activateQueryTool('media', event); });
     document.querySelector('.uplink-css-studio-container-toggle').addEventListener('click', (event) => { event.stopPropagation(); activateQueryTool('container', event); });
@@ -4487,6 +4508,8 @@
     }
     syncEditorFromBricks(next);
     refreshResponsiveTools();
+    const targetsPanel = document.querySelector('.uplink-css-studio-targets-panel');
+    if (targetsPanel && !targetsPanel.hidden) renderTargetValues();
   }
 
   function promoteNativeCssGroup() {
@@ -6171,14 +6194,44 @@
   function toggleOutline() { togglePopover('outline'); }
 
   function renderTargetValues() {
-    const settings = state.context?.element?.settings || {};
+    const ctx = state.context;
+    const element = ctx?.element;
+    const settings = element?.settings || {};
+    const elementId = String(element?.id || '');
+    const fields = [
+      ['.uplink-css-studio-id-input', '_cssId'],
+      ['.uplink-css-studio-element-classes-input', '_cssClasses']
+    ];
+    fields.forEach(([selector, key]) => {
+      const input = document.querySelector(selector);
+      if (!input) return;
+      if (input.dataset.elementId !== elementId) input.dataset.dirty = 'false';
+      if (input.dataset.dirty !== 'true') input.value = String(settings[key] || '');
+      input.dataset.elementId = elementId;
+      input.disabled = !element;
+    });
     const classInput = document.querySelector('.uplink-css-studio-class-input');
-    const idInput = document.querySelector('.uplink-css-studio-id-input');
-    const classNames = (Array.isArray(settings._cssGlobalClasses) ? settings._cssGlobalClasses : [])
-      .map((id) => state.context?.s?.globalClasses?.find((item) => item.id === id)?.name)
-      .filter(Boolean);
-    if (classInput) classInput.value = classNames.join(' ');
-    if (idInput) idInput.value = String(settings._cssId || '');
+    if (classInput) {
+      if (classInput.dataset.elementId !== elementId) classInput.value = '';
+      classInput.dataset.elementId = elementId;
+      classInput.disabled = !element;
+    }
+    const list = document.querySelector('.uplink-css-studio-assigned-classes');
+    if (list) {
+      const classes = htmlGlobalClassNames(ctx);
+      const ids = Array.isArray(settings._cssGlobalClasses) ? settings._cssGlobalClasses : [];
+      const signature = JSON.stringify([elementId, ids, classes, ctx?.kind, ctx?.target?.id]);
+      if (list.dataset.signature !== signature) {
+        list.innerHTML = ids.map((id) => {
+          const globalClass = ctx?.s?.globalClasses?.find((item) => item?.id === id);
+          if (!globalClass) return '';
+          const active = ctx.kind === 'Class' && ctx.target?.id === id;
+          return `<button type="button" data-target-class-id="${escapeAttr(id)}" aria-label="Edit global class ${escapeAttr(globalClass.name)}" aria-pressed="${active}">.${escapeHtml(globalClass.name)}</button>`;
+        }).join('') || '<span class="uplink-css-studio-target-help">None assigned</span>';
+        list.dataset.signature = signature;
+      }
+    }
+    document.querySelectorAll('.uplink-css-studio-assign-id, .uplink-css-studio-save-element-classes, .uplink-css-studio-assign-class').forEach((button) => { button.disabled = !element; });
   }
 
   function toggleTargetsPanel() {
@@ -6307,18 +6360,33 @@
     return id;
   }
 
-  function assignIdTarget() {
-    leaveSiteWideContext();
+  function saveElementTargetField(key, value) {
+    if (!['_cssId', '_cssClasses'].includes(key)) return;
     const ctx = state.context;
-    if (!ctx) return;
+    if (!ctx?.element) return;
+    if (state.pendingWrite) writeToBricks(true);
+    ctx.element.settings = ctx.element.settings || {};
+    if (value) ctx.element.settings[key] = value;
+    else delete ctx.element.settings[key];
+    markElementDirty(`${key === '_cssId' ? 'CSS ID' : 'CSS classes'} ${value ? 'saved' : 'cleared'}`);
+    const input = document.querySelector(key === '_cssId' ? '.uplink-css-studio-id-input' : '.uplink-css-studio-element-classes-input');
+    if (input) input.dataset.dirty = 'false';
+    renderTargetValues();
+  }
+
+  function saveElementClasses() {
+    const input = document.querySelector('.uplink-css-studio-element-classes-input');
+    const value = String(input?.value || '').trim();
+    leaveSiteWideContext();
+    // Keep native Bricks text intact, including case, utility names and dynamic tags.
+    saveElementTargetField('_cssClasses', value);
+  }
+
+  function assignIdTarget() {
     const input = document.querySelector('.uplink-css-studio-id-input');
-    const id = String(input?.value || '').replace(/^#/, '').replace(/[^a-zA-Z0-9_-]/g, '');
-    if (!id) { setStatus('Enter an ID', 'dirty'); return; }
-    ctx.element.settings._cssId = id;
-    if (input) input.value = id;
-    markElementDirty(`Assigned #${id}`);
-    insertRule('%root% {\n  \n}');
-    closePopovers();
+    const id = String(input?.value || '').trim().replace(/^#/, '');
+    leaveSiteWideContext();
+    saveElementTargetField('_cssId', id);
   }
 
   function nativeStyleManagerTrigger() {
