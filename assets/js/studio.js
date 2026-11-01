@@ -1710,7 +1710,7 @@
           <footer class="uplink-css-studio-footer">
             <span class="uplink-css-studio-status">Ready</span>
             <span class="uplink-css-studio-position">Ln 1, Col 1</span>
-            <span class="uplink-css-studio-shortcuts"><kbd>@recipe;</kbd> insert recipe &nbsp; <kbd>tr80 Tab</kbd> rem &nbsp; <kbd>r Tab</kbd> %root% rule &nbsp; <kbd>⌘⌥X</kbd> scrub</span>
+            <span class="uplink-css-studio-shortcuts"><kbd>?recipe;</kbd> insert recipe &nbsp; <kbd>tr80 Tab</kbd> rem &nbsp; <kbd>r Tab</kbd> %root% rule &nbsp; <kbd>⌘⌥X</kbd> scrub</span>
             <span class="uplink-css-studio-shortcuts uplink-css-studio-html-shortcuts" hidden><kbd>Tab</kbd> expand &nbsp; <kbd>Ctrl Space</kbd> complete &nbsp; <kbd>⌘/Ctrl ]</kbd> apply</span>
           </footer>
         </section>
@@ -3471,7 +3471,7 @@
     const character = change.text[0];
     if (character === ';' && expandRecipeTrigger(editor)) return;
     if (updateCalculationPreview(editor)) return;
-    if (!/[a-zA-Z@():>-]/.test(character)) return;
+    if (!/[a-zA-Z?@():>-]/.test(character)) return;
     const cursor = editor.getCursor();
     const token = editor.getTokenAt(cursor);
     if (/comment|string/.test(token.type || '')) return;
@@ -3482,7 +3482,8 @@
   function expandRecipeTrigger(editor) {
     const cursor = editor.getCursor();
     const beforeCursor = editor.getLine(cursor.line).slice(0, cursor.ch);
-    const match = beforeCursor.match(/@([a-z0-9_-]+);$/i);
+    if (editor.somethingSelected() || /comment|string/.test(editor.getTokenAt(cursor)?.type || '')) return false;
+    const match = beforeCursor.match(/\?([a-z0-9_-]+);$/i);
     if (!match) return false;
     const catalog = recipeCatalog();
     const recipeName = Object.keys(catalog).find((name) => name.toLowerCase() === match[1].toLowerCase());
@@ -3521,8 +3522,9 @@
 
     const catalog = recipeCatalog();
     const recipeName = Object.keys(catalog).find((name) => name.toLowerCase() === token);
-    if (recipeName) {
-      insertExternalRecipe(catalog[recipeName].css, editor, from, cursor);
+    if (recipeName && !/@$/.test(beforeToken)) {
+      const recipeFrom = beforeToken.endsWith('?') ? CodeMirror.Pos(from.line, from.ch - 1) : from;
+      insertExternalRecipe(catalog[recipeName].css, editor, recipeFrom, cursor);
       return;
     }
 
@@ -4087,6 +4089,24 @@
     return { list, from: CodeMirror.Pos(from.line, from.ch), to: cursor };
   }
 
+  function recipeTriggerHints(editor, cursor, CodeMirror) {
+    if (editor.somethingSelected() || /comment|string/.test(editor.getTokenAt(cursor)?.type || '')) return null;
+    const beforeCursor = editor.getLine(cursor.line).slice(0, cursor.ch);
+    const trigger = beforeCursor.match(/\?([a-z0-9_-]*)$/i);
+    if (!trigger) return null;
+    const prefix = trigger[1].toLowerCase();
+    const from = CodeMirror.Pos(cursor.line, cursor.ch - trigger[0].length);
+    const list = Object.entries(recipeCatalog())
+      .filter(([name]) => name.toLowerCase().startsWith(prefix))
+      .map(([name, recipe]) => ({
+        text: `?${name};`,
+        displayText: `?${name};  →  ${recipe.label}`,
+        className: 'uplink-css-studio-hint-recipe',
+        hint: (cm, data) => insertExternalRecipe(recipe.css, cm, data.from, data.to)
+      }));
+    return { list, from, to: cursor };
+  }
+
   function cssHints(editor, options) {
     const CodeMirror = window.wp?.CodeMirror;
     const cursor = editor.getCursor();
@@ -4097,28 +4117,22 @@
     const queryHints = queryPreludeHints(editor, cursor, CodeMirror);
     if (queryHints) return queryHints;
 
-    const recipeTrigger = beforeCursor.match(/@([a-z0-9_-]*)$/i);
-    if (recipeTrigger) {
-      const recipePrefix = recipeTrigger[1].toLowerCase();
-      const recipeFrom = CodeMirror.Pos(cursor.line, cursor.ch - recipeTrigger[0].length);
+    const recipeHints = recipeTriggerHints(editor, cursor, CodeMirror);
+    if (recipeHints) return recipeHints;
+
+    const atRuleTrigger = beforeCursor.match(/@([a-z0-9_-]*)$/i);
+    if (atRuleTrigger) {
+      const atRulePrefix = atRuleTrigger[1].toLowerCase();
+      const atRuleFrom = CodeMirror.Pos(cursor.line, cursor.ch - atRuleTrigger[0].length);
       const atRuleItems = ['media', 'container']
-        .filter((name) => name.startsWith(recipePrefix))
+        .filter((name) => name.startsWith(atRulePrefix))
         .map((name) => ({
           text: `@${name} () {\n  \n}`,
           displayText: `@${name} (…) { … }`,
           className: 'uplink-css-studio-hint-catalog',
           hint: (cm, data) => insertAtRuleCompletion(cm, data.from, data.to, name)
         }));
-      const recipeItems = Object.entries(recipeCatalog())
-        .filter(([name]) => name.toLowerCase().startsWith(recipePrefix))
-        .map(([name, recipe]) => ({
-          text: `@${name};`,
-          displayText: `@${name};  →  ${recipe.label}`,
-          className: 'uplink-css-studio-hint-recipe',
-          hint: (cm, data) => insertExternalRecipe(recipe.css, cm, data.from, data.to)
-        }));
-      const atRuleAndRecipeItems = [...atRuleItems, ...recipeItems];
-      if (atRuleAndRecipeItems.length) return { list: atRuleAndRecipeItems, from: recipeFrom, to: cursor };
+      if (atRuleItems.length) return { list: atRuleItems, from: atRuleFrom, to: cursor };
     }
 
     if (declaration) {
@@ -4194,7 +4208,7 @@
         displayText: `${variable.name}  →  ${variable.source}`,
         className: 'uplink-css-studio-hint-variable'
       }));
-    const recipeItems = prefix.length >= 2 ? Object.entries(recipeCatalog())
+    const recipeItems = prefix.length >= 2 && !/@[a-z0-9_-]*$/i.test(beforeCursor) ? Object.entries(recipeCatalog())
       .filter(([name]) => name.toLowerCase().startsWith(prefix))
       .map(([name, recipe]) => recipeHint(name, recipe.css, recipe.provider)) : [];
     const seen = new Set();

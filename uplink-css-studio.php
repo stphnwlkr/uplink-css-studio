@@ -4,7 +4,7 @@
  * Plugin URI: https://plugins.uplink.press/project/css-studio-for-bricks/
  * Update URI: https://github.com/stphnwlkr/uplink-css-studio/
  * Description: A code-first CSS workspace for Bricks with live sync, completion, visual value tools, recipes, and query helpers.
- * Version: 1.10.0
+ * Version: 1.10.1
  * Requires at least: 7.0
  * Requires PHP: 8.3
  * Tested up to: 7.1
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Plugin {
-	const VERSION = '1.10.0';
+	const VERSION = '1.10.1';
 	const MINIMUM_BRICKS_VERSION = '2.4';
 	const USER_RECIPES_META = '_uplink_css_studio_recipes';
 
@@ -52,6 +52,7 @@ final class Plugin {
 			return array();
 		}
 
+		$color_variables = self::get_acss_recipe_variables();
 		$recipes = array();
 		foreach ( is_array( $available ) ? $available : array() as $name => $css ) {
 			if ( ! is_string( $name ) || ! is_string( $css ) || '' === trim( $css ) ) {
@@ -63,10 +64,53 @@ final class Plugin {
 			if ( ! preg_match( '/%root%|@(?:media|container|supports|layer|property|scope)\b|(?:^|\n)\s*[-\w]+\s*:|\b(?:var|hsl|rgb|oklch|color-mix)\(/m', $css ) ) {
 				continue;
 			}
+			if ( ! self::acss_color_recipe_is_available( $name, $css, $color_variables ) ) {
+				continue;
+			}
 			$recipes[ sanitize_key( $name ) ] = $css;
 		}
 
 		return $recipes;
+	}
+
+	private static function get_acss_recipe_variables() {
+		// ACSS 4.0.2 exposes the tokens actually present in its generated CSS.
+		if ( class_exists( '\\Automatic_CSS\\Model\\Generated_Inventory' ) ) {
+			try {
+				$inventory = new \Automatic_CSS\Model\Generated_Inventory();
+				if ( $inventory->is_available() ) {
+					return array_fill_keys( self::normalize_variable_names( $inventory->get_variables() ), true );
+				}
+			} catch ( \Throwable $error ) {
+				// Older ACSS installations can still provide their active catalogue.
+			}
+		}
+		if ( class_exists( '\\Automatic_CSS\\Model\\Config\\Framework' ) ) {
+			try {
+				$variables = self::normalize_variable_names( ( new \Automatic_CSS\Model\Config\Framework() )->get_variables( true ) );
+				if ( $variables ) {
+					return array_fill_keys( $variables, true );
+				}
+			} catch ( \Throwable $error ) {
+				// Without an inventory, preserve the provider's recipes.
+			}
+		}
+		return null;
+	}
+
+	private static function acss_color_recipe_is_available( $name, $css, $variables ) {
+		// Limit filtering to ACSS colour-value recipes. Layout recipes may define
+		// their own local variables, and user recipes have a separate loader.
+		if ( null === $variables || ! preg_match( '/-clr$/i', $name ) ) {
+			return true;
+		}
+		preg_match_all( '/var\(\s*(--[A-Za-z_][A-Za-z0-9_-]*)\s*([,)])/', $css, $references, PREG_SET_ORDER );
+		foreach ( $references as $reference ) {
+			if ( ')' === $reference[2] && ! isset( $variables[ $reference[1] ] ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static function normalize_variable_names( $variables ) {

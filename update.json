@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.10.0/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.10.1/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.10.0</h4><p>Edit element CSS classes and CSS ID directly in the target panel. Global class assignment comes first, with assigned classes listed separately for stylesheet editing. Element fields preserve case and dynamic tags, support clearing, and keep unfinished edits during refreshes. The target button now appears first after CSS/HTML. Includes nine new target-panel regression checks.</p>"
+    "changelog": "<h4>1.10.1</h4><p>Follow ACSS\u2019s new question-mark recipe trigger: use ?recipe;, ? autocomplete, or ?recipe with Tab. CSS at-rules retain @. Hide ACSS color recipes whose required tokens are unavailable while preserving available colors, layout recipes, and user recipes. Includes 17 new recipe compatibility and trigger regression checks.</p>"
   }
 }

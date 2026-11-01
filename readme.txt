@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.10.0
+Stable tag: 1.10.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,8 @@ The in-editor value tools were inspired in particular by Elliot Bear's Drypoint 
 Uplink CSS Studio is an independent implementation. It does not include or derive from those projects' source code. It is not affiliated with or endorsed by Bricks, Drypoint, Etch, Strange Tech, Advanced Themer, Code2Bricks, or ACSS.
 
 == Features ==
+
+* ACSS color recipes follow the site's available color tokens, hiding disabled colors and their shades while preserving layout and custom recipes.
 
 * Edit the selected element's CSS ID and plain CSS classes in the CSS target panel. View assigned global classes separately and click a class to edit its stylesheet. Plain CSS class edits do not create or rename reusable global classes.
 
@@ -94,7 +96,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 * Tab after a property abbreviation or partial property name: Complete the property and insert `: ;`, leaving the caret between the colon and semicolon.
 * Arithmetic declaration values show a calculation preview beside the cursor. Tab applies the preview, expands bare custom properties, and preserves an existing semicolon. Escape dismisses the preview.
 * Tab after `tr` plus a pixel number, such as `tr80`: Convert it to rem using the rendered Bricks HTML font size (`5rem` at `100%`, `8rem` at `62.5%`).
-* Type `@recipe-shortcut;`: Insert the matching ACSS or user recipe at the cursor.
+* Type `?recipe-shortcut;`: Insert the matching ACSS or user recipe at the cursor.
 * Tab after an exact ACSS or user-recipe shortcut: Insert the recipe at the cursor.
 * `R` + Tab in an otherwise empty editor: Insert `%root%`.
 * `r` + Tab in an otherwise empty editor: Insert a `%root%` rule and place the caret inside it.
@@ -105,7 +107,7 @@ Uplink CSS Studio is an independent implementation. It does not include or deriv
 1. Select an element in the Bricks canvas or Structure panel. CSS Studio opens automatically unless that preference is disabled.
 2. Assign a global class or ID from Studio when needed. New classes receive a `%root%` rule with the caret inside it.
 3. For a site-wide HTML tag such as `address` or `dl`, open the target panel and enter the tag. CSS Studio switches to the applicable site-wide Theme Style stylesheet and creates the rule when needed.
-4. Write CSS, use the toolbar, or type `@recipe-shortcut;`. Changes update Bricks and the canvas while you type.
+4. Write CSS, use the toolbar, or type `?recipe-shortcut;`. Changes update Bricks and the canvas while you type.
 5. Press Tab after an expression such as `--space-s * 2` to produce `calc(var(--space-s) * 2)`.
 6. Add media or container queries from registered breakpoints, then save the Bricks page normally.
 
@@ -162,6 +164,12 @@ The `tr` + Tab shortcut works in media and container query thresholds as well as
 Right-click a numeric CSS length to open Convert units. Converted options preserve the length at the current canvas size. Unit swap options keep the number and change only its unit. Selecting an option changes only that token; Escape dismisses the menu. This works with numeric scrubbing disabled. On a focused numeric token, Enter or Shift+F10 also opens the menu.
 
 == Changelog ==
+
+= 1.10.1 =
+* Follow ACSS's question-mark recipe trigger: type `?recipe;`, use `?` autocomplete, or expand `?recipe` with Tab. Reserve `@` for CSS at-rules.
+* Hide ACSS color recipes whose required color tokens are unavailable on the site. Preserve layout recipes, user recipes, and available color shades.
+* Read generated ACSS token availability when supported, with a fallback to the active variable catalogue on older installations.
+* Keep recipe expansion out of comments, strings, and selections. Add 17 recipe compatibility and trigger regression checks.
 
 = 1.10.0 =
 * Add editable element CSS classes and CSS ID to the target panel, with save buttons, Enter to apply, and Escape to discard a field draft.

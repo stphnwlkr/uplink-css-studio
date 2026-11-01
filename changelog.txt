@@ -1,6 +1,17 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.10.1
+------
+Updated recipe behavior for ACSS 4.0.2 compatibility.
+
+* Change the recipe trigger from @recipe; to ?recipe;. Update autocomplete labels, the footer hint, and documentation. Tab replaces the entire ?recipe trigger.
+* Keep @media and @container completion separate from recipe suggestions. Do not expand recipe triggers in comments, strings, or selections.
+* Filter ACSS color-value recipes against generated color tokens so disabled color families and their shades are not offered.
+* Preserve layout recipes, locally defined variables, user recipes, and color recipes with usable literal fallbacks.
+* Use the active ACSS variable catalogue when generated-token inventory is unavailable, and preserve provider recipes when neither API can report availability.
+* Add nine ACSS recipe-filter checks and eight recipe-trigger checks to release validation.
+
 1.10.0
 ------
 Added element CSS classes and ID editing to the target panel.

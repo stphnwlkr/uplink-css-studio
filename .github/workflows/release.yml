@@ -41,7 +41,9 @@ jobs:
           node tests/rem-regression.cjs
           node tests/toolbar-regression.cjs
           node tests/targets-regression.cjs
+          node tests/recipe-trigger-regression.cjs
           php -l uplink-css-studio.php
+          php tests/acss-recipes-regression.php
 
       - name: Build the installable ZIP
         run: |
