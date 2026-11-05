@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.10.1
+Stable tag: 1.11.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -164,6 +164,11 @@ The `tr` + Tab shortcut works in media and container query thresholds as well as
 Right-click a numeric CSS length to open Convert units. Converted options preserve the length at the current canvas size. Unit swap options keep the number and change only its unit. Selecting an option changes only that token; Escape dismisses the menu. This works with numeric scrubbing disabled. On a focused numeric token, Enter or Shift+F10 also opens the menu.
 
 == Changelog ==
+
+= 1.11.0 =
+* Add Structure context menu actions to enable a query loop and open its settings, edit an existing loop, or remove a loop while preserving its query settings.
+* Add a default-on Query loop shortcut preference.
+* Arrange Preferences in two columns, with a single column on narrow screens.
 
 = 1.10.1 =
 * Follow ACSS's question-mark recipe trigger: type `?recipe;`, use `?` autocomplete, or expand `?recipe` with Tab. Reserve `@` for CSS at-rules.

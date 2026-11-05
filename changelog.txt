@@ -1,6 +1,12 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.11.0
+------
+* Add Structure context menu actions to enable a query loop and open its settings, edit an existing loop, or remove a loop while preserving its query settings.
+* Add a default-on Query loop shortcut preference.
+* Arrange Preferences in two columns, with a single column on narrow screens.
+
 1.10.1
 ------
 Updated recipe behavior for ACSS 4.0.2 compatibility.

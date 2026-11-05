@@ -16,6 +16,8 @@ Version 1.1 adds a constrained HTML view for the selected element. Its lightweig
 
 CSS Studio does not edit Bricks' breakpoint-specific style-control values. It keeps responsive behavior in the Custom CSS stylesheet through `@media` and `@container` rules. Its query tools use registered Bricks breakpoint widths to help author those rules. The breakpoint label in the header reports builder context only.
 
+Right-click a loop-capable element in the Structure panel and choose **Enable query loop** to turn on its native Bricks loop and open query settings. Existing loops offer **Edit query loop** and **Remove query loop**. Removing a loop switches off the native loop toggle and preserves its query settings. The **Query loop shortcut** preference is enabled by default and saved in this browser. The shortcut uses native Bricks controls and supports undo/redo.
+
 ## Requirements
 
 - WordPress 7.0 or newer

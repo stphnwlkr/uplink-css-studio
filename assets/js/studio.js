@@ -34,6 +34,8 @@
     ignoreExternalUntil: 0,
     lastSyncedValue: '',
     contextTimer: null,
+    loopMenuElementId: '',
+    loopMenuBusy: false,
     outlineTimer: null,
     autocompleteTimer: null,
     decorationTimer: null,
@@ -411,7 +413,7 @@
   }
 
   function readPrefs() {
-    const defaults = { autoOpen: true, firstAppliedClass: true, responsiveTools: true, viewportHandles: true, hideElementActions: false, numericScrubbing: true, minimized: false, dockHeight: '', colorMode: 'hex' };
+    const defaults = { autoOpen: true, firstAppliedClass: true, responsiveTools: true, viewportHandles: true, hideElementActions: false, structureQueryLoop: true, numericScrubbing: true, minimized: false, dockHeight: '', colorMode: 'hex' };
     try { return Object.assign(defaults, JSON.parse(localStorage.getItem(storeKey)) || {}); } catch (e) { return defaults; }
   }
 
@@ -1664,12 +1666,15 @@
             </aside>
             <aside class="uplink-css-studio-popover uplink-css-studio-preferences-panel" hidden aria-label="CSS Studio preferences">
               <div class="uplink-css-studio-popover-head"><strong>Preferences</strong><span>Saved in this browser</span></div>
+              <div class="uplink-css-studio-preferences-grid">
               <label class="uplink-css-studio-switch-row"><span><strong>Open on element selection</strong><small>Show the editor when an element is clicked in the canvas or Structure panel.</small></span><input class="uplink-css-studio-auto-open" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Select first applied class</strong><small>Edit the first unlocked global class when moving to another element.</small></span><input class="uplink-css-studio-first-class" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Follow canvas width</strong><small>Query icons use the canvas width. Turn off to use Bricks breakpoint choices. Editing tools stay in the cursor’s rule.</small></span><input class="uplink-css-studio-responsive-tools" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Viewport resize handles</strong><small>Show width controls on the left and right edges of the visible canvas.</small></span><input class="uplink-css-studio-viewport-handles" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Hide element actions</strong><small>Hide the blue action toolbar on canvas elements.</small></span><input class="uplink-css-studio-hide-element-actions" type="checkbox"></label>
+              <label class="uplink-css-studio-switch-row"><span><strong>Query loop shortcut</strong><small>Enable, edit, or remove query loops from the Structure context menu.</small></span><input class="uplink-css-studio-structure-query-loop" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Numeric scrubbing</strong><small>Drag numeric CSS values horizontally. Toggle with Cmd/Ctrl+Alt+X.</small></span><input class="uplink-css-studio-numeric-scrubbing" type="checkbox"></label>
+              </div>
               <p class="uplink-css-studio-pref-note">The editor also remembers whether it was minimized or expanded.</p>
             </aside>
             <aside class="uplink-css-studio-popover uplink-css-studio-value-panel" hidden aria-label="CSS value editor">
@@ -1792,6 +1797,10 @@
     bindEvents();
     mountLauncher();
     mountCanvasResizers();
+    document.addEventListener('contextmenu', (event) => {
+      const row = event.target.closest('#bricks-structure li.element');
+      state.loopMenuElementId = row?.dataset.id || '';
+    }, true);
     state.contextTimer = setInterval(refreshContext, 80);
   }
 
@@ -3391,6 +3400,11 @@
       syncElementActionsVisibility();
       setStatus(state.prefs.hideElementActions ? 'Element actions hidden' : 'Element actions shown', 'synced');
     });
+    document.querySelector('.uplink-css-studio-structure-query-loop').addEventListener('change', (event) => {
+      state.prefs.structureQueryLoop = Boolean(event.target.checked);
+      savePrefs();
+      syncStructureQueryLoopMenu();
+    });
     document.querySelector('.uplink-css-studio-numeric-scrubbing').addEventListener('change', (event) => {
       setNumericScrubbing(Boolean(event.target.checked));
     });
@@ -4499,7 +4513,103 @@
     requestAnimationFrame(focusActiveEditor);
   }
 
+  // Use native controls so Bricks owns query rendering, history and persistence.
+  function structureQueryLoopTarget() {
+    const proxy = findProxy();
+    const s = proxy?.$_state;
+    const element = s?.activeElement;
+    if (state.prefs.structureQueryLoop === false || !state.loopMenuElementId || !element ||
+        element.id !== state.loopMenuElementId || element.cid || s.isPreviewing ||
+        s.contextMenuCopyIds || proxy.$_isBulkEditing?.() ||
+        proxy.$_userHasPermission?.(`edit_element_${element.name}`) === false) return null;
+    const controls = window.bricksData?.elements?.[element.name]?.controls;
+    if (!controls?.hasLoop) return null;
+    return { proxy, s, element, controls };
+  }
+
+  function syncStructureQueryLoopMenu() {
+    const menu = document.querySelector('#bricks-builder-context-menu');
+    const existing = menu ? Array.from(menu.querySelectorAll('[data-uplink-query-loop]')) : [];
+    const target = structureQueryLoopTarget();
+    if (!menu || !target || !target.s.showContextMenu) { existing.forEach((item) => item.remove()); return; }
+    const enabled = Boolean(target.element.settings?.hasLoop);
+    const actions = enabled
+      ? [['edit', 'Edit query loop'], ['remove', 'Remove query loop']]
+      : [['enable', 'Enable query loop']];
+    if (existing.map((item) => item.dataset.uplinkQueryLoop).join(',') === actions.map(([action]) => action).join(',')) return;
+    existing.forEach((item) => item.remove());
+    const list = menu.querySelector('ul');
+    if (!list) return;
+    actions.forEach(([action, label]) => {
+      const item = document.createElement('li');
+      item.dataset.uplinkQueryLoop = action;
+      item.tabIndex = 0;
+      item.setAttribute('role', 'menuitem');
+      item.setAttribute('aria-label', label);
+      const text = document.createElement('span');
+      text.className = 'label';
+      text.textContent = label;
+      item.append(text);
+      const activate = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openStructureQueryLoop(action === 'remove');
+      };
+      item.addEventListener('click', activate);
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') activate(event);
+      });
+      list.append(item);
+    });
+    // The native menu was positioned before this extra row was inserted.
+    const rect = menu.getBoundingClientRect();
+    if (rect.bottom > window.innerHeight) menu.style.top = `${Math.max(0, window.innerHeight - rect.height)}px`;
+  }
+
+  async function openStructureQueryLoop(remove = false) {
+    const target = structureQueryLoopTarget();
+    if (!target || state.loopMenuBusy) return;
+    state.loopMenuBusy = true;
+    const { proxy, s, element, controls } = target;
+    const stillSelected = () => state.prefs.structureQueryLoop !== false && s.activeElement?.id === element.id;
+    const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+    try {
+      s.showContextMenu = false;
+      s.showInteractions = false;
+      s.showConditions = false;
+      s.searchControlKeyword = '';
+      s.activePanel = 'element';
+      s.activePanelTab = 'content';
+      s.activePanelGroup = controls.hasLoop.group || '';
+      // Selecting Content and lazy-loading controls can take more than one Vue tick.
+      for (let frame = 0; frame < 120 && stillSelected(); frame += 1) {
+        const toggle = document.querySelector('#bricks-panel [data-controlkey="hasLoop"] input');
+        if (toggle && !toggle.disabled) {
+          if (Boolean(element.settings?.hasLoop) === remove) toggle.click();
+          break;
+        }
+        await nextFrame();
+      }
+      if (remove || !stillSelected() || !element.settings?.hasLoop) return;
+      for (let frame = 0; frame < 120 && stillSelected(); frame += 1) {
+        const query = document.querySelector('#bricks-panel [data-controlkey="query"]');
+        if (query) {
+          // Match Structure's native showQueryLoop action. Bricks opens its popup.
+          s.activeControlKey = 'query';
+          if (proxy.$nextTick) await proxy.$nextTick();
+          else await nextFrame();
+          s.activeControlKey = null;
+          return;
+        }
+        await nextFrame();
+      }
+    } finally {
+      state.loopMenuBusy = false;
+    }
+  }
+
   function refreshContext() {
+    syncStructureQueryLoopMenu();
     promoteNativeCssGroup();
     mountCanvasResizers();
     let next = activeContext();
@@ -6196,6 +6306,8 @@
     const firstAppliedClass = document.querySelector('.uplink-css-studio-first-class');
     const viewportHandles = document.querySelector('.uplink-css-studio-viewport-handles');
     const hideElementActions = document.querySelector('.uplink-css-studio-hide-element-actions');
+    const structureQueryLoop = document.querySelector('.uplink-css-studio-structure-query-loop');
+    if (structureQueryLoop) structureQueryLoop.checked = state.prefs.structureQueryLoop !== false;
     const numericScrubbing = document.querySelector('.uplink-css-studio-numeric-scrubbing');
     if (autoOpen) autoOpen.checked = Boolean(state.prefs.autoOpen);
     if (firstAppliedClass) firstAppliedClass.checked = Boolean(state.prefs.firstAppliedClass);

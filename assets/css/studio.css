@@ -343,7 +343,12 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
 .uplink-css-studio-query-panel { width: min(440px, calc(100vw - 20px)); height: min(420px, calc(100vh - 20px)); grid-template-rows: 44px minmax(0, 1fr); }
 .uplink-css-studio-query-panel:not([hidden]) { display: grid; }
 .uplink-css-studio-states-panel { width: min(430px, calc(100vw - 20px)); }
-.uplink-css-studio-preferences-panel { right: auto; width: min(390px, calc(100vw - 20px)); }
+.uplink-css-studio-preferences-panel { right: auto; width: min(740px, calc(100vw - 20px)); }
+.uplink-css-studio-preferences-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 4px 0; }
+@media (max-width: 640px) {
+  .uplink-css-studio-preferences-panel { width: min(390px, calc(100vw - 20px)); }
+  .uplink-css-studio-preferences-grid { grid-template-columns: minmax(0, 1fr); }
+}
 .uplink-css-studio-popover-head { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 13px; border-bottom: 1px solid var(--uplink-css-studio-border); color: #e8eaf0; font-size: 12px; }
 .uplink-css-studio-popover-head { cursor: grab; user-select: none; touch-action: none; }
 .uplink-css-studio-popover-head button,
