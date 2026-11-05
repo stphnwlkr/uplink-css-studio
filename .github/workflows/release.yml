@@ -31,6 +31,11 @@ jobs:
           assert metadata['download_url'] == f'https://github.com/stphnwlkr/uplink-css-studio/releases/download/{version}/uplink-css-studio.zip'
           PY
 
+      - name: Validate JSON changelog and prepare release notes
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: python3 tests/validate-changelog.py "$RELEASE_VERSION" build/release-notes.md
+
       - name: Check layout regressions
         run: |
           node --check assets/js/studio.js
@@ -66,7 +71,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ github.ref_name }}
         run: |
-          gh release create "${RELEASE_VERSION}" uplink-css-studio.zip \
+          gh release create "${RELEASE_VERSION}" uplink-css-studio.zip changelog.json \
             --title "Uplink CSS Studio ${RELEASE_VERSION}" \
-            --generate-notes \
+            --notes-file build/release-notes.md \
             --verify-tag

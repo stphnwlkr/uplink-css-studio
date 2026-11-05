@@ -1,0 +1,355 @@
+[
+  {
+    "version": "1.11.0",
+    "summary": "Added context menu for enabling a query loop",
+    "changes": {
+      "features": [
+        "Add Structure context menu actions to enable a query loop and open its settings, edit an existing loop, or remove a loop while preserving its query settings.",
+        "Add a default-on Query loop shortcut preference.",
+        "Arrange Preferences in two columns, with a single column on narrow screens."
+      ]
+    }
+  },
+  {
+    "version": "1.10.1",
+    "summary": "Updated recipe behavior for ACSS 4.0.2 compatibility.",
+    "changes": {
+      "features": [
+        "Use ?recipe; and question-mark autocomplete for ACSS recipes while retaining @ for CSS at-rules.",
+        "Filter unavailable ACSS color recipes from suggestions."
+      ]
+    }
+  },
+  {
+    "version": "1.10.0",
+    "summary": "Added element CSS classes and ID editing to the target panel.",
+    "changes": {
+      "features": [
+        "Put global class assignment first and show assigned global classes as buttons that open their stylesheets.",
+        "Add an Element CSS & ID section for plain element class names and the CSS ID. Save with the check button or Enter; discard a field draft with Escape.",
+        "Preserve case, utility class names, and dynamic tag syntax. Element class edits do not create or rename reusable global classes.",
+        "Allow clearing the CSS ID or element classes without changing the stylesheet or global class assignments.",
+        "Keep unfinished field edits during refreshes and reset values when selecting another element.",
+        "Move the target button to the first toolbar position after CSS/HTML.",
+        "Add nine target-panel regression checks to release validation."
+      ]
+    }
+  },
+  {
+    "version": "1.9.2",
+    "summary": "Fixed missing alignment options and toolbar context updates.",
+    "changes": {
+      "fixes": [
+        "Add space-between and space-around for the flex main axis, and stretch for cross-axis alignment.",
+        "Replace alignment icons with solid bars and guide lines that follow the flex direction.",
+        "Refresh toolbar visibility when Bricks or class layouts change without resizing the canvas element. Show alignment for flex and grid, grid templates only for grid, and spacing alignment only for flex.",
+        "Keep the enclosing selector layout inside media and container queries without inheriting display from parent selectors.",
+        "Recognize inline and two-keyword flex/grid display values, important declarations, and resolved display variables.",
+        "Add eight contextual toolbar regression checks to release validation."
+      ]
+    }
+  },
+  {
+    "version": "1.9.1",
+    "summary": "Fixed autocomplete contrast in the Bricks light editor.",
+    "changes": {
+      "fixes": [
+        "Keep suggestions readable on CSS Studio's dark autocomplete popup in both Bricks editor themes.",
+        "Prevent Advanced Themer's theme-dependent suggestion and hover colors from overriding Studio's text and selected-row colors.",
+        "Scope the fix to CSS Studio autocomplete lists."
+      ]
+    }
+  },
+  {
+    "version": "1.9.0",
+    "summary": "Added contextual unit conversion and query-aware tr expansion.",
+    "changes": {
+      "features": [
+        "Right-click a numeric CSS length to choose a conversion. Computed equivalents are labelled converted; replacements without a known reference are labelled unit swap. Only the selected token changes.",
+        "Support rem, em, px, viewport and point conversions, plus explicit unit swaps. Media thresholds use the browser's initial font size. Declaration em conversions use the selected element's font; named container thresholds use the eligible container font.",
+        "Expand tr + Tab inside media/container query thresholds, including nested rules, ranges, legacy syntax, and multiline conditions. Declarations inside query bodies retain HTML-root conversion.",
+        "Keep contextual conversion available with scrubbing disabled. Show the text cursor in that mode and the scrubber pointer only when dragging is enabled.",
+        "Support keyboard access and Escape cancellation, reject stale token replacements, and avoid converting custom-property identifiers.",
+        "Add rem and conversion regression checks to release validation."
+      ]
+    }
+  },
+  {
+    "version": "1.8.2",
+    "summary": "Fixed the remaining style reset when resizing across Bricks breakpoints.",
+    "changes": {
+      "fixes": [
+        "Use a dedicated CSS synchronization manager that interprets the base Custom CSS stylesheet against base control keys, regardless of the preview breakpoint. This prevents root display and gap values from being moved to tablet or mobile controls and then removed on returning to desktop.",
+        "Keep visual edits and declaration shortcuts in the rule containing the cursor. A cursor outside a media or container query never redirects edits into that query.",
+        "Keep current-canvas-width query insertion, nested root placement, and the preference for registered Bricks breakpoint choices.",
+        "Add regressions for base control keys at multiple preview widths, native-manager bypass, cursor positions, and query insertion."
+      ]
+    }
+  },
+  {
+    "version": "1.8.1",
+    "summary": "Fixed styling being reset during viewport resizing.",
+    "changes": {
+      "fixes": [
+        "Stop deleting native alignment defaults during context selection and passive editor refreshes. These deletions triggered Bricks to regenerate unrelated root declarations.",
+        "Preserve authored base styles and nested queries while retaining intentional native-control edits and CSS-to-control removal.",
+        "Add regression checks that passive refreshes do not mutate native settings, including while an editor write is pending."
+      ]
+    }
+  },
+  {
+    "version": "1.8.0",
+    "summary": "Thanks to Mario Peischl for the reminder to include this.\nAdded responsive query insertion and visual editing that follow the canvas width.",
+    "changes": {
+      "features": [
+        "Insert media and container queries inside the base root, including when the cursor is outside the root or inside another query.",
+        "Use the current canvas width for mobile-first query insertion. Disable Follow canvas width to use registered Bricks breakpoint choices, or Shift-click either icon while enabled.",
+        "Apply visual edits to the last matching width query, using actual ancestor content width for container queries.",
+        "Keep direct typing, selected text, and child or pseudo selectors at the cursor. Show the visual editing target in the header.",
+        "Add responsive routing and nested insertion regression checks to release validation."
+      ]
+    }
+  },
+  {
+    "version": "1.7.7",
+    "summary": "Fixed canvas content being obscured by the CSS panel.",
+    "changes": {
+      "fixes": [
+        "Measure the visible space above the panel and account for canvas scaling when setting the iframe height.",
+        "Keep the canvas accessible after resizing, minimizing, and restoring the editor.",
+        "Restore native canvas sizing when the editor closes or enters full-screen mode, and preserve Bricks preview modes.",
+        "Add canvas sizing regression checks to release validation."
+      ]
+    }
+  },
+  {
+    "version": "1.7.6",
+    "summary": "Fixed sync-engine discovery in Bricks 2.4.3.",
+    "changes": {
+      "fixes": [
+        "Continue searching past editor components that reference the sync methods but do not export the engine factory.",
+        "Add regression coverage for an editor component appearing before the sync engine."
+      ]
+    }
+  },
+  {
+    "version": "1.7.5",
+    "summary": "Fixed bidirectional style synchronization (regression from 1.7.4) and native input clearing.",
+    "changes": {
+      "fixes": [
+        "Swap root shortcuts: lowercase r + Tab inserts the empty rule; uppercase R + Tab inserts only the selector.",
+        "Restore CSS-to-control synchronization across Bricks builds with different internal module IDs.",
+        "Clear native style settings when CSS is removed while the sync engine is starting.",
+        "Refresh native input controls on every sync update, including rapid consecutive edits."
+      ]
+    }
+  },
+  {
+    "version": "1.7.4",
+    "summary": "Fixed display settings cleanup and layout synchronization.",
+    "changes": {
+      "fixes": [
+        "Remove incompatible flex and grid container declarations when changing display presets.",
+        "Sync complete layout edits immediately without competing native control events.",
+        "Preserve display when editing grid templates, including compact CSS and declarations without a final semicolon.",
+        "Handle repeated declarations and preserve nested rule scope when updating layout styles."
+      ]
+    }
+  },
+  {
+    "version": "1.7.3",
+    "summary": "Fixed generated alignment cleanup after nested rules.",
+    "changes": {
+      "fixes": [
+        "Remove generated align-items: initial declarations after nested CSS blocks.",
+        "Preserve other alignment values, comments, strings, and explicit !important declarations."
+      ]
+    }
+  },
+  {
+    "version": "1.7.2",
+    "summary": "Fixed layout toolbar edits in nested CSS.",
+    "changes": {
+      "fixes": [
+        "Keep nested flex/grid toolbar edits from changing the parent element’s native Bricks controls.",
+        "Scope layout declarations to nested media, container, and other conditional blocks.",
+        "Avoid using the parent’s computed layout for nested selectors."
+      ]
+    }
+  },
+  {
+    "version": "1.7.1",
+    "summary": "Fixed update checks when GitHub rejects API requests.",
+    "changes": {
+      "fixes": [
+        "Fetch update information from a public JSON file instead of GitHub API endpoints, avoiding API rate-limit failures.",
+        "Continue installing the official release ZIP and checking versions through WordPress."
+      ]
+    }
+  },
+  {
+    "version": "1.7.0",
+    "summary": "Added CSS calculation tools and corrected header button sizing.",
+    "changes": {
+      "features": [
+        "Added a clamp calculator beside Style Manager with rem/px controls and insertion at the CSS cursor or selection.",
+        "Detect the maximum viewport from ACSS content width or the active Bricks Theme Style container width, with editable values and compact inputs.",
+        "Added calculation previews showing the result before pressing Tab to wrap arithmetic in calc().",
+        "Flatten nested calc() expressions while preserving arithmetic precedence.",
+        "Validate calculation units with the browser CSS engine and prevent Tab from applying confirmed invalid calculations."
+      ],
+      "fixes": [
+        "Set header spacing to 8px and header buttons to 32px, including their flex sizing."
+      ]
+    }
+  },
+  {
+    "version": "1.6.0",
+    "summary": "Added a keyboard shortcut for the CSS Target class field.",
+    "changes": {
+      "features": [
+        "Added Command + Option + G on macOS and Control + Alt + G on Windows/Linux to open CSS Target with the global class field focused.",
+        "Open or restore CSS Studio as needed, support the canvas and editor, and preserve an existing class-name draft when refocusing.",
+        "Added the shortcut to the target-button tooltip and accessibility metadata."
+      ]
+    }
+  },
+  {
+    "version": "1.5.2",
+    "summary": "Added an option to hide canvas element actions.",
+    "changes": {
+      "features": [
+        "Added a browser-saved preference to hide the blue canvas element-actions toolbar.",
+        "Apply visibility changes immediately and preserve the preference when the canvas reloads."
+      ]
+    }
+  },
+  {
+    "version": "1.5.1",
+    "summary": "Fixed viewport resizing after switching Bricks Scale off.",
+    "changes": {
+      "fixes": [
+        "Fixed canvas alignment after enabling and then disabling Bricks Scale.",
+        "Keep resize handles from updating the disabled scale control and constrain the unscaled canvas to the available preview width."
+      ]
+    }
+  },
+  {
+    "version": "1.5.0",
+    "summary": "Added Bricks dynamic-data autocomplete in the HTML editor.",
+    "changes": {
+      "features": [
+        "Added dynamic-data autocomplete in the HTML editor using the site’s registered Bricks tags, including third-party providers.",
+        "Filter suggestions by tag-name prefix after an opening brace, in text and quoted attributes.",
+        "Insert complete tags with Enter or Tab while preserving an existing closing brace."
+      ]
+    }
+  },
+  {
+    "version": "1.4.0",
+    "summary": "Extended HTML text conversion to Bricks Div elements.",
+    "changes": {
+      "features": [
+        "Convert an empty Bricks Div to Basic Text when text or inline formatting is added in the HTML editor, including Divs using a paragraph tag.",
+        "Preserve the element tag, ID, classes, attributes, position, and styling during conversion.",
+        "Keep elements with Bricks children managed in the Structure panel."
+      ]
+    }
+  },
+  {
+    "version": "1.3.1",
+    "summary": "Improved the CSS Studio toolbar.",
+    "changes": {
+      "fixes": [
+        "Updated the Has me, container query, and media query icons and placed them immediately after the selector target.",
+        "Made the middle toolbar scroll horizontally while keeping the CSS/HTML tabs and search, comment, and format controls fixed."
+      ]
+    }
+  },
+  {
+    "version": "1.3.0",
+    "summary": "Added root-aware pixel-to-rem abbreviation expansion.",
+    "changes": {
+      "features": [
+        "Type `tr` followed by a pixel number and press Tab to insert the equivalent rem value.",
+        "Resolve the conversion against the rendered Bricks HTML font size, including `100%` (16px) and `62.5%` (10px) configurations."
+      ]
+    }
+  },
+  {
+    "version": "1.2.0",
+    "summary": "Added update discovery through GitHub Releases.",
+    "changes": {
+      "features": [
+        "Show new Uplink CSS Studio releases in the normal WordPress Plugins screen.",
+        "Support WordPress' per-plugin automatic-update setting without enabling unattended updates by default.",
+        "Require the validated `uplink-css-studio.zip` release asset instead of installing a repository source archive.",
+        "Provide one permanent latest-release download URL for the product website."
+      ]
+    }
+  },
+  {
+    "version": "1.1.3",
+    "summary": "Improved editor isolation and updated compatibility guidance.",
+    "changes": {
+      "fixes": [
+        "Disable Grammarly and browser writing assistance inside both CodeMirror editors.",
+        "Document that Advanced Themer 3.5 or newer supports Bricks' bidirectional CSS sync; earlier versions require SuperPower CSS to be disabled."
+      ]
+    }
+  },
+  {
+    "version": "1.1.2",
+    "summary": "Fixed the Studio layer appearing above Bricks full-screen managers.",
+    "changes": {
+      "fixes": [
+        "Keep CSS Studio and its viewport resize handles below Bricks managers while retaining their position above ordinary builder controls."
+      ]
+    }
+  },
+  {
+    "version": "1.1.1",
+    "summary": "Fixed anchored tool panel positioning and stacking.",
+    "changes": {
+      "fixes": [
+        "Open tool panels above or below their anchor according to the available viewport space.",
+        "Constrain oversized panels to the larger available area and keep their contents scrollable.",
+        "Keep Bricks controls and CSS Studio viewport resize handles beneath open tool panels."
+      ]
+    }
+  },
+  {
+    "version": "1.1.0",
+    "summary": "Added a constrained, bidirectional HTML view for the selected Bricks element.",
+    "changes": {
+      "features": [
+        "Edit supported HTML tags, simple text content, IDs, attributes including inline styles, links, and image source or alt text.",
+        "Use HTML syntax highlighting, line numbers, matching tags, context-aware tag and attribute completion, and focused Emmet-style Tab expansion.",
+        "Rename matching opening and closing tags in one edit by clicking the opening tag name.",
+        "Convert an empty Bricks Block to Basic Text in place when text or inline formatting is added, preserving its existing element data.",
+        "Apply HTML changes to the current builder session with Command + ] on macOS or Control + ] elsewhere.",
+        "Add state-aware Reset draft and Apply to builder actions that enable only for an unapplied HTML draft, with clear page-save guidance.",
+        "Switch directly between element CSS and every assigned global class from the CSS breadcrumbs.",
+        "Create or attach Bricks global styling classes from the HTML class attribute without using the raw class input.",
+        "Preserve Bricks child structure and builder-only settings, with validation for unsafe or unsupported markup."
+      ]
+    }
+  },
+  {
+    "version": "1.0.0",
+    "summary": "Initial public release.",
+    "changes": {
+      "features": [
+        "Native two-way editing of Bricks Custom CSS for elements, global classes, selectors, pseudo-states, and component variants.",
+        "Docked and full-screen CodeMirror workspace with formatting, search, comments, outline navigation, declaration toggles, and optional numeric scrubbing.",
+        "Context-aware flex, grid, alignment, state, color, shadow, gradient, easing, media-query, and container-query tools.",
+        "Interactive color variables, color picker, angle dial, cubic-bezier editor, multi-layer shadows, and type-aware gradient controls.",
+        "Property-aware completion, CSS math expansion, query-block completion, Bricks and ACSS variables, ACSS recipes, and per-user custom recipes.",
+        "Global class and element ID assignment, native Theme Style stylesheet editing and clickable active-style indicators for global HTML selectors, a Bricks Style Manager shortcut, and Bricks structure breadcrumbs.",
+        "Automatic native element labels for changed HTML tags without overwriting user-defined element names.",
+        "Draggable tool panels, horizontally scrollable compact-screen controls, optional first-applied-class selection, optional canvas resize handles, remembered preferences, and live canvas updates.",
+        "Protection against the empty `align-items: initial` declaration produced by Bricks CSS Sync."
+      ]
+    }
+  }
+]
