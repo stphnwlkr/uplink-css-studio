@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.11.1",
+    "summary": "Fixed canvas content being hidden beneath the CSS editor.",
+    "changes": {
+      "fixes": [
+        "Keep the canvas iframe within the space above the editor so bottom content remains reachable with element actions visible, including when the editor is minimized."
+      ]
+    }
+  },
+  {
     "version": "1.11.0",
     "summary": "Added context menu for enabling a query loop",
     "changes": {

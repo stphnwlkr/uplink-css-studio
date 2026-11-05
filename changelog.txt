@@ -1,6 +1,12 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.11.1
+------
+Fixed canvas content being hidden beneath the CSS editor.
+
+* Keep the canvas iframe within the space above the editor so bottom content remains reachable with element actions visible, including when the editor is minimized.
+
 1.11.0
 ------
 * Add Structure context menu actions to enable a query loop and open its settings, edit an existing loop, or remove a loop while preserving its query settings.

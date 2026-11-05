@@ -102,6 +102,11 @@ body:has(#preview-scale[readonly]) #bricks-preview:not(.is-previewing):not(.canv
 #bricks-preview.uplink-css-studio-dock-open:not(.is-previewing):not(.canvas-preview-active):not(.uplink-css-studio-studio-fullscreen) #bricks-builder-iframe-wrapper {
   height: var(--uplink-css-studio-canvas-height, calc(100% - max(280px, var(--uplink-css-studio-dock-height, 48%)))) !important;
 }
+/* Keep the iframe viewport in step with its wrapper even when native Builder
+   controls or extensions assign the iframe its own height. */
+#bricks-preview.uplink-css-studio-dock-open:not(.is-previewing):not(.canvas-preview-active):not(.uplink-css-studio-studio-fullscreen) #bricks-builder-iframe {
+  height: var(--uplink-css-studio-canvas-height, 100%) !important;
+}
 #bricks-preview.uplink-css-studio-is-resizing iframe { pointer-events: none; }
 body.uplink-css-studio-is-resizing { cursor: row-resize !important; user-select: none !important; }
 .uplink-css-studio-shell.is-minimized { height: 46px; min-height: 46px; }

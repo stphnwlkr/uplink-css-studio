@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.11.0/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.11.1/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.11.0</h4><ul><li>Add Structure context menu actions to enable a query loop and open its settings, edit an existing loop, or remove a loop while preserving its query settings.</li><li>Add a default-on Query loop shortcut preference.</li><li>Arrange Preferences in two columns, with a single column on narrow screens.</li></ul>"
+    "changelog": "<h4>1.11.1</h4><p>Fixed canvas content being hidden beneath the CSS editor.</p><ul><li>Keep the canvas iframe within the space above the editor so bottom content remains reachable with element actions visible, including when the editor is minimized.</li></ul>"
   }
 }
