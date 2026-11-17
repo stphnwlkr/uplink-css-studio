@@ -97,14 +97,9 @@ body:has(#preview-scale[readonly]) #bricks-preview:not(.is-previewing):not(.canv
   margin-inline: auto !important;
 }
 
-/* Bricks sets an inline, unscaled height for zoomed canvases. Reserve the
-   measured dock space in screen pixels, then convert back to canvas pixels. */
-#bricks-preview.uplink-css-studio-dock-open:not(.is-previewing):not(.canvas-preview-active):not(.uplink-css-studio-studio-fullscreen) #bricks-builder-iframe-wrapper {
-  height: var(--uplink-css-studio-canvas-height, calc(100% - max(280px, var(--uplink-css-studio-dock-height, 48%)))) !important;
-}
-/* Keep the iframe viewport in step with its wrapper even when native Builder
-   controls or extensions assign the iframe its own height. */
-#bricks-preview.uplink-css-studio-dock-open:not(.is-previewing):not(.canvas-preview-active):not(.uplink-css-studio-studio-fullscreen) #bricks-builder-iframe {
+/* Bricks can replace the preview's classes when its layout updates. Scope the
+   measured height to the visible dock so the wrapper and iframe stay in sync. */
+#bricks-preview:not(.is-previewing, .canvas-preview-active):has(> .uplink-css-studio-shell:not([hidden], .is-fullscreen)) :is(#bricks-builder-iframe-wrapper, #bricks-builder-iframe) {
   height: var(--uplink-css-studio-canvas-height, 100%) !important;
 }
 #bricks-preview.uplink-css-studio-is-resizing iframe { pointer-events: none; }

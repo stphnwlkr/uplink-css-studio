@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.11.2",
+    "summary": "Fixed canvas overlap when Bricks refreshes the preview classes.",
+    "changes": {
+      "fixes": [
+        "Keep the bottom of the canvas reachable while CSS Studio is open or minimized."
+      ]
+    }
+  },
+  {
     "version": "1.11.1",
     "summary": "Fixed canvas content being hidden beneath the CSS editor.",
     "changes": {
