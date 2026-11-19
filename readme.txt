@@ -4,7 +4,7 @@ Tags: bricks, css, code editor, builder
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 1.11.3
+Stable tag: 1.12.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ The in-editor value tools were inspired in particular by Elliot Bear's Drypoint 
 Uplink CSS Studio is an independent implementation. It does not include or derive from those projects' source code. It is not affiliated with or endorsed by Bricks, Drypoint, Etch, Strange Tech, Advanced Themer, Code2Bricks, or ACSS.
 
 == Features ==
+
+* Choose All properties, Prefer logical properties, or Logical properties only for autocomplete, Tab shortcuts, and toolbar inserts. Logical modes use inline/block sizing, spacing, and offsets. The setting does not rewrite existing CSS or saved recipes, and any CSS can still be typed manually. All-side shorthands remain available: `b` + Tab inserts border, `i` inserts inset, `m` inserts margin, and `p` inserts padding, while `pb` and `pi` insert padding-block and padding-inline.
+* Logical shortcuts use family + axis + edge: `pis`/`pie`/`pbs`/`pbe` for padding; `mis`/`mie`/`mbs`/`mbe` for margin; `iis`/`iie`/`ibs`/`ibe` for insets; and the same pattern with `b` for borders, `sm` for scroll-margin, or `sp` for scroll-padding. Omit the edge for both sides of an axis, such as `pi`, `mb`, or `ib`. Border shortcuts also accept `w`, `st`, or `c` for width, style, or color, such as `bisc`.
+* Insert the built-in nested CSS Grid Stack recipe with `?grid-stack;` or from the recipe manager. Comments explain how to overlap direct children, align foreground content, and control layer order. Available with or without ACSS.
 
 * ACSS color recipes follow the site's available color tokens, hiding disabled colors and their shades while preserving layout and custom recipes.
 
@@ -164,6 +168,14 @@ The `tr` + Tab shortcut works in media and container query thresholds as well as
 Right-click a numeric CSS length to open Convert units. Converted options preserve the length at the current canvas size. Unit swap options keep the number and change only its unit. Selecting an option changes only that token; Escape dismisses the menu. This works with numeric scrubbing disabled. On a focused numeric token, Enter or Shift+F10 also opens the menu.
 
 == Changelog ==
+
+= 1.12.0 =
+Added logical property preferences, logical CSS shortcuts, and a Grid Stack recipe.
+
+* Choose All properties, Prefer logical properties, or Logical properties only for autocomplete, Tab shortcuts, and toolbar inserts. Preserve existing CSS and all-side shorthands.
+* Add compact inline/block and start/end shortcuts for padding, margin, insets, borders, scroll-margin, and scroll-padding, plus b for border and i for inset.
+* Add a built-in Grid Stack recipe with nested CSS and comments explaining child overlap, alignment, and layer order. Available with or without ACSS.
+* Keep CSS properties and exact shortcuts ahead of matching recipes. Use the question-mark trigger to access recipes without interfering with property suggestions.
 
 = 1.11.3 =
 Fixed synchronization between Custom CSS and Bricks style controls.

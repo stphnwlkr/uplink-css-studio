@@ -696,3 +696,10 @@ body.uplink-css-studio-is-scrubbing, body.uplink-css-studio-is-scrubbing * { cur
 .uplink-css-studio-target-field > .uplink-css-studio-assigned-classes { display: flex; flex-wrap: wrap; gap: 6px; }
 .uplink-css-studio-assigned-classes button { max-width: 100%; padding: 5px 8px; border: 1px solid #50545f; border-radius: 5px; background: #1c1e23; color: #dfe5ee; overflow-wrap: anywhere; font: 12px/1.4 "SFMono-Regular", Consolas, monospace; cursor: pointer; }
 .uplink-css-studio-assigned-classes button:hover, .uplink-css-studio-assigned-classes button[aria-pressed="true"] { border-color: var(--uplink-css-studio-accent); color: var(--uplink-css-studio-accent); }
+
+.uplink-css-studio-property-preference { display: grid; align-content: center; gap: 10px; padding: 12px 14px; color: #e7eaf0; }
+.uplink-css-studio-property-preference > span { display: grid; gap: 5px; }
+.uplink-css-studio-property-preference strong { font-size: 13px; }
+.uplink-css-studio-property-preference small { color: #aeb5c0; font-size: 12px; line-height: 1.4; }
+.uplink-css-studio-property-preference select { inline-size: 100%; min-block-size: 34px; border: 1px solid #535762; border-radius: 4px; padding: 6px 8px; background: #191c22; color: #e7eaf0; font: inherit; }
+.uplink-css-studio-property-preference select:focus-visible { outline: 2px solid var(--uplink-css-studio-accent); outline-offset: 2px; }

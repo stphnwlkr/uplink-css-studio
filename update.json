@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.11.3",
+  "version": "1.12.0",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.11.3/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.12.0/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.11.3</h4><p>Fixed synchronization between Custom CSS and Bricks style controls.</p><ul><li>Restore CSS-to-input synchronization in Bricks 2.5 beta while retaining compatibility with Bricks 2.4.</li><li>Keep CSS and style controls synchronized for elements with a custom CSS ID.</li></ul>"
+    "changelog": "<h4>1.12.0</h4><p>Added logical property preferences, logical CSS shortcuts, and a Grid Stack recipe.</p><ul><li>Choose All properties, Prefer logical properties, or Logical properties only for autocomplete, Tab shortcuts, and toolbar inserts. Preserve existing CSS and all-side shorthands.</li><li>Add compact inline/block and start/end shortcuts for padding, margin, insets, borders, scroll-margin, and scroll-padding, plus b for border and i for inset.</li><li>Add a built-in Grid Stack recipe with nested CSS and comments explaining child overlap, alignment, and layer order. Available with or without ACSS.</li><li>Keep CSS properties and exact shortcuts ahead of matching recipes. Use the question-mark trigger to access recipes without interfering with property suggestions.</li></ul>"
   }
 }

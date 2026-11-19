@@ -129,6 +129,31 @@
     columns: { 'grid-template-columns': 'repeat(3, minmax(0, 1fr))' },
     rows: { 'grid-template-rows': 'repeat(3, minmax(0, 1fr))' }
   };
+  const builtInRecipes = {
+    'grid-stack': `/* Apply to the parent whose direct children should overlap.
+   Keep the background/image first and the foreground content last in Structure. */
+%root% {
+  display: grid;
+  grid-template-areas: "stack";
+  grid-template-columns: minmax(0, 1fr);
+  isolation: isolate; /* Keep layer z-index values inside this stack. */
+
+  /* Every direct child shares one grid cell. The tallest layer sets the height.
+     Use a more specific child selector if only some children should stack. */
+  & > * {
+    grid-area: stack;
+    min-inline-size: 0;
+  }
+
+  /* The last child is the foreground. Change this selector or each child's
+     z-index to control the layers. Change place-self to start/end to align it. */
+  & > :last-child {
+    z-index: 1;
+    place-self: center;
+  }
+}
+`
+  };
   const recipeProvider = String(config.recipeProvider || 'CSS');
   const externalRecipes = Object.fromEntries(Object.entries(config.recipes || {}).filter(([name, css]) => name && typeof css === 'string' && css.trim()));
   const userRecipes = Object.fromEntries(Object.entries(config.userRecipes || {})
@@ -233,7 +258,7 @@
       border: designTokenReference(['--border', '--border-color', '--border-light'], '#d1d5db'),
       radius: designTokenReference(['--radius', '--radius-m', '--radius-md'], '0.5rem')
     };
-    return String(template || '').replace(/\{\{(\w+)\}\}/g, (match, token) => tokens[token] || match);
+    return logicalPresetCss(String(template || '').replace(/\{\{(\w+)\}\}/g, (match, token) => tokens[token] || match));
   }
 
   const modernCssTerms = [
@@ -260,16 +285,104 @@
 
   const cssAbbreviations = {
     ai: 'align-items', ac: 'align-content', as: 'align-self', ar: 'aspect-ratio',
-    bg: 'background', bgc: 'background-color', bgi: 'background-image', br: 'border-radius',
+    b: 'border', bg: 'background', bgc: 'background-color', bgi: 'background-image', br: 'border-radius',
     bs: 'box-shadow', c: 'color', cg: 'column-gap', d: 'display', fd: 'flex-direction',
     fg: 'flex-grow', fs: 'font-size', fw: 'font-weight', ff: 'font-family', g: 'gap',
-    ga: 'grid-area', gtc: 'grid-template-columns', h: 'height', inset: 'inset', jc: 'justify-content',
+    ga: 'grid-area', gtc: 'grid-template-columns', h: 'height', i: 'inset', inset: 'inset', jc: 'justify-content',
     lh: 'line-height', ls: 'letter-spacing', m: 'margin', mah: 'max-height', maw: 'max-width',
     mih: 'min-height', miw: 'min-width', o: 'opacity', of: 'object-fit', ov: 'overflow',
-    p: 'padding', pos: 'position', rg: 'row-gap', ta: 'text-align', td: 'text-decoration',
+    p: 'padding', pb: 'padding-block', pi: 'padding-inline', mb: 'margin-block', mi: 'margin-inline', pos: 'position', rg: 'row-gap', ta: 'text-align', td: 'text-decoration',
     tr: 'transition', tf: 'transform', ts: 'text-shadow', tt: 'text-transform', w: 'width',
     ws: 'white-space', zi: 'z-index'
   };
+
+  // Family + axis + optional edge: pis = padding-inline-start, ibe = inset-block-end.
+  for (const [prefix, family] of [['p', 'padding'], ['m', 'margin'], ['i', 'inset'], ['b', 'border'], ['sm', 'scroll-margin'], ['sp', 'scroll-padding']]) {
+    for (const [axis, logical] of [['i', 'inline'], ['b', 'block']]) {
+      for (const [edge, side] of [['', ''], ['s', '-start'], ['e', '-end']]) {
+        const alias = `${prefix}${axis}${edge}`;
+        const property = `${family}-${logical}${side}`;
+        cssAbbreviations[alias] = property;
+        if (family === 'border') {
+          for (const [suffix, part] of [['w', 'width'], ['st', 'style'], ['c', 'color']]) {
+            cssAbbreviations[`${alias}${suffix}`] = `${property}-${part}`;
+          }
+        }
+      }
+    }
+  }
+
+  // Directional replacements are authoring choices, never a migration of saved CSS.
+  const logicalPropertyAlternatives = {
+    width: ['inline-size'], height: ['block-size'],
+    'min-width': ['min-inline-size'], 'max-width': ['max-inline-size'],
+    'min-height': ['min-block-size'], 'max-height': ['max-block-size'],
+    top: ['inset-block-start'], bottom: ['inset-block-end'],
+    left: ['inset-inline-start'], right: ['inset-inline-end'],
+    margin: ['margin-block', 'margin-inline'], padding: ['padding-block', 'padding-inline'],
+    inset: ['inset-block', 'inset-inline'], border: ['border-block', 'border-inline'],
+    'border-width': ['border-block-width', 'border-inline-width'],
+    'border-style': ['border-block-style', 'border-inline-style'],
+    'border-color': ['border-block-color', 'border-inline-color'],
+    'border-radius': ['border-start-start-radius', 'border-start-end-radius', 'border-end-start-radius', 'border-end-end-radius'],
+    'border-top-left-radius': ['border-start-start-radius'], 'border-top-right-radius': ['border-start-end-radius'],
+    'border-bottom-left-radius': ['border-end-start-radius'], 'border-bottom-right-radius': ['border-end-end-radius']
+  };
+  for (const [physical, logical] of [['top', 'block-start'], ['bottom', 'block-end'], ['left', 'inline-start'], ['right', 'inline-end']]) {
+    for (const family of ['margin', 'padding', 'scroll-margin', 'scroll-padding', 'border']) {
+      logicalPropertyAlternatives[`${family}-${physical}`] = [`${family}-${logical}`];
+    }
+    for (const suffix of ['width', 'style', 'color']) {
+      logicalPropertyAlternatives[`border-${physical}-${suffix}`] = [`border-${logical}-${suffix}`];
+    }
+  }
+  for (const family of ['scroll-margin', 'scroll-padding']) {
+    logicalPropertyAlternatives[family] = [`${family}-block`, `${family}-inline`];
+  }
+
+  const allSidesCssShorthands = new Set(['margin', 'padding', 'inset', 'border', 'border-width', 'border-style', 'border-color', 'border-radius', 'scroll-margin', 'scroll-padding']);
+
+  function isCssPropertyName(name) {
+    return Boolean(cssAbbreviations[name] || catalogPropertyMap.has(name)
+      || allSidesCssShorthands.has(name) || modernCssTerms.includes(name));
+  }
+
+  function logicalPropertyMode() {
+    return ['prefer', 'only'].includes(state.prefs.logicalProperties) ? state.prefs.logicalProperties : 'all';
+  }
+
+  function preferredCssProperty(property) {
+    return logicalPropertyMode() === 'all' || allSidesCssShorthands.has(property) ? property : (logicalPropertyAlternatives[property]?.[0] || property);
+  }
+
+  function prioritizeLogicalProperties(items, prefix = '') {
+    const mode = logicalPropertyMode();
+    const propertyName = (item) => typeof item === 'string' ? item : item.text || '';
+    const exactPriority = (item) => item.exactAbbreviation ? 2
+      : Number(propertyName(item) === prefix && allSidesCssShorthands.has(prefix));
+    const compareExact = (a, b) => exactPriority(b) - exactPriority(a);
+    if (mode === 'all') return [...items].sort(compareExact);
+    const alternatives = items.flatMap((item) => {
+      const property = typeof item === 'string' ? item : item.text;
+      if (allSidesCssShorthands.has(property)) return [];
+      return (logicalPropertyAlternatives[property] || []).map((name) => ({
+        text: name, displayText: name, className: 'uplink-css-studio-hint-catalog'
+      }));
+    });
+    const isLogical = (name) => /(?:^|-)(?:inline|block|start|end)(?:-|$)/.test(name);
+    return [...alternatives, ...items]
+      .filter((item) => mode !== 'only' || allSidesCssShorthands.has(typeof item === 'string' ? item : item.text) || !logicalPropertyAlternatives[typeof item === 'string' ? item : item.text])
+      .sort((a, b) => compareExact(a, b) || Number(isLogical(typeof b === 'string' ? b : b.text || '')) - Number(isLogical(typeof a === 'string' ? a : a.text || '')));
+  }
+
+  function logicalPresetCss(css) {
+    if (logicalPropertyMode() === 'all') return css;
+    // Only transform our fixed toolbar templates, not user or provider recipes.
+    return css.replace(/([a-z-]+):\s*([^;]+);/g, (match, property, value) => {
+      const alternatives = logicalPropertyAlternatives[property];
+      return alternatives ? alternatives.map((name) => `${name}: ${value};`).join('\n') : match;
+    });
+  }
 
   const cssWideValues = ['inherit', 'initial', 'revert', 'revert-layer', 'unset'];
   const queryFeatures = {
@@ -413,7 +526,7 @@
   }
 
   function readPrefs() {
-    const defaults = { autoOpen: true, firstAppliedClass: true, responsiveTools: true, viewportHandles: true, hideElementActions: false, structureQueryLoop: true, numericScrubbing: true, minimized: false, dockHeight: '', colorMode: 'hex' };
+    const defaults = { autoOpen: true, firstAppliedClass: true, responsiveTools: true, viewportHandles: true, hideElementActions: false, structureQueryLoop: true, numericScrubbing: true, logicalProperties: 'all', minimized: false, dockHeight: '', colorMode: 'hex' };
     try { return Object.assign(defaults, JSON.parse(localStorage.getItem(storeKey)) || {}); } catch (e) { return defaults; }
   }
 
@@ -1611,7 +1724,7 @@
                   <label><span>Keyboard shortcut</span><input class="uplink-css-studio-recipe-name" type="text" placeholder="card-grid" autocomplete="off"></label>
                   <label><span>Category</span><input class="uplink-css-studio-recipe-category" type="text" placeholder="Layout" list="uplink-css-studio-recipe-categories" autocomplete="off"><datalist id="uplink-css-studio-recipe-categories"></datalist></label>
                   <label><span>CSS expansion</span><textarea class="uplink-css-studio-recipe-css" placeholder="%root% {&#10;  display: grid;&#10;}"></textarea></label>
-                  <p>Type <code>@shortcut;</code> in the CSS editor to insert the recipe. Categories group saved recipes in this panel.</p>
+                  <p>Type <code>?shortcut;</code> in the CSS editor to insert the recipe. Categories group saved recipes in this panel.</p>
                 </div>
                 <div class="uplink-css-studio-recipe-actions"><button class="uplink-css-studio-action uplink-css-studio-recipe-editor-back" type="button">Back</button><button class="uplink-css-studio-action uplink-css-studio-recipe-delete" type="button" hidden>Delete</button><button class="uplink-css-studio-action is-primary uplink-css-studio-recipe-save" type="submit">Save recipe</button></div>
               </form>
@@ -1675,6 +1788,7 @@
               <label class="uplink-css-studio-switch-row"><span><strong>Hide element actions</strong><small>Hide the blue action toolbar on canvas elements.</small></span><input class="uplink-css-studio-hide-element-actions" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Query loop shortcut</strong><small>Enable, edit, or remove query loops from the Structure context menu.</small></span><input class="uplink-css-studio-structure-query-loop" type="checkbox"></label>
               <label class="uplink-css-studio-switch-row"><span><strong>Numeric scrubbing</strong><small>Drag numeric CSS values horizontally. Toggle with Cmd/Ctrl+Alt+X.</small></span><input class="uplink-css-studio-numeric-scrubbing" type="checkbox"></label>
+              <label class="uplink-css-studio-property-preference"><span><strong>CSS properties</strong><small>Control suggestions, Tab shortcuts, and toolbar inserts. Logical-only hides physical sides and sizes. All-side shorthands such as padding remain available.</small></span><select class="uplink-css-studio-logical-properties"><option value="all">All properties</option><option value="prefer">Prefer logical properties</option><option value="only">Logical properties only</option></select></label>
               </div>
               <p class="uplink-css-studio-pref-note">The editor also remembers whether it was minimized or expanded.</p>
             </aside>
@@ -1813,6 +1927,7 @@
     const summary = [];
     const customCount = Object.keys(userRecipes).length;
     const providerCount = Object.keys(externalRecipes).length;
+    summary.push(`${Object.keys(builtInRecipes).length} built-in`);
     if (customCount) summary.push(`${customCount} custom`);
     if (providerCount) summary.push(`${providerCount} ${recipeProvider}`);
     return summary.join(' · ') || 'No saved recipes';
@@ -1821,6 +1936,7 @@
   function recipeCatalog() {
     const catalog = {};
     Object.entries(externalRecipes).forEach(([name, css]) => { catalog[name] = { css, label: recipeLabel(name), provider: recipeProvider }; });
+    Object.entries(builtInRecipes).forEach(([name, css]) => { catalog[name] = { css, label: recipeLabel(name), provider: 'CSS Studio' }; });
     Object.entries(userRecipes).forEach(([name, recipe]) => { catalog[name] = { css: recipe.css, label: recipe.label, provider: recipe.category }; });
     return catalog;
   }
@@ -1842,12 +1958,13 @@
   function renderSnippets(filter = '') {
     const panel = document.querySelector('.uplink-css-studio-snippet-panel-body');
     const query = String(filter).trim().toLowerCase();
+    const builtInItems = Object.keys(builtInRecipes).filter((name) => !query || `${name} ${recipeLabel(name)}`.toLowerCase().includes(query));
     const providerItems = Object.keys(externalRecipes).filter((name) => !query || `${name} ${recipeLabel(name)}`.toLowerCase().includes(query));
     const customItems = Object.keys(userRecipes).filter((name) => !query || `${name} ${userRecipes[name].label} ${userRecipes[name].category}`.toLowerCase().includes(query));
     const customCategories = [...new Set(customItems.map((name) => userRecipes[name].category))].sort((a, b) => a.localeCompare(b));
     const customHtml = customCategories.map((category) => renderRecipeGroup(category, customItems.filter((name) => userRecipes[name].category === category), 'user')).join('');
     const providerHtml = renderRecipeGroup(`${recipeProvider} recipes`, providerItems, 'external');
-    panel.innerHTML = customHtml + providerHtml || '<p class="uplink-css-studio-snippet-empty">No matching recipes.</p>';
+    panel.innerHTML = customHtml + renderRecipeGroup('CSS Studio recipes', builtInItems, 'builtin') + providerHtml || '<p class="uplink-css-studio-snippet-empty">No matching recipes.</p>';
     const summary = document.querySelector('.uplink-css-studio-recipe-summary');
     if (summary) summary.textContent = recipeSummary();
   }
@@ -1860,9 +1977,10 @@
     title.textContent = group.name;
     list.innerHTML = group.items.map((item) => {
       const css = resolvePresetCss(item[1]);
+      const label = logicalPropertyMode() === 'all' ? item[0] : ({ 'Max width': 'Max inline size', 'Min height': 'Min block size' }[item[0]] || item[0]);
       return `
       <button type="button" data-css="${escapeAttr(css)}" data-context="${item[2] || 'all'}">
-        <strong>${escapeHtml(item[0])}</strong><code>${escapeHtml(css.split(':')[0])}</code>
+        <strong>${escapeHtml(label)}</strong><code>${escapeHtml(css.split(':')[0])}</code>
       </button>`;
     }).join('');
     const elementType = state.context?.elementType || '';
@@ -3209,7 +3327,7 @@
       const button = event.target.closest('.uplink-css-studio-snippet');
       if (!button) return;
       if (button.dataset.recipeName) {
-        const recipes = button.dataset.recipeSource === 'user' ? userRecipes : externalRecipes;
+        const recipes = button.dataset.recipeSource === 'user' ? userRecipes : (button.dataset.recipeSource === 'builtin' ? builtInRecipes : externalRecipes);
         const recipe = recipes[button.dataset.recipeName];
         insertExternalRecipe(typeof recipe === 'string' ? recipe : recipe?.css || '');
       }
@@ -3406,6 +3524,12 @@
       savePrefs();
       syncStructureQueryLoopMenu();
     });
+    document.querySelector('.uplink-css-studio-logical-properties').addEventListener('change', (event) => {
+      state.prefs.logicalProperties = event.target.value;
+      savePrefs();
+      state.editor?.closeHint?.();
+      setStatus('CSS property preference saved', 'synced');
+    });
     document.querySelector('.uplink-css-studio-numeric-scrubbing').addEventListener('change', (event) => {
       setNumericScrubbing(Boolean(event.target.checked));
     });
@@ -3537,20 +3661,25 @@
 
     const catalog = recipeCatalog();
     const recipeName = Object.keys(catalog).find((name) => name.toLowerCase() === token);
-    if (recipeName && !/@$/.test(beforeToken)) {
+    const propertyPosition = /(?:^|[;{])\s*$/.test(beforeToken);
+    const explicitRecipe = beforeToken.endsWith('?');
+    const knownProperty = propertyPosition && isCssPropertyName(token);
+    if (recipeName && !/@$/.test(beforeToken) && (explicitRecipe || !knownProperty)) {
       const recipeFrom = beforeToken.endsWith('?') ? CodeMirror.Pos(from.line, from.ch - 1) : from;
       insertExternalRecipe(catalog[recipeName].css, editor, recipeFrom, cursor);
       return;
     }
 
-    if (!/(?:^|[;{])\s*$/.test(beforeToken)) return CodeMirror.Pass;
+    if (!propertyPosition) return CodeMirror.Pass;
 
     const hints = cssHints(editor, {})?.list || [];
     const candidates = hints.map((item) => typeof item === 'string' ? item : item.text || '')
       .filter((item) => /^[a-z-][\w-]*$/i.test(item));
-    const property = cssAbbreviations[token]
+    const property = preferredCssProperty(cssAbbreviations[token]
+      || (knownProperty && token)
+      || (logicalPropertyMode() !== 'all' && !allSidesCssShorthands.has(token) && logicalPropertyAlternatives[token]?.[0])
       || candidates.find((item) => item.toLowerCase() === token)
-      || candidates.find((item) => item.toLowerCase().startsWith(token));
+      || candidates.find((item) => item.toLowerCase().startsWith(token)));
     if (!property) return CodeMirror.Pass;
 
     insertPropertyCompletion(editor, from, cursor, property);
@@ -4215,7 +4344,10 @@
       }) : [];
     const shorthandItems = Object.entries(cssAbbreviations)
       .filter(([alias, property]) => alias.startsWith(prefix) || property.startsWith(prefix))
-      .map(([alias, property]) => ({ text: property, displayText: `${alias}  →  ${property}`, className: 'uplink-css-studio-hint-abbreviation' }));
+      .map(([alias, property]) => {
+        const preferred = preferredCssProperty(property);
+        return { text: preferred, displayText: `${alias}  →  ${preferred}`, className: 'uplink-css-studio-hint-abbreviation', exactAbbreviation: alias === prefix };
+      });
     const variableItems = variables
       .filter((variable) => variable.name.toLowerCase().startsWith(prefix.replace(/^var\(/, '')))
       .map((variable) => ({
@@ -4223,11 +4355,16 @@
         displayText: `${variable.name}  →  ${variable.source}`,
         className: 'uplink-css-studio-hint-variable'
       }));
-    const recipeItems = prefix.length >= 2 && !/@[a-z0-9_-]*$/i.test(beforeCursor) ? Object.entries(recipeCatalog())
-      .filter(([name]) => name.toLowerCase().startsWith(prefix))
+    const recipeItems = !inBlock && prefix.length >= 2 && !/@[a-z0-9_-]*$/i.test(beforeCursor) ? Object.entries(recipeCatalog())
+      .filter(([name]) => name.toLowerCase().startsWith(prefix) && (!inBlock || !isCssPropertyName(name.toLowerCase())))
       .map(([name, recipe]) => recipeHint(name, recipe.css, recipe.provider)) : [];
     const seen = new Set();
-    const list = [...recipeItems, ...shorthandItems, ...baseList, ...catalogItems, ...additions, ...variableItems].filter((item) => {
+    // A shortcut prefix gets a compact shortcut list. Full property names still
+    // use the normal catalogue, with the selected logical-property preference.
+    const shortcutPrefix = inBlock && prefix && Object.keys(cssAbbreviations).some((alias) => alias.startsWith(prefix));
+    const items = shortcutPrefix ? [...recipeItems, ...shorthandItems]
+      : [...recipeItems, ...shorthandItems, ...baseList, ...catalogItems, ...additions, ...variableItems];
+    const list = (inBlock ? prioritizeLogicalProperties(items, prefix) : items).filter((item) => {
       const label = typeof item === 'string' ? item : item.text || item.displayText || '';
       if (!label || seen.has(label)) return false;
       seen.add(label);
@@ -6310,6 +6447,8 @@
     const hideElementActions = document.querySelector('.uplink-css-studio-hide-element-actions');
     const structureQueryLoop = document.querySelector('.uplink-css-studio-structure-query-loop');
     if (structureQueryLoop) structureQueryLoop.checked = state.prefs.structureQueryLoop !== false;
+    const logicalProperties = document.querySelector('.uplink-css-studio-logical-properties');
+    if (logicalProperties) logicalProperties.value = logicalPropertyMode();
     const numericScrubbing = document.querySelector('.uplink-css-studio-numeric-scrubbing');
     if (autoOpen) autoOpen.checked = Boolean(state.prefs.autoOpen);
     if (firstAppliedClass) firstAppliedClass.checked = Boolean(state.prefs.firstAppliedClass);

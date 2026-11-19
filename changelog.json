@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.12.0",
+    "summary": "Added logical property preferences, logical CSS shortcuts, and a Grid Stack recipe.",
+    "changes": {
+      "features": [
+        "Choose All properties, Prefer logical properties, or Logical properties only for autocomplete, Tab shortcuts, and toolbar inserts. Preserve existing CSS and all-side shorthands.",
+        "Add compact inline/block and start/end shortcuts for padding, margin, insets, borders, scroll-margin, and scroll-padding, plus b for border and i for inset.",
+        "Add a built-in Grid Stack recipe with nested CSS and comments explaining child overlap, alignment, and layer order. Available with or without ACSS."
+      ],
+      "fixes": [
+        "Keep CSS properties and exact shortcuts ahead of matching recipes. Use the question-mark trigger to access recipes without interfering with property suggestions."
+      ]
+    }
+  },
+  {
     "version": "1.11.3",
     "summary": "Fixed synchronization between Custom CSS and Bricks style controls.",
     "changes": {

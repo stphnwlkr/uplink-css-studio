@@ -13,7 +13,7 @@ let completionCalls=0;
 const CodeMirror={Pos:(line,ch)=>({line,ch}),Pass:'PASS'};
 const context=vm.createContext({window:{wp:{CodeMirror}},state:{},recipeCatalog:()=>recipes,setStatus(){},
  availableVariableEntries:()=>[],queryPreludeHints:()=>null,expandToRemShortcut:()=>false,completeCssCalculation:()=>false,
- rootShortcutMode:()=>null,updateCalculationPreview:()=>false,clearTimeout(){},setTimeout:fn=>{fn();return 1;},autocomplete:()=>completionCalls++});
+ rootShortcutMode:()=>null,isCssPropertyName:()=>false,updateCalculationPreview:()=>false,clearTimeout(){},setTimeout:fn=>{fn();return 1;},autocomplete:()=>completionCalls++});
 vm.runInContext(functions,context);
 function editor(value,type='',selected=false){
  let text=value,cursor={line:0,ch:value.length};
