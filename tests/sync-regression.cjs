@@ -9,13 +9,13 @@ function extract(name) {
   const end = source.slice(start + 1).search(/\n  (?:function |const )/);
   return source.slice(start, start + 1 + end);
 }
-function context(modules, exports) {
+function context(modules, exports, chunkName = 'webpackChunkbricks') {
   let required = [];
   const require = (id) => { required.push(String(id)); return exports[id]; };
   require.m = modules;
   const chunks = [];
   chunks.push = (chunk) => chunk[2](require);
-  const sandbox = vm.createContext({ window: { webpackChunkbricks: chunks }, state: {},
+  const sandbox = vm.createContext({ window: { [chunkName]: chunks }, state: {},
     contextSignature: () => 'element:desktop', contextRootSelector: () => '#brxe-test',
     replaceContextRoot: (ctx, from, to, css) => css,
     nativeCssControl: () => null, requestCanvasRender() {}, clearTimeout() {}, setTimeout() {},
@@ -28,16 +28,16 @@ function context(modules, exports) {
 function engineModule() { return { handleCssInput() {}, flushCssInput() {}, refreshControls() {} }; }
 (async () => {
   let passed = 0;
-  for (const id of ['15000', '11433', '90210']) {
+  for (const [chunkName, id] of [['webpackChunkbricks', '15000'], ['webpackChunkbricks', '11433'], ['webpackChunkbricks', '90210'], ['rspackChunkbricks', '69658']]) {
     const factory = () => {};
-    const { sandbox, required } = context({ [id]: engineModule, 1: function unrelated() {} }, { [id]: { vK: factory } });
+    const { sandbox, required } = context({ [id]: engineModule, 1: function unrelated() {} }, { [id]: { vK: factory } }, chunkName);
     assert.equal(sandbox.bricksCssSyncFactory(), factory);
     assert.deepEqual(required, [id]);
     assert.equal(sandbox.bricksCssSyncFactory(), factory);
     assert.deepEqual(required, [id], 'reuse discovery without reloading modules');
     passed++;
   }
-  console.log('PASS sync discovery survives shuffled webpack IDs');
+  console.log('PASS sync discovery supports legacy webpack and Bricks 2.5 Rspack runtimes');
   const actualFactory = () => {};
   const decoy = context({ 3561: engineModule, 14255: engineModule }, {
     3561: { default: {} }, 14255: { vK: actualFactory }
@@ -51,6 +51,16 @@ function engineModule() { return { handleCssInput() {}, flushCssInput() {}, refr
   assert.deepEqual(missing.required, []);
   passed++;
   console.log('PASS missing sync module does not execute unrelated modules');
+
+  const roots = vm.createContext({ nativeCssControl: () => null });
+  vm.runInContext(extract('contextRootSelector'), roots);
+  const customIdContext = {kind: 'Element', element: {id: 'test', settings: {_cssId: 'home'}}};
+  assert.equal(roots.contextRootSelector(customIdContext), '#home');
+  assert.equal(roots.contextRootSelector({...customIdContext, kind: 'Class', target: {name: 'card'}}), '.card');
+  assert.equal(roots.contextRootSelector({kind: 'Element', element: {id: 'test', settings: {}}}), '#brxe-test');
+  assert.equal(roots.contextRootSelector(customIdContext, {cssId: '.brxe-component'}), '.brxe-component');
+  passed++;
+  console.log('PASS custom CSS IDs match native sync roots without overriding class or component scopes');
 
   let finishInit;
   let refresh;

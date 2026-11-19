@@ -1,14 +1,14 @@
 {
   "name": "Uplink CSS Studio for Bricks",
   "slug": "uplink-css-studio",
-  "version": "1.11.2",
+  "version": "1.11.3",
   "homepage": "https://github.com/stphnwlkr/uplink-css-studio",
-  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.11.2/uplink-css-studio.zip",
+  "download_url": "https://github.com/stphnwlkr/uplink-css-studio/releases/download/1.11.3/uplink-css-studio.zip",
   "requires": "7.0",
   "tested": "7.1",
   "requires_php": "8.3",
   "sections": {
     "description": "CSS workspace for the Bricks builder.",
-    "changelog": "<h4>1.11.2</h4><p>Fixed canvas overlap when Bricks refreshes the preview classes.</p><ul><li>Keep the bottom of the canvas reachable while CSS Studio is open or minimized.</li></ul>"
+    "changelog": "<h4>1.11.3</h4><p>Fixed synchronization between Custom CSS and Bricks style controls.</p><ul><li>Restore CSS-to-input synchronization in Bricks 2.5 beta while retaining compatibility with Bricks 2.4.</li><li>Keep CSS and style controls synchronized for elements with a custom CSS ID.</li></ul>"
   }
 }

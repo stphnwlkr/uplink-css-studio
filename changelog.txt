@@ -1,6 +1,13 @@
 Uplink CSS Studio for Bricks changelog
 ======================================
 
+1.11.3
+------
+Fixed synchronization between Custom CSS and Bricks style controls.
+
+* Restore CSS-to-input synchronization in Bricks 2.5 beta while retaining compatibility with Bricks 2.4.
+* Keep CSS and style controls synchronized for elements with a custom CSS ID.
+
 1.11.2
 ------
 Fixed canvas overlap when Bricks refreshes the preview classes.

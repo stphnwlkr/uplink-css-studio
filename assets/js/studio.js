@@ -1483,6 +1483,7 @@
     if (ctx?.kind === 'Theme style') return '';
     if (control?.cssId) return control.cssId;
     if (ctx?.kind === 'Class' && ctx.target?.name) return `.${ctx.target.name}`;
+    if (ctx?.element?.settings?._cssId) return `#${ctx.element.settings._cssId}`;
     return ctx?.element?.id ? `#brxe-${ctx.element.id}` : '';
   }
 
@@ -5452,7 +5453,8 @@
 
   function bricksCssSyncFactory() {
     if (typeof bricksCssSyncFactoryCache === 'function') return bricksCssSyncFactoryCache;
-    const chunks = window.webpackChunkbricks;
+    // Bricks 2.5 uses Rspack; legacy builds expose the same runtime via webpack.
+    const chunks = [window.rspackChunkbricks, window.webpackChunkbricks].find(Array.isArray);
     if (!Array.isArray(chunks)) return null;
     let webpackRequire;
     try {

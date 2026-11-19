@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.11.3",
+    "summary": "Fixed synchronization between Custom CSS and Bricks style controls.",
+    "changes": {
+      "fixes": [
+        "Restore CSS-to-input synchronization in Bricks 2.5 beta while retaining compatibility with Bricks 2.4.",
+        "Keep CSS and style controls synchronized for elements with a custom CSS ID."
+      ]
+    }
+  },
+  {
     "version": "1.11.2",
     "summary": "Fixed canvas overlap when Bricks refreshes the preview classes.",
     "changes": {
@@ -189,9 +199,9 @@
     "summary": "Fixed layout toolbar edits in nested CSS.",
     "changes": {
       "fixes": [
-        "Keep nested flex/grid toolbar edits from changing the parent element’s native Bricks controls.",
+        "Keep nested flex/grid toolbar edits from changing the parent element\u2019s native Bricks controls.",
         "Scope layout declarations to nested media, container, and other conditional blocks.",
-        "Avoid using the parent’s computed layout for nested selectors."
+        "Avoid using the parent\u2019s computed layout for nested selectors."
       ]
     }
   },
@@ -257,7 +267,7 @@
     "summary": "Added Bricks dynamic-data autocomplete in the HTML editor.",
     "changes": {
       "features": [
-        "Added dynamic-data autocomplete in the HTML editor using the site’s registered Bricks tags, including third-party providers.",
+        "Added dynamic-data autocomplete in the HTML editor using the site\u2019s registered Bricks tags, including third-party providers.",
         "Filter suggestions by tag-name prefix after an opening brace, in text and quoted attributes.",
         "Insert complete tags with Enter or Tab while preserving an existing closing brace."
       ]
